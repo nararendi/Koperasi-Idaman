@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
+import { hitungSimulasiPinjaman, formatRupiah } from '../../lib/formatters';
 
 export default function PinjamanPage() {
   const [summary, setSummary] = useState({
@@ -23,11 +24,14 @@ export default function PinjamanPage() {
 
   // Modal: Ajukan Pinjaman Baru
   const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [showSchedulePreview, setShowSchedulePreview] = useState(false);
   const [applyForm, setApplyForm] = useState({
     nomor_anggota: '',
-    jumlah: '5000000',
-    bunga: 1.5,
+    jumlah: '10000000',
+    bunga: 2.5,
     tenor: 12,
+    metodeBunga: 'menurun',
+    pembulatan: 50000,
     keperluan: ''
   });
 
@@ -59,7 +63,7 @@ export default function PinjamanPage() {
       setApplyForm((prev) => ({
         ...prev,
         nomor_anggota: anggota[0].nomor_anggota || anggota[0].id,
-        bunga: currentSettings.sukuBungaPinjaman || 1.5
+        bunga: 2.5
       }));
     }
   };
@@ -84,11 +88,14 @@ export default function PinjamanPage() {
   const handleOpenApplyModal = () => {
     setApplyForm({
       nomor_anggota: anggotaList.length > 0 ? (anggotaList[0].nomor_anggota || anggotaList[0].id) : '',
-      jumlah: '5000000',
-      bunga: settings.sukuBungaPinjaman || 1.5,
+      jumlah: '10000000',
+      bunga: 2.5,
       tenor: 12,
+      metodeBunga: 'menurun',
+      pembulatan: 50000,
       keperluan: ''
     });
+    setShowSchedulePreview(false);
     setApplyModalOpen(true);
   };
 
@@ -185,11 +192,14 @@ export default function PinjamanPage() {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
   };
 
-  // Calculator preview for application form
-  const calcPokokBulan = Math.round(Number(applyForm.jumlah || 0) / Number(applyForm.tenor || 1));
-  const calcBungaBulan = Math.round(Number(applyForm.jumlah || 0) * (Number(applyForm.bunga || 0) / 100));
-  const calcTotalBulan = calcPokokBulan + calcBungaBulan;
-  const calcTotalSemua = calcTotalBulan * Number(applyForm.tenor || 1);
+  // Real-time Declining Balance Loan Calculation & Rounding Preview
+  const liveSim = hitungSimulasiPinjaman(
+    applyForm.jumlah,
+    applyForm.tenor,
+    applyForm.bunga,
+    applyForm.metodeBunga,
+    applyForm.pembulatan
+  );
 
   return (
     <AppLayout
@@ -501,7 +511,7 @@ export default function PinjamanPage() {
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Bunga (% / Bln)</label>
+                  <label className="font-bold text-slate-700 block mb-1">Suku Bunga (% / Bln)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -509,6 +519,43 @@ export default function PinjamanPage() {
                     onChange={(e) => setApplyForm({ ...applyForm, bunga: Number(e.target.value) })}
                     className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-semibold text-slate-700 text-xs"
                   />
+                </div>
+              </div>
+
+              {/* Metode Bunga & Pembulatan Pokok */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div>
+                  <label className="font-bold text-[#002045] block mb-1">Sistem Perhitungan Bunga</label>
+                  <select
+                    value={applyForm.metodeBunga}
+                    onChange={(e) => setApplyForm({ ...applyForm, metodeBunga: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-bold text-[#002045] text-xs cursor-pointer"
+                  >
+                    <option value="menurun">Bunga Menurun (Efektif - Dari Sisa Pinjaman) ⭐</option>
+                    <option value="flat">Bunga Flat (Tetap Tiap Bulan)</option>
+                  </select>
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    {applyForm.metodeBunga === 'menurun'
+                      ? 'Bunga awal 2.5% x Plafon, bulan selanjutnya 2.5% x Sisa Pokok (menurun).'
+                      : 'Bunga tetap flat dihitung dari plafon awal.'}
+                  </span>
+                </div>
+
+                <div>
+                  <label className="font-bold text-[#002045] block mb-1">Pembulatan Pokok / Bulan</label>
+                  <select
+                    value={applyForm.pembulatan}
+                    onChange={(e) => setApplyForm({ ...applyForm, pembulatan: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-bold text-[#002045] text-xs cursor-pointer"
+                  >
+                    <option value={50000}>Dibulatkan ke atas Rp 50.000 (contoh: 833.333 &rarr; 850.000)</option>
+                    <option value={10000}>Dibulatkan ke atas Rp 10.000 (contoh: 833.333 &rarr; 840.000)</option>
+                    <option value={1000}>Dibulatkan ke atas Rp 1.000 (contoh: 833.333 &rarr; 834.000)</option>
+                    <option value={0}>Tanpa Pembulatan (Nominal Pas)</option>
+                  </select>
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    Mencegah pecahan ganjil agar cicilan bulat dan mudah dibayarkan.
+                  </span>
                 </div>
               </div>
 
@@ -523,29 +570,86 @@ export default function PinjamanPage() {
                 />
               </div>
 
-              {/* Real-time Loan Calculator Preview */}
-              <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col gap-2">
-                <span className="font-bold text-[#002045] flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-blue-600">calculate</span>
-                  Simulasi Angsuran Bulanan:
-                </span>
+              {/* Real-time Loan Calculator Preview with Declining Interest Details */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50/60 border border-blue-200 rounded-xl p-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#002045] flex items-center gap-1.5 text-xs">
+                    <span className="material-symbols-outlined text-base text-blue-600">calculate</span>
+                    Simulasi Angsuran Pinjaman {applyForm.metodeBunga === 'menurun' ? '(Bunga Menurun)' : '(Bunga Flat)'}:
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                    Pokok Dibulatkan: {formatRupiah(liveSim.pokokPerBulan)}/Bln
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
-                  <div>
-                    <span className="text-slate-500 block">Pokok / Bln:</span>
-                    <span className="font-bold text-slate-800">{formatRupiah(calcPokokBulan)}</span>
+                  <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <span className="text-slate-500 block text-[10px]">Pokok / Bulan:</span>
+                    <span className="font-extrabold text-slate-800">{formatRupiah(liveSim.pokokPerBulan)}</span>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">Bunga / Bln:</span>
-                    <span className="font-bold text-slate-800">{formatRupiah(calcBungaBulan)}</span>
+                  <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <span className="text-slate-500 block text-[10px]">Bunga Bulan ke-1:</span>
+                    <span className="font-extrabold text-emerald-700">{formatRupiah(liveSim.bungaBulanPertama)}</span>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">Total Angsuran/Bln:</span>
-                    <span className="font-extrabold text-blue-900">{formatRupiah(calcTotalBulan)}</span>
+                  <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <span className="text-slate-500 block text-[10px]">Angsuran Bulan ke-1:</span>
+                    <span className="font-extrabold text-blue-900">{formatRupiah(liveSim.angsuranBulanPertama)}</span>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">Total Pengembalian:</span>
-                    <span className="font-extrabold text-indigo-900">{formatRupiah(calcTotalSemua)}</span>
+                  <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <span className="text-slate-500 block text-[10px]">Total Estimasi:</span>
+                    <span className="font-extrabold text-indigo-900">{formatRupiah(liveSim.totalPengembalian)}</span>
                   </div>
+                </div>
+
+                {applyForm.metodeBunga === 'menurun' && liveSim.jadwal && liveSim.jadwal.length > 1 && (
+                  <div className="text-[11px] bg-emerald-50 border border-emerald-200 rounded-lg p-2 text-emerald-900 flex items-center justify-between">
+                    <span>
+                      📉 <strong>Bulan ke-2 Menurun:</strong> Pokok {formatRupiah(liveSim.jadwal[1].pokok)} + Bunga <strong>{formatRupiah(liveSim.jadwal[1].bunga)}</strong> (Sisa {formatRupiah(liveSim.jadwal[1].sisaAwal)}) = <strong>{formatRupiah(liveSim.jadwal[1].totalAngsuran)}</strong>
+                    </span>
+                  </div>
+                )}
+
+                {/* Collapsible Monthly Schedule */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowSchedulePreview(!showSchedulePreview)}
+                    className="text-[11px] text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-sm">
+                      {showSchedulePreview ? 'expand_less' : 'expand_more'}
+                    </span>
+                    {showSchedulePreview ? 'Sembunyikan Rincian Jadwal Angsuran' : `Lihat Jadwal Angsuran Menurun Lengkap (${liveSim.tenor} Bulan)`}
+                  </button>
+
+                  {showSchedulePreview && (
+                    <div className="mt-2 max-h-48 overflow-y-auto border border-blue-200 rounded-lg bg-white shadow-2xs">
+                      <table className="w-full text-left border-collapse text-[10px]">
+                        <thead>
+                          <tr className="bg-[#002045] text-white font-bold">
+                            <th className="p-1.5 text-center">Bln</th>
+                            <th className="p-1.5 text-right">Sisa Pokok Awal</th>
+                            <th className="p-1.5 text-right">Pokok</th>
+                            <th className="p-1.5 text-right">Bunga ({applyForm.bunga}%)</th>
+                            <th className="p-1.5 text-right">Total Tagihan</th>
+                            <th className="p-1.5 text-right">Sisa Pokok Akhir</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {liveSim.jadwal.map((j) => (
+                            <tr key={j.bulanKe} className="hover:bg-blue-50/50">
+                              <td className="p-1.5 text-center font-bold">{j.bulanKe}</td>
+                              <td className="p-1.5 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
+                              <td className="p-1.5 text-right font-semibold">{formatRupiah(j.pokok)}</td>
+                              <td className="p-1.5 text-right text-emerald-700 font-semibold">{formatRupiah(j.bunga)}</td>
+                              <td className="p-1.5 text-right font-bold text-blue-900">{formatRupiah(j.totalAngsuran)}</td>
+                              <td className="p-1.5 text-right text-slate-500">{formatRupiah(j.sisaAkhir)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -724,7 +828,7 @@ export default function PinjamanPage() {
                     Belum ada riwayat pembayaran angsuran.
                   </p>
                 ) : (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto">
                     <table className="w-full text-left">
                       <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
                         <tr>
@@ -748,6 +852,40 @@ export default function PinjamanPage() {
                   </div>
                 )}
               </div>
+
+              {/* Projected Schedule if Available */}
+              {selectedPinjamanDetail.jadwal_angsuran && selectedPinjamanDetail.jadwal_angsuran.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-[#002045] mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm text-indigo-700">calendar_month</span>
+                    Jadwal Estimasi Angsuran Bunga Menurun ({selectedPinjamanDetail.tenor} Bulan)
+                  </h4>
+                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto">
+                    <table className="w-full text-left text-[10px]">
+                      <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                        <tr>
+                          <th className="p-1.5 text-center">Bln</th>
+                          <th className="p-1.5 text-right">Sisa Pokok Awal</th>
+                          <th className="p-1.5 text-right">Pokok</th>
+                          <th className="p-1.5 text-right">Bunga</th>
+                          <th className="p-1.5 text-right">Total Tagihan</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {selectedPinjamanDetail.jadwal_angsuran.map((j) => (
+                          <tr key={j.bulanKe}>
+                            <td className="p-1.5 text-center font-bold">{j.bulanKe}</td>
+                            <td className="p-1.5 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
+                            <td className="p-1.5 text-right font-semibold">{formatRupiah(j.pokok)}</td>
+                            <td className="p-1.5 text-right text-emerald-700 font-semibold">{formatRupiah(j.bunga)}</td>
+                            <td className="p-1.5 text-right font-bold text-blue-900">{formatRupiah(j.totalAngsuran)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
