@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
+import { authService } from '../../lib/authService';
 
 export default function PengaturanPage() {
+  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'users' | 'profil_saya' | 'database'
+
+  // Tab 1: Koperasi Settings
   const [formData, setFormData] = useState({
     namaKoperasi: '',
     badanHukum: '',
@@ -22,12 +26,67 @@ export default function PengaturanPage() {
     shuPersenCadangan: 10
   });
 
+  // Tab 2: Admin Users Management
+  const [usersList, setUsersList] = useState([]);
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [userFormData, setUserFormData] = useState({
+    id: '',
+    username: '',
+    nama: '',
+    email: '',
+    password: '',
+    role: 'Kasir & Teller',
+    status: 'Aktif'
+  });
+  const [isEditingUser, setIsEditingUser] = useState(false);
+
+  // Tab 3: Profil Saya
+  const [currentUser, setCurrentUser] = useState({});
+  const [myProfileForm, setMyProfileForm] = useState({
+    nama: '',
+    email: '',
+    username: '',
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
   const [toastMessage, setToastMessage] = useState('');
-  const [importStatus, setImportStatus] = useState('');
+
+  const loadData = () => {
+    const s = dataService.getSettings();
+    const uList = authService.getAllUsers();
+    const current = authService.getCurrentUser();
+
+    setFormData(s);
+    setUsersList(uList);
+    setCurrentUser(current);
+
+    if (current) {
+      setMyProfileForm({
+        nama: current.nama || '',
+        email: current.email || '',
+        username: current.username || '',
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    }
+  };
 
   useEffect(() => {
-    const s = dataService.getSettings();
-    setFormData(s);
+    loadData();
+
+    const handleUsersUpdate = () => {
+      loadData();
+    };
+
+    window.addEventListener('koperasi_users_updated', handleUsersUpdate);
+    window.addEventListener('koperasi_auth_updated', handleUsersUpdate);
+    return () => {
+      window.removeEventListener('koperasi_users_updated', handleUsersUpdate);
+      window.removeEventListener('koperasi_auth_updated', handleUsersUpdate);
+    };
   }, []);
 
   const showToast = (msg) => {
@@ -35,15 +94,8 @@ export default function PengaturanPage() {
     setTimeout(() => setToastMessage(''), 3500);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  // Handle Save Koperasi Settings
+  const handleKoperasiSubmit = (e) => {
     e.preventDefault();
     dataService.updateSettings({
       ...formData,
@@ -58,7 +110,120 @@ export default function PengaturanPage() {
     showToast('Konfigurasi dan profil koperasi berhasil disimpan!');
   };
 
-  // Export Backup Database JSON
+  // Open Add User Modal
+  const handleOpenAddUser = () => {
+    setIsEditingUser(false);
+    setUserFormData({
+      id: '',
+      username: '',
+      nama: '',
+      email: '',
+      password: '',
+      role: 'Kasir & Teller',
+      status: 'Aktif'
+    });
+    setUserModalOpen(true);
+  };
+
+  // Open Edit User Modal
+  const handleOpenEditUser = (user) => {
+    setIsEditingUser(true);
+    setUserFormData({
+      id: user.id,
+      username: user.username,
+      nama: user.nama,
+      email: user.email,
+      password: '',
+      role: user.role,
+      status: user.status
+    });
+    setUserModalOpen(true);
+  };
+
+  // Save User (Add / Edit)
+  const handleSaveUser = (e) => {
+    e.preventDefault();
+    try {
+      if (isEditingUser) {
+        const updateData = {
+          nama: userFormData.nama,
+          email: userFormData.email,
+          role: userFormData.role,
+          status: userFormData.status
+        };
+        if (userFormData.password) {
+          updateData.password = userFormData.password;
+        }
+        authService.updateUser(userFormData.id, updateData);
+        showToast(`Akun admin ${userFormData.nama} berhasil diperbarui!`);
+      } else {
+        if (!userFormData.password) {
+          alert('Kata sandi wajib diisi untuk pengguna baru.');
+          return;
+        }
+        authService.addUser(userFormData);
+        showToast(`Pengguna admin baru "${userFormData.nama}" berhasil ditambahkan!`);
+      }
+      setUserModalOpen(false);
+      loadData();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // Delete User
+  const handleDeleteUser = (user) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus akun admin "${user.nama}" (${user.username})?`)) {
+      try {
+        authService.deleteUser(user.id);
+        showToast(`Akun ${user.nama} berhasil dihapus.`);
+        loadData();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  };
+
+  // Save My Profile & Change Password
+  const handleSaveMyProfile = (e) => {
+    e.preventDefault();
+    try {
+      if (myProfileForm.newPassword) {
+        if (myProfileForm.newPassword !== myProfileForm.confirmPassword) {
+          alert('Konfirmasi kata sandi baru tidak cocok.');
+          return;
+        }
+        if (currentUser.password !== myProfileForm.oldPassword) {
+          alert('Kata sandi lama salah.');
+          return;
+        }
+      }
+
+      const updatedFields = {
+        nama: myProfileForm.nama,
+        email: myProfileForm.email,
+        username: myProfileForm.username
+      };
+
+      if (myProfileForm.newPassword) {
+        updatedFields.password = myProfileForm.newPassword;
+      }
+
+      authService.updateUser(currentUser.id, updatedFields);
+      showToast('Profil akun Anda berhasil diperbarui!');
+      setMyProfileForm((prev) => ({
+        ...prev,
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+      loadData();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // Backup & Database
   const handleExportBackup = () => {
     const json = dataService.exportDatabaseJSON();
     const blob = new Blob([json], { type: 'application/json' });
@@ -71,7 +236,6 @@ export default function PengaturanPage() {
     showToast('Backup database JSON berhasil diunduh.');
   };
 
-  // Import Backup Database JSON
   const handleImportBackup = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -90,9 +254,8 @@ export default function PengaturanPage() {
     reader.readAsText(file);
   };
 
-  // Reset to default
   const handleResetDatabase = () => {
-    if (confirm('PERINGATAN: Apakah Anda yakin ingin mereset seluruh database ke data contoh default? Seluruh data yang Anda ubah akan diganti ke konfigurasi awal.')) {
+    if (confirm('PERINGATAN: Apakah Anda yakin ingin mereset seluruh database ke data contoh default?')) {
       dataService.resetDatabase();
       setFormData(dataService.getSettings());
       showToast('Database berhasil direset ke data contoh default.');
@@ -101,8 +264,8 @@ export default function PengaturanPage() {
 
   return (
     <AppLayout
-      title="Pengaturan & Konfigurasi Koperasi"
-      subtitle="Kelola profil institusi, parameter bunga, tarif simpanan, dan pemeliharaan database."
+      title="Pengaturan & Manajemen Sistem"
+      subtitle="Kelola konfigurasi koperasi, manajemen pengguna admin/operator, profil akun, dan database."
     >
       {/* Toast */}
       {toastMessage && (
@@ -112,263 +275,656 @@ export default function PengaturanPage() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto flex flex-col gap-6">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          {/* Card 1: Profil Koperasi */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-              <span className="material-symbols-outlined text-blue-700">account_balance</span>
-              <h2 className="text-sm font-bold text-[#002045]">Profil Lembaga Koperasi</h2>
+      {/* Tabs Navigation */}
+      <div className="max-w-5xl mx-auto flex flex-col gap-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-1.5 shadow-sm flex flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('koperasi')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'koperasi'
+                ? 'bg-[#002045] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">account_balance</span>
+            Profil & Parameter Koperasi
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('users')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'users'
+                ? 'bg-[#002045] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">manage_accounts</span>
+            Kelola Pengguna Admin ({usersList.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('profil_saya')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'profil_saya'
+                ? 'bg-[#002045] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">person</span>
+            Profil Saya & Password
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('database')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'database'
+                ? 'bg-[#002045] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">database</span>
+            Backup & Pemulihan
+          </button>
+        </div>
+
+        {/* TAB 1: KOPERASI & PARAMETER */}
+        {activeTab === 'koperasi' && (
+          <form onSubmit={handleKoperasiSubmit} className="flex flex-col gap-6">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-700">account_balance</span>
+                <h2 className="text-sm font-bold text-[#002045]">Profil Lembaga Koperasi</h2>
+              </div>
+
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-700 block mb-1">Nama Resmi Koperasi *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.namaKoperasi || ''}
+                    onChange={(e) => setFormData({ ...formData, namaKoperasi: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor SK / Badan Hukum</label>
+                  <input
+                    type="text"
+                    value={formData.badanHukum || ''}
+                    onChange={(e) => setFormData({ ...formData, badanHukum: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor Telepon Kantor</label>
+                  <input
+                    type="text"
+                    value={formData.telepon || ''}
+                    onChange={(e) => setFormData({ ...formData, telepon: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Email Resmi Koperasi</label>
+                  <input
+                    type="email"
+                    value={formData.email || ''}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Ketua Pengurus</label>
+                  <input
+                    type="text"
+                    value={formData.ketua || ''}
+                    onChange={(e) => setFormData({ ...formData, ketua: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-700 block mb-1">Alamat Kantor Koperasi</label>
+                  <textarea
+                    rows={2}
+                    value={formData.alamat || ''}
+                    onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="sm:col-span-2">
-                <label className="font-bold text-slate-700 block mb-1">Nama Resmi Koperasi *</label>
+            {/* Parameter Simpan Pinjam */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-700">tune</span>
+                <h2 className="text-sm font-bold text-[#002045]">Parameter Simpan Pinjam & Suku Bunga</h2>
+              </div>
+
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Pokok (Rp)</label>
+                  <input
+                    type="number"
+                    value={formData.simpananPokok || 0}
+                    onChange={(e) => setFormData({ ...formData, simpananPokok: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">Biaya saat pendaftaran awal</span>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Wajib (Rp / Bln)</label>
+                  <input
+                    type="number"
+                    value={formData.simpananWajib || 0}
+                    onChange={(e) => setFormData({ ...formData, simpananWajib: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">Iuran rutin bulanan</span>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Suku Bunga Pinjaman (% / Bln)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.sukuBungaPinjaman || 1.5}
+                    onChange={(e) => setFormData({ ...formData, sukuBungaPinjaman: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">Bunga pinjaman flat per bulan</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Alokasi SHU */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                <span className="material-symbols-outlined text-purple-700">pie_chart</span>
+                <h2 className="text-sm font-bold text-[#002045]">Alokasi Pembagian SHU (%)</h2>
+              </div>
+
+              <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Jasa Anggota (%)</label>
+                  <input
+                    type="number"
+                    value={formData.shuPersenAnggota || 40}
+                    onChange={(e) => setFormData({ ...formData, shuPersenAnggota: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Jasa Modal (%)</label>
+                  <input
+                    type="number"
+                    value={formData.shuPersenModal || 30}
+                    onChange={(e) => setFormData({ ...formData, shuPersenModal: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Pengurus & Pengawas (%)</label>
+                  <input
+                    type="number"
+                    value={formData.shuPersenPengurus || 20}
+                    onChange={(e) => setFormData({ ...formData, shuPersenPengurus: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Dana Cadangan (%)</label>
+                  <input
+                    type="number"
+                    value={formData.shuPersenCadangan || 10}
+                    onChange={(e) => setFormData({ ...formData, shuPersenCadangan: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-base">save</span>
+                Simpan Konfigurasi Koperasi
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB 2: KELOLA PENGGUNA ADMIN */}
+        {activeTab === 'users' && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-4 md:p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-bold text-[#002045]">Daftar Pengguna & Hak Akses Administrator</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Kelola akun staf, bendahara, kasir, dan hak akses sistem.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenAddUser}
+                className="px-3.5 py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                Tambah Pengguna Baru
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                    <th className="px-4 py-3">Pengguna</th>
+                    <th className="px-4 py-3">Username</th>
+                    <th className="px-4 py-3">Email</th>
+                    <th className="px-4 py-3">Role / Jabatan</th>
+                    <th className="px-4 py-3">Login Terakhir</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                    <th className="px-4 py-3 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {usersList.map((u) => {
+                    const isSelf = currentUser && currentUser.id === u.id;
+                    return (
+                      <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                              {u.avatar || 'US'}
+                            </div>
+                            <div className="font-bold text-[#002045]">
+                              {u.nama} {isSelf && <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-1 font-normal">(Anda)</span>}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-mono font-semibold text-slate-700 whitespace-nowrap">
+                          {u.username}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                          {u.email}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                              u.role === 'Super Admin'
+                                ? 'bg-purple-100 text-purple-800'
+                                : u.role === 'Bendahara'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-emerald-100 text-emerald-800'
+                            }`}
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                          {u.lastLogin || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              u.status === 'Aktif' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            {u.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditUser(u)}
+                              title="Edit Pengguna"
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">edit</span>
+                            </button>
+                            {!isSelf && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteUser(u)}
+                                title="Hapus Pengguna"
+                                className="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: PROFIL SAYA & PASSWORD */}
+        {activeTab === 'profil_saya' && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-4 md:p-5 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
+              <span className="material-symbols-outlined text-blue-700">badge</span>
+              <div>
+                <h3 className="text-sm font-bold text-[#002045]">Profil Akun Saya</h3>
+                <p className="text-xs text-slate-500">Perbarui data profil pribadi dan kata sandi akun Anda.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveMyProfile} className="p-6 md:p-8 flex flex-col gap-6 text-xs">
+              <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
+                <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-md border-2 border-white">
+                  {currentUser.avatar || 'AD'}
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-[#002045]">{currentUser.nama}</h4>
+                  <p className="text-xs text-slate-500 font-semibold">{currentUser.role} &bull; @{currentUser.username}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
+                  <input
+                    type="text"
+                    required
+                    value={myProfileForm.nama}
+                    onChange={(e) => setMyProfileForm({ ...myProfileForm, nama: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Alamat Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={myProfileForm.email}
+                    onChange={(e) => setMyProfileForm({ ...myProfileForm, email: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Username Login *</label>
+                  <input
+                    type="text"
+                    required
+                    value={myProfileForm.username}
+                    onChange={(e) => setMyProfileForm({ ...myProfileForm, username: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Hak Akses / Role</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={currentUser.role || 'Super Admin'}
+                    className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Password Change Box */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                <span className="font-bold text-slate-700 block text-xs flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-amber-600">lock_reset</span>
+                  Ganti Kata Sandi (Kosongkan jika tidak ingin mengubah sandi)
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="font-semibold text-slate-600 block mb-1">Kata Sandi Lama</label>
+                    <input
+                      type="password"
+                      value={myProfileForm.oldPassword}
+                      onChange={(e) => setMyProfileForm({ ...myProfileForm, oldPassword: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-600 block mb-1">Kata Sandi Baru</label>
+                    <input
+                      type="password"
+                      value={myProfileForm.newPassword}
+                      onChange={(e) => setMyProfileForm({ ...myProfileForm, newPassword: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-600 block mb-1">Ulangi Sandi Baru</label>
+                    <input
+                      type="password"
+                      value={myProfileForm.confirmPassword}
+                      onChange={(e) => setMyProfileForm({ ...myProfileForm, confirmPassword: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold shadow-sm"
+                >
+                  Simpan Perubahan Profil
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* TAB 4: DATABASE & BACKUP */}
+        {activeTab === 'database' && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span className="material-symbols-outlined text-slate-700">database</span>
+              <h2 className="text-sm font-bold text-[#002045]">Manajemen Database & Pemulihan</h2>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4 text-xs">
+              <p className="text-slate-500">
+                Unduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk cadangan berkala, atau impor file backup untuk pemulihan.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-slate-50/50">
+                  <div>
+                    <h3 className="font-bold text-slate-800">Backup Data (JSON)</h3>
+                    <p className="text-slate-500 text-[11px] mt-1">Unduh seluruh rekaman database koperasi ke komputer Anda.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleExportBackup}
+                    className="w-full py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-base">cloud_download</span>
+                    Unduh Backup JSON
+                  </button>
+                </div>
+
+                <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-slate-50/50">
+                  <div>
+                    <h3 className="font-bold text-slate-800">Restore Data (JSON)</h3>
+                    <p className="text-slate-500 text-[11px] mt-1">Unggah file backup .json untuk memulihkan rekaman.</p>
+                  </div>
+                  <label className="w-full py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 rounded-lg font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+                    <span className="material-symbols-outlined text-base">upload_file</span>
+                    Pilih File Backup
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportBackup}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div className="border border-rose-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-rose-50/30">
+                  <div>
+                    <h3 className="font-bold text-rose-800">Reset Data Default</h3>
+                    <p className="text-slate-500 text-[11px] mt-1">Kembalikan seluruh data ke contoh awal sistem.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResetDatabase}
+                    className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-base">restart_alt</span>
+                    Reset ke Awal
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* MODAL TAMBAH / EDIT PENGGUNA ADMIN */}
+      {userModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined">person</span>
+                <h3 className="text-base font-bold">{isEditingUser ? 'Edit Pengguna Admin' : 'Tambah Pengguna Admin Baru'}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUserModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveUser} className="p-6 flex flex-col gap-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
                 <input
                   type="text"
                   required
-                  name="namaKoperasi"
-                  value={formData.namaKoperasi || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  value={userFormData.nama}
+                  onChange={(e) => setUserFormData({ ...userFormData, nama: e.target.value })}
+                  placeholder="Contoh: Siti Rahayu"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Nomor Badan Hukum / SK Kemenkumham</label>
-                <input
-                  type="text"
-                  name="badanHukum"
-                  value={formData.badanHukum || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Nomor Telepon Kantor</label>
-                <input
-                  type="text"
-                  name="telepon"
-                  value={formData.telepon || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Email Resmi</label>
+                <label className="font-bold text-slate-700 block mb-1">Alamat Email *</label>
                 <input
                   type="email"
-                  name="email"
-                  value={formData.email || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  required
+                  value={userFormData.email}
+                  onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                  placeholder="siti@koperasi-idaman.co.id"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
                 />
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Nama Ketua Pengurus</label>
-                <input
-                  type="text"
-                  name="ketua"
-                  value={formData.ketua || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="font-bold text-slate-700 block mb-1">Alamat Kantor Koperasi</label>
-                <textarea
-                  rows={2}
-                  name="alamat"
-                  value={formData.alamat || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: Parameter Simpan Pinjam & Suku Bunga */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-              <span className="material-symbols-outlined text-blue-700">tune</span>
-              <h2 className="text-sm font-bold text-[#002045]">Parameter Simpan Pinjam & Suku Bunga</h2>
-            </div>
-
-            <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Pokok (Rp)</label>
-                <input
-                  type="number"
-                  name="simpananPokok"
-                  value={formData.simpananPokok || 0}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                />
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Biaya saat pendaftaran</span>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Wajib (Rp / Bln)</label>
-                <input
-                  type="number"
-                  name="simpananWajib"
-                  value={formData.simpananWajib || 0}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                />
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Iuran bulanan anggota</span>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Suku Bunga Pinjaman (% / Bln)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  name="sukuBungaPinjaman"
-                  value={formData.sukuBungaPinjaman || 1.5}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                />
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Bunga flat pinjaman</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Persentase Alokasi SHU */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-              <span className="material-symbols-outlined text-purple-700">pie_chart</span>
-              <h2 className="text-sm font-bold text-[#002045]">Konfigurasi Pembagian Alokasi SHU (%)</h2>
-            </div>
-
-            <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Jasa Anggota (%)</label>
-                <input
-                  type="number"
-                  name="shuPersenAnggota"
-                  value={formData.shuPersenAnggota || 40}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Jasa Modal (%)</label>
-                <input
-                  type="number"
-                  name="shuPersenModal"
-                  value={formData.shuPersenModal || 30}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Dana Pengurus (%)</label>
-                <input
-                  type="number"
-                  name="shuPersenPengurus"
-                  value={formData.shuPersenPengurus || 20}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Dana Cadangan (%)</label>
-                <input
-                  type="number"
-                  name="shuPersenCadangan"
-                  value={formData.shuPersenCadangan || 10}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-base">save</span>
-              Simpan Pengaturan
-            </button>
-          </div>
-        </form>
-
-        {/* Card 4: Backup & Restore Database */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-            <span className="material-symbols-outlined text-slate-700">database</span>
-            <h2 className="text-sm font-bold text-[#002045]">Manajemen Database & Pemulihan</h2>
-          </div>
-
-          <div className="p-6 flex flex-col gap-4 text-xs">
-            <p className="text-slate-500">
-              Anda dapat mengunduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk keamanan data, atau mengimpor file backup untuk memulihkan sistem.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              {/* Backup */}
-              <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-slate-50/50">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <h3 className="font-bold text-slate-800">Backup Data (JSON)</h3>
-                  <p className="text-slate-500 text-[11px] mt-1">Unduh seluruh rekaman database koperasi ke komputer Anda.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleExportBackup}
-                  className="w-full py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-base">cloud_download</span>
-                  Unduh Backup JSON
-                </button>
-              </div>
-
-              {/* Restore */}
-              <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-slate-50/50">
-                <div>
-                  <h3 className="font-bold text-slate-800">Restore Data (JSON)</h3>
-                  <p className="text-slate-500 text-[11px] mt-1">Unggah file backup .json untuk memulihkan rekaman.</p>
-                </div>
-                <label className="w-full py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 rounded-lg font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
-                  <span className="material-symbols-outlined text-base">upload_file</span>
-                  Pilih File Backup
+                  <label className="font-bold text-slate-700 block mb-1">Username *</label>
                   <input
-                    type="file"
-                    accept=".json"
-                    onChange={handleImportBackup}
-                    className="hidden"
+                    type="text"
+                    required
+                    disabled={isEditingUser}
+                    value={userFormData.username}
+                    onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
+                    placeholder="kasir1"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono disabled:bg-slate-100"
                   />
-                </label>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    {isEditingUser ? 'Kata Sandi Baru (Opsional)' : 'Kata Sandi *'}
+                  </label>
+                  <input
+                    type="password"
+                    required={!isEditingUser}
+                    value={userFormData.password}
+                    onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
               </div>
 
-              {/* Reset */}
-              <div className="border border-rose-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-rose-50/30">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <h3 className="font-bold text-rose-800">Reset Data Default</h3>
-                  <p className="text-slate-500 text-[11px] mt-1">Kembalikan seluruh data ke contoh awal sistem.</p>
+                  <label className="font-bold text-slate-700 block mb-1">Role / Peran</label>
+                  <select
+                    value={userFormData.role}
+                    onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                  >
+                    <option value="Super Admin">Super Admin</option>
+                    <option value="Bendahara">Bendahara</option>
+                    <option value="Kasir & Teller">Kasir & Teller</option>
+                    <option value="Pengawas">Pengawas</option>
+                  </select>
                 </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Status Akun</label>
+                  <select
+                    value={userFormData.status}
+                    onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                  >
+                    <option value="Aktif">Aktif</option>
+                    <option value="Nonaktif">Nonaktif</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={handleResetDatabase}
-                  className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                  onClick={() => setUserModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
                 >
-                  <span className="material-symbols-outlined text-base">restart_alt</span>
-                  Reset ke Awal
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm"
+                >
+                  {isEditingUser ? 'Simpan Perubahan' : 'Tambah Pengguna'}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
-      </div>
+      )}
     </AppLayout>
   );
 }

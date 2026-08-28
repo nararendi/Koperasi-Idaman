@@ -1,12 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { authService } from '../lib/authService';
 
 export default function AppLayout({ children, title, subtitle, rightAction }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState({
+    nama: 'Administrator',
+    role: 'Super Admin',
+    avatar: 'AD'
+  });
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+
+    const handleAuthUpdate = () => {
+      const u = authService.getCurrentUser();
+      setCurrentUser(u);
+    };
+
+    window.addEventListener('koperasi_auth_updated', handleAuthUpdate);
+    return () => window.removeEventListener('koperasi_auth_updated', handleAuthUpdate);
+  }, []);
+
+  const handleLogoutConfirm = () => {
+    authService.logout();
+    setLogoutModalOpen(false);
+    router.push('/login');
+  };
 
   const navigation = [
     { name: 'Beranda', href: '/', icon: 'dashboard' },
@@ -15,7 +42,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
     { name: 'Pinjaman', href: '/pinjaman', icon: 'payments' },
     { name: 'Transaksi Kas', href: '/kas', icon: 'receipt_long' },
     { name: 'Laporan', href: '/laporan', icon: 'assessment' },
-    { name: 'Pengaturan', href: '/pengaturan', icon: 'settings' }
+    { name: 'Pengaturan & Admin', href: '/pengaturan', icon: 'settings' }
   ];
 
   const isActive = (href) => {
@@ -38,7 +65,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           </div>
         </div>
 
-        <div className="px-3 mb-3">
+        <div className="px-3 mb-2">
           <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-blue-200/60">
             Menu Utama
           </div>
@@ -66,24 +93,31 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           })}
         </nav>
 
-        {/* User profile info & logout */}
+        {/* User profile info & logout button */}
         <div className="mt-auto px-4 pt-4 border-t border-white/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs border-2 border-white/20">
-              AD
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-white">Administrator</span>
-              <span className="text-[11px] text-blue-200/60">Super Admin</span>
-            </div>
-          </div>
           <Link
             href="/pengaturan"
-            title="Pengaturan"
-            className="p-1.5 rounded-lg text-blue-200/70 hover:text-white hover:bg-white/10 transition-colors"
+            title="Profil Pengguna & Pengaturan"
+            className="flex items-center gap-2.5 hover:bg-white/5 p-1.5 rounded-lg transition-colors overflow-hidden group flex-1 mr-2"
           >
-            <span className="material-symbols-outlined text-lg">settings</span>
+            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs border border-white/20 shrink-0">
+              {currentUser.avatar || 'AD'}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-white truncate">{currentUser.nama || 'Administrator'}</span>
+              <span className="text-[10px] text-blue-200/70 truncate">{currentUser.role || 'Super Admin'}</span>
+            </div>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setLogoutModalOpen(true)}
+            title="Keluar / Logout"
+            className="p-1.5 rounded-lg text-rose-300 hover:text-white hover:bg-rose-600/80 transition-all flex items-center justify-center cursor-pointer"
+            aria-label="Logout"
+          >
+            <span className="material-symbols-outlined text-lg">logout</span>
+          </button>
         </div>
       </aside>
 
@@ -93,22 +127,43 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           <span className="material-symbols-outlined text-2xl text-[#adc7f7]">account_balance</span>
           <span className="text-sm font-bold text-white tracking-wide">Koperasi Idaman</span>
         </div>
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-          aria-label="Toggle navigation menu"
-        >
-          <span className="material-symbols-outlined text-2xl">
-            {mobileMenuOpen ? 'close' : 'menu'}
-          </span>
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setLogoutModalOpen(true)}
+            title="Keluar"
+            className="text-rose-300 hover:text-white p-1.5 rounded hover:bg-white/10"
+          >
+            <span className="material-symbols-outlined text-xl">logout</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            <span className="material-symbols-outlined text-2xl">
+              {mobileMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
       </header>
 
-      {/* Mobile Navigation Drawer Dropdown */}
+      {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm pt-16" onClick={() => setMobileMenuOpen(false)}>
           <div className="bg-[#002045] text-white p-4 shadow-xl border-b border-white/10 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 p-3 mb-2 bg-white/10 rounded-xl">
+              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">
+                {currentUser.avatar || 'AD'}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-white">{currentUser.nama}</span>
+                <span className="text-[11px] text-blue-200/70">{currentUser.role}</span>
+              </div>
+            </div>
+
             {navigation.map((item) => {
               const active = isActive(item.href);
               return (
@@ -152,11 +207,49 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
             <span>&bull;</span>
             <span className="text-green-600 font-semibold flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              Sistem Aktif & Terhubung
+              Aktif sebagai {currentUser.role}
             </span>
           </div>
         </footer>
       </main>
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      {logoutModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs">
+            <div className="p-5 bg-rose-700 text-white flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <span className="material-symbols-outlined text-2xl">logout</span>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold">Konfirmasi Keluar</h3>
+                <p className="text-[11px] text-rose-100">Akhiri sesi pengguna aktif</p>
+              </div>
+            </div>
+
+            <div className="p-6 text-slate-600">
+              Apakah Anda yakin ingin keluar dari sistem <strong>Koperasi Idaman</strong>? Anda perlu memasukkan username & password kembali untuk mengakses.
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setLogoutModalOpen(false)}
+                className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleLogoutConfirm}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold shadow-sm"
+              >
+                Ya, Keluar Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
