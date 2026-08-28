@@ -99,12 +99,15 @@ export default function PengaturanPage() {
 
     const handleUsersUpdate = () => loadData();
     const handleAuthUpdate = () => loadData();
+    const handleDbUpdate = () => loadData();
 
     window.addEventListener('koperasi_users_updated', handleUsersUpdate);
     window.addEventListener('koperasi_auth_updated', handleAuthUpdate);
+    window.addEventListener('koperasi_db_updated', handleDbUpdate);
     return () => {
       window.removeEventListener('koperasi_users_updated', handleUsersUpdate);
       window.removeEventListener('koperasi_auth_updated', handleAuthUpdate);
+      window.removeEventListener('koperasi_db_updated', handleDbUpdate);
     };
   }, []);
 
