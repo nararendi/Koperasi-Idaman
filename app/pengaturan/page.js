@@ -352,6 +352,32 @@ export default function PengaturanPage() {
     }
   };
 
+  if (currentUser && currentUser.role !== 'Super Admin') {
+    return (
+      <AppLayout
+        title="Pengaturan & Sistem"
+        subtitle="Akses terbatas hanya untuk Super Administrator."
+      >
+        <div className="bg-white rounded-3xl p-10 text-center border border-slate-100 shadow-xs max-w-md mx-auto my-10">
+          <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-3xl">lock</span>
+          </div>
+          <h3 className="text-base font-extrabold text-[#0f172a] mb-2">Akses Dibatasi</h3>
+          <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+            Halaman Pengaturan sistem hanya dapat diakses oleh akun dengan role <strong>Super Admin</strong>. Akun Anda saat ini tercatat sebagai <strong>{currentUser.role}</strong>.
+          </p>
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2563eb] text-white rounded-full text-xs font-bold shadow-md shadow-[#2563eb]/20 hover:bg-[#1d4ed8] transition-all"
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            Kembali ke Beranda
+          </a>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout
       title="Pengaturan & Sistem"

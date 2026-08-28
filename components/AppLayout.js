@@ -12,24 +12,28 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [currentUser, setCurrentUser] = useState({
-    nama: 'Administrator',
-    role: 'Super Admin',
-    avatar: 'AD'
-  });
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
+    if (!user && pathname !== '/login') {
+      router.push('/login');
+      return;
+    }
     setCurrentUser(user);
 
     const handleAuthUpdate = () => {
       const u = authService.getCurrentUser();
+      if (!u && pathname !== '/login') {
+        router.push('/login');
+        return;
+      }
       setCurrentUser(u);
     };
 
     window.addEventListener('koperasi_auth_updated', handleAuthUpdate);
     return () => window.removeEventListener('koperasi_auth_updated', handleAuthUpdate);
-  }, []);
+  }, [pathname, router]);
 
   const handleLogoutConfirm = () => {
     authService.logout();
@@ -46,7 +50,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
     { name: 'Usaha & Qurban', label: 'Usaha & Qurban', href: '/usaha', icon: 'storefront' },
     { name: 'Daftar Tagihan', label: 'Daftar Tagihan', href: '/tagihan', icon: 'fact_check' },
     { name: 'Laporan', label: 'Laporan', href: '/laporan', icon: 'bar_chart' },
-    { name: 'Pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: 'settings' }
+    ...(currentUser?.role === 'Super Admin' ? [{ name: 'Pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: 'settings' }] : [])
   ];
 
   const isActive = (href) => {

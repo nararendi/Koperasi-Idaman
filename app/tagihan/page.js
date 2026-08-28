@@ -247,36 +247,40 @@ export default function TagihanPage() {
           </div>
         </div>
 
-        {/* Beautiful Modern Table Layout */}
-        <div className="overflow-hidden border border-slate-200 rounded-2xl shadow-2xs">
+        {/* Beautiful Modern Table Layout with Abu Muda Headers */}
+        <div className="overflow-hidden border border-slate-300 rounded-2xl shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
-                {/* Header Tingkat 1 */}
-                <tr className="bg-[#0f172a] text-white font-bold text-center text-[11px]">
-                  <th rowSpan={2} className="border-r border-b border-slate-700/80 py-3.5 px-2 w-12 text-center">NO.</th>
-                  <th rowSpan={2} className="border-r border-b border-slate-700/80 py-3.5 px-3 w-28 text-center tracking-wide">NO. ANGGOTA</th>
-                  <th rowSpan={2} className="border-r border-b border-slate-700/80 py-3.5 px-4 text-left min-w-48 tracking-wide">NAMA</th>
-                  <th colSpan={3} className="border-r border-b border-slate-700/80 py-2.5 px-3 bg-[#1e3a8a] text-white font-extrabold tracking-wider">
+                {/* Header Tingkat 1 - Abu Muda */}
+                <tr className="bg-[#e2e8f0] text-slate-800 font-black text-center text-[11px]">
+                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-2 w-12 text-center text-slate-800">NO.</th>
+                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-3 w-28 text-center tracking-wide text-slate-800">NO. ANGGOTA</th>
+                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-4 text-left min-w-48 tracking-wide text-slate-800">NAMA</th>
+                  <th colSpan={3} className="border border-slate-300 py-2.5 px-3 bg-[#dbeafe] text-[#1e40af] font-black tracking-wider">
                     SIMPANAN
                   </th>
-                  <th colSpan={4} className="border-r border-b border-slate-700/80 py-2.5 px-3 bg-[#1e293b] text-white font-extrabold tracking-wider">
+                  <th colSpan={4} className="border border-slate-300 py-2.5 px-3 bg-[#e2e8f0] text-slate-800 font-black tracking-wider">
                     POTONGAN
                   </th>
-                  <th rowSpan={2} className="border-r border-b border-slate-700/80 py-3.5 px-4 w-36 bg-[#002045] font-black text-center tracking-wider">
+                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-4 w-36 bg-[#ffe4e6] text-[#be123c] font-black text-center tracking-wider">
                     JUMLAH
                   </th>
-                  <th rowSpan={2} className="border-b border-slate-700/80 py-3.5 px-2 w-14 text-center">AKSI</th>
+                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-2 w-14 text-center text-slate-800">AKSI</th>
                 </tr>
-                {/* Header Tingkat 2 */}
-                <tr className="bg-[#0f172a] text-white font-extrabold text-center text-[10px]">
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2.5 w-24 bg-[#1e3a8a]/90">WAJIB</th>
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2.5 w-24 bg-[#1e3a8a]/90">SUKARELA</th>
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2.5 w-24 bg-[#1e3a8a]/90">QURBAN</th>
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2 w-20 bg-[#1e293b]/90">CICILAN KE</th>
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2.5 w-28 bg-[#1e293b]/90">POKOK</th>
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2.5 w-24 bg-[#1e293b]/90">JASA</th>
-                  <th className="border-r border-b border-slate-700/80 py-2 px-2.5 w-24 bg-[#1e293b]/90">SEMBAKO</th>
+                {/* Header Tingkat 2 - Abu Muda */}
+                <tr className="bg-[#f1f5f9] text-slate-700 font-extrabold text-center text-[10px]">
+                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#eff6ff] text-[#1e40af]">WAJIB</th>
+                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#eff6ff] text-[#1e40af]">SUKARELA</th>
+                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#eff6ff] text-[#1e40af]">QURBAN</th>
+                  <th title="Urutan angsuran pinjaman berjalan anggota" className="border border-slate-300 py-2 px-2 w-20 bg-[#f8fafc] text-slate-700">
+                    CICILAN KE
+                  </th>
+                  <th className="border border-slate-300 py-2 px-2.5 w-28 bg-[#f8fafc] text-slate-700">POKOK</th>
+                  <th title="Bunga pinjaman anggota" className="border border-slate-300 py-2 px-2.5 w-24 bg-[#f8fafc] text-slate-700">
+                    JASA
+                  </th>
+                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#f8fafc] text-slate-700">SEMBAKO</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-700">
@@ -295,24 +299,26 @@ export default function TagihanPage() {
                 ) : (
                   filteredList.map((row, idx) => (
                     <tr key={row.nomor_anggota} className={`${idx % 2 === 1 ? 'bg-[#fcfdfe]' : 'bg-white'} hover:bg-[#eff6ff]/70 transition-colors`}>
-                      <td className="border-r border-slate-200 py-3 px-2 text-center font-semibold text-slate-500">{row.no}</td>
-                      <td className="border-r border-slate-200 py-3 px-2 text-center">
+                      <td className="border border-slate-300 py-3 px-2 text-center font-semibold text-slate-500">{row.no}</td>
+                      <td className="border border-slate-300 py-3 px-2 text-center">
                         <span className="font-mono font-bold text-xs text-[#0f172a] bg-slate-100 px-2 py-0.5 rounded-md">
                           {row.nomor_anggota}
                         </span>
                       </td>
-                      <td className="border-r border-slate-200 py-3 px-3 font-bold text-[#0f172a]">{row.nama}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-medium text-slate-700">{row.wajib > 0 ? formatRupiah(row.wajib) : '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-medium text-slate-700">{row.sukarela > 0 ? formatRupiah(row.sukarela) : '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-medium text-slate-700">{row.qurban > 0 ? formatRupiah(row.qurban) : '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-2 text-center font-bold text-[#2563eb]">{row.cicilanKe || '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-medium text-slate-700">{row.pokok > 0 ? formatRupiah(row.pokok) : '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-medium text-slate-700">{row.jasa > 0 ? formatRupiah(row.jasa) : '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-medium text-slate-700">{row.sembako > 0 ? formatRupiah(row.sembako) : '-'}</td>
-                      <td className="border-r border-slate-200 py-3 px-3 text-right font-black text-rose-600 bg-rose-50/50">
+                      <td className="border border-slate-300 py-3 px-3 font-bold text-[#0f172a]">{row.nama}</td>
+                      <td className="border border-slate-300 py-3 px-3 text-right font-medium text-slate-700">{row.wajib > 0 ? formatRupiah(row.wajib) : '-'}</td>
+                      <td className="border border-slate-300 py-3 px-3 text-right font-medium text-slate-700">{row.sukarela > 0 ? formatRupiah(row.sukarela) : '-'}</td>
+                      <td className="border border-slate-300 py-3 px-3 text-right font-medium text-slate-700">{row.qurban > 0 ? formatRupiah(row.qurban) : '-'}</td>
+                      <td title={`Urutan Cicilan Ke-${row.cicilanKe}`} className="border border-slate-300 py-3 px-2 text-center font-bold text-[#2563eb]">
+                        {row.cicilanKe ? `Ke ${row.cicilanKe}` : '-'}
+                      </td>
+                      <td className="border border-slate-300 py-3 px-3 text-right font-medium text-slate-700">{row.pokok > 0 ? formatRupiah(row.pokok) : '-'}</td>
+                      <td title="Bunga Pinjaman" className="border border-slate-300 py-3 px-3 text-right font-medium text-slate-700">{row.jasa > 0 ? formatRupiah(row.jasa) : '-'}</td>
+                      <td className="border border-slate-300 py-3 px-3 text-right font-medium text-slate-700">{row.sembako > 0 ? formatRupiah(row.sembako) : '-'}</td>
+                      <td className="border border-slate-300 py-3 px-3 text-right font-black text-rose-600 bg-rose-50/50">
                         {formatRupiah(row.jumlah)}
                       </td>
-                      <td className="py-3 px-2 text-center">
+                      <td className="border border-slate-300 py-3 px-2 text-center">
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(row)}
@@ -327,20 +333,20 @@ export default function TagihanPage() {
                 )}
                 {/* Row Total JUMLAH */}
                 <tr className="bg-[#f1f5f9] font-black text-slate-900 text-xs border-t-2 border-slate-400">
-                  <td colSpan={3} className="border-r border-slate-300 py-3.5 px-4 text-center font-black tracking-wider text-[12px] bg-slate-200/80">
+                  <td colSpan={3} className="border border-slate-300 py-3.5 px-4 text-center font-black tracking-wider text-[12px] bg-slate-200/90">
                     JUMLAH
                   </td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.wajib)}</td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.sukarela)}</td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.qurban)}</td>
-                  <td className="border-r border-slate-300 py-3.5 px-2 text-center"></td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.pokok)}</td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.jasa)}</td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.sembako)}</td>
-                  <td className="border-r border-slate-300 py-3.5 px-3 text-right font-black text-rose-600 bg-rose-100/70 text-sm">
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.wajib)}</td>
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.sukarela)}</td>
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.qurban)}</td>
+                  <td className="border border-slate-300 py-3.5 px-2 text-center"></td>
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.pokok)}</td>
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.jasa)}</td>
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-extrabold">{formatRupiah(totals.sembako)}</td>
+                  <td className="border border-slate-300 py-3.5 px-3 text-right font-black text-rose-600 bg-rose-100/80 text-sm">
                     {formatRupiah(totals.total)}
                   </td>
-                  <td className="py-3.5 px-2"></td>
+                  <td className="border border-slate-300 py-3.5 px-2"></td>
                 </tr>
               </tbody>
             </table>
@@ -436,7 +442,7 @@ export default function TagihanPage() {
                 </h4>
                 <div className="grid grid-cols-4 gap-3">
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Cicilan Ke</label>
+                    <label className="font-bold text-slate-700 block mb-1">Cicilan Ke (Urutan)</label>
                     <input
                       type="text"
                       value={editForm.cicilanKe}
@@ -456,7 +462,7 @@ export default function TagihanPage() {
                     />
                   </div>
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Jasa Pinjaman</label>
+                    <label className="font-bold text-slate-700 block mb-1">Jasa (Bunga Pinjaman)</label>
                     <input
                       type="number"
                       value={editForm.jasa}
