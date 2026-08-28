@@ -12,30 +12,30 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [currentUser, setCurrentUser] = useState({
-    nama: 'Administrator',
-    role: 'Super Admin',
-    avatar: 'AD'
-  });
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
-    if (!user && pathname !== '/login') {
-      router.push('/login');
+    if (!user) {
+      if (pathname !== '/login') {
+        router.replace('/login');
+      }
       return;
     }
-    if (user) {
-      setCurrentUser(user);
-    }
+
+    setCurrentUser(user);
+    setIsAuthReady(true);
 
     const handleAuthUpdate = () => {
       const u = authService.getCurrentUser();
       if (!u && pathname !== '/login') {
-        router.push('/login');
+        router.replace('/login');
         return;
       }
       if (u) {
         setCurrentUser(u);
+        setIsAuthReady(true);
       }
     };
 
@@ -46,7 +46,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   const handleLogoutConfirm = () => {
     authService.logout();
     setLogoutModalOpen(false);
-    router.push('/login');
+    router.replace('/login');
   };
 
   const navigation = [
@@ -66,6 +66,15 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
     if (href !== '/' && pathname.startsWith(href)) return true;
     return false;
   };
+
+  // Jangan render dashboard/layout jika belum terautentikasi (mencegah kedipan/blits)
+  if (!isAuthReady) {
+    return (
+      <div className="min-h-screen bg-[#eaf2fc] flex flex-col items-center justify-center font-sans">
+        <div className="w-10 h-10 border-4 border-[#2563eb]/20 border-t-[#2563eb] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#eaf2fc] p-2 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center font-sans antialiased text-[#0f172a]">
