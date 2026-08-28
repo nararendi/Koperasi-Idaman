@@ -354,12 +354,13 @@ export default function TagihanPage() {
           </div>
         </div>
 
-        {/* Tanda Tangan Sesuai Permintaan: Bandung, (today) */}
+        {/* Tanda Tangan Sesuai Permintaan: Simetris & Sejajar */}
         <div className="mt-8 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs">
-          <div className="pl-4">
+          <div className="pl-4 sm:pl-8">
+            <span className="invisible block mb-0.5 select-none">{dateLine}</span>
             <span className="font-semibold text-slate-600 block mb-1">Ketua Koperasi</span>
             <div className="h-16"></div>
-            <span className="font-extrabold text-[#0f172a] text-sm block border-b border-slate-800 pb-0.5 inline-block min-w-40">
+            <span className="font-extrabold text-[#0f172a] text-sm block border-b border-slate-800 pb-0.5 inline-block min-w-44">
               {settings.ketua || 'Asep Solehudin, S.Pd.'}
             </span>
           </div>
@@ -368,7 +369,7 @@ export default function TagihanPage() {
             <span className="text-slate-500 font-semibold block mb-0.5">{dateLine}</span>
             <span className="font-semibold text-slate-600 block mb-1">Bendahara Koperasi</span>
             <div className="h-16"></div>
-            <span className="font-extrabold text-[#0f172a] text-sm block border-b border-slate-800 pb-0.5 inline-block min-w-40">
+            <span className="font-extrabold text-[#0f172a] text-sm block border-b border-slate-800 pb-0.5 inline-block min-w-44">
               {settings.bendahara || 'Ica Cahyani'}
             </span>
           </div>
