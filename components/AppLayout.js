@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '../lib/authService';
+import { dataService } from '../lib/dataService';
 import AppLogo from './AppLogo';
 
 export default function AppLayout({ children, title, subtitle, rightAction }) {
