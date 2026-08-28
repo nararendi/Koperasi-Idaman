@@ -5,6 +5,8 @@ import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 
 export default function LaporanPage() {
+  const currentYear = new Date().getFullYear();
+
   const [laporan, setLaporan] = useState({
     arusKas: {
       totalSimpananMasuk: 0,
@@ -43,7 +45,17 @@ export default function LaporanPage() {
 
   const [settings, setSettings] = useState({});
   const [periodeBulan, setPeriodeBulan] = useState('');
-  const [periodeTahun, setPeriodeTahun] = useState('2024');
+  const [periodeTahun, setPeriodeTahun] = useState(String(currentYear));
+
+  // Generate dynamic list of years around current year
+  const availableYears = [
+    currentYear + 1,
+    currentYear,
+    currentYear - 1,
+    currentYear - 2,
+    currentYear - 3,
+    currentYear - 4
+  ];
 
   const loadLaporan = () => {
     const data = dataService.getLaporanData(periodeBulan, periodeTahun);
@@ -73,9 +85,10 @@ export default function LaporanPage() {
 
   // Export CSV of Financial Summary
   const handleExportCSV = () => {
+    const labelPeriode = `${periodeBulan ? `Bulan ${periodeBulan} ` : 'Semua Bulan '}${periodeTahun || 'Semua Tahun'}`;
     const rows = [
       ['LAPORAN KEUANGAN KOPERASI IDAMAN'],
-      ['Periode', `${periodeBulan ? `Bulan ${periodeBulan}` : 'Semua Bulan'} ${periodeTahun}`],
+      ['Periode', labelPeriode],
       [''],
       ['1. LAPORAN ARUS KAS'],
       ['Pemasukan Simpanan', laporan.arusKas.totalSimpananMasuk],
@@ -112,7 +125,7 @@ export default function LaporanPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${periodeTahun}.csv`);
+    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${periodeTahun || 'Semua_Tahun'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -177,11 +190,14 @@ export default function LaporanPage() {
             <select
               value={periodeTahun}
               onChange={(e) => setPeriodeTahun(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium"
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium font-bold text-[#002045]"
             >
-              <option value="2024">Tahun 2024</option>
-              <option value="2023">Tahun 2023</option>
-              <option value="2022">Tahun 2022</option>
+              <option value="">Semua Tahun</option>
+              {availableYears.map((yr) => (
+                <option key={yr} value={String(yr)}>
+                  Tahun {yr} {yr === currentYear ? '(Tahun Sekarang)' : ''}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -193,7 +209,7 @@ export default function LaporanPage() {
           <h2 className="text-lg font-black text-[#002045]">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
           <p className="text-xs text-slate-500">{settings.alamat || 'Jakarta, Indonesia'}</p>
           <p className="text-xs font-bold text-blue-900 mt-1">
-            Laporan Keuangan & Perkembangan Usaha Periode {periodeBulan ? `Bulan ${periodeBulan} ` : ''}{periodeTahun}
+            Laporan Keuangan & Perkembangan Usaha Periode {periodeBulan ? `Bulan ${periodeBulan} ` : ''}{periodeTahun ? `Tahun ${periodeTahun}` : 'Semua Periode'}
           </p>
         </div>
 
