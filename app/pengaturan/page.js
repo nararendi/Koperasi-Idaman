@@ -515,24 +515,34 @@ export default function PengaturanPage() {
               <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Pokok (Rp)</label>
-                  <input
-                    type="number"
-                    value={formData.simpananPokok || 0}
-                    onChange={(e) => setFormData({ ...formData, simpananPokok: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                  />
-                  <span className="text-[10px] text-slate-400 mt-0.5 block">Biaya saat pendaftaran awal</span>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
+                    <input
+                      type="number"
+                      value={formData.simpananPokok || 0}
+                      onChange={(e) => setFormData({ ...formData, simpananPokok: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                    />
+                  </div>
+                  <span className="text-[10px] text-blue-700 font-bold mt-1 block">
+                    Format: {Number(formData.simpananPokok || 0).toLocaleString('id-ID')}
+                  </span>
                 </div>
 
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Wajib (Rp / Bln)</label>
-                  <input
-                    type="number"
-                    value={formData.simpananWajib || 0}
-                    onChange={(e) => setFormData({ ...formData, simpananWajib: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                  />
-                  <span className="text-[10px] text-slate-400 mt-0.5 block">Iuran rutin bulanan</span>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
+                    <input
+                      type="number"
+                      value={formData.simpananWajib || 0}
+                      onChange={(e) => setFormData({ ...formData, simpananWajib: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                    />
+                  </div>
+                  <span className="text-[10px] text-blue-700 font-bold mt-1 block">
+                    Format: {Number(formData.simpananWajib || 0).toLocaleString('id-ID')}
+                  </span>
                 </div>
 
                 <div>

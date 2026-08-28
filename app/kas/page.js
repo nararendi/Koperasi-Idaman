@@ -321,15 +321,23 @@ export default function KasPage() {
 
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Nominal Transaksi (Rp) *</label>
-                <input
-                  type="number"
-                  required
-                  min="1000"
-                  placeholder="Contoh: 150000"
-                  value={formData.jumlah}
-                  onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none text-sm font-bold text-[#002045]"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
+                  <input
+                    type="number"
+                    required
+                    min="1000"
+                    placeholder="Contoh: 20000"
+                    value={formData.jumlah}
+                    onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
+                    className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none text-sm font-bold text-[#002045]"
+                  />
+                </div>
+                {formData.jumlah && (
+                  <p className="text-[11px] text-blue-800 font-bold mt-1">
+                    Format: {formatRupiah(formData.jumlah)}
+                  </p>
+                )}
               </div>
 
               <div>
