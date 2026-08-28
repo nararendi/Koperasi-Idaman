@@ -43,6 +43,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
     { name: 'Simpanan', label: 'Simpanan', href: '/simpanan', icon: 'savings' },
     { name: 'Pinjaman', label: 'Pinjaman', href: '/pinjaman', icon: 'payments' },
     { name: 'Kas & Buku', label: 'Transaksi Kas', href: '/kas', icon: 'receipt_long' },
+    { name: 'Usaha & Qurban', label: 'Usaha & Qurban', href: '/usaha', icon: 'storefront' },
     { name: 'Laporan', label: 'Laporan', href: '/laporan', icon: 'bar_chart' },
     { name: 'Pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: 'settings' }
   ];
