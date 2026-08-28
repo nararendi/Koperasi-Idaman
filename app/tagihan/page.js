@@ -247,40 +247,40 @@ export default function TagihanPage() {
           </div>
         </div>
 
-        {/* Beautiful Modern Table Layout with Abu Muda Headers */}
-        <div className="overflow-hidden border border-slate-300 rounded-2xl shadow-2xs">
+        {/* Beautiful Modern Table Layout with Pure Abu Muda (Light Grey) Headers */}
+        <div className="overflow-hidden border border-slate-400 rounded-2xl shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
-                {/* Header Tingkat 1 - Abu Muda */}
-                <tr className="bg-[#e2e8f0] text-slate-800 font-black text-center text-[11px]">
-                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-2 w-12 text-center text-slate-800">NO.</th>
-                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-3 w-28 text-center tracking-wide text-slate-800">NO. ANGGOTA</th>
-                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-4 text-left min-w-48 tracking-wide text-slate-800">NAMA</th>
-                  <th colSpan={3} className="border border-slate-300 py-2.5 px-3 bg-[#dbeafe] text-[#1e40af] font-black tracking-wider">
+                {/* Header Tingkat 1 - Abu Muda Solid */}
+                <tr className="bg-[#e2e8f0] text-slate-900 font-black text-center text-[11px]">
+                  <th rowSpan={2} className="border border-slate-400 py-3.5 px-2 w-12 text-center bg-[#e2e8f0] text-slate-900">NO.</th>
+                  <th rowSpan={2} className="border border-slate-400 py-3.5 px-3 w-28 text-center tracking-wide bg-[#e2e8f0] text-slate-900">NO. ANGGOTA</th>
+                  <th rowSpan={2} className="border border-slate-400 py-3.5 px-4 text-left min-w-48 tracking-wide bg-[#e2e8f0] text-slate-900">NAMA</th>
+                  <th colSpan={3} className="border border-slate-400 py-2.5 px-3 bg-[#e2e8f0] text-slate-900 font-black tracking-wider">
                     SIMPANAN
                   </th>
-                  <th colSpan={4} className="border border-slate-300 py-2.5 px-3 bg-[#e2e8f0] text-slate-800 font-black tracking-wider">
+                  <th colSpan={4} className="border border-slate-400 py-2.5 px-3 bg-[#e2e8f0] text-slate-900 font-black tracking-wider">
                     POTONGAN
                   </th>
-                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-4 w-36 bg-[#ffe4e6] text-[#be123c] font-black text-center tracking-wider">
+                  <th rowSpan={2} className="border border-slate-400 py-3.5 px-4 w-36 bg-[#e2e8f0] text-slate-900 font-black text-center tracking-wider">
                     JUMLAH
                   </th>
-                  <th rowSpan={2} className="border border-slate-300 py-3.5 px-2 w-14 text-center text-slate-800">AKSI</th>
+                  <th rowSpan={2} className="border border-slate-400 py-3.5 px-2 w-14 text-center bg-[#e2e8f0] text-slate-900">AKSI</th>
                 </tr>
                 {/* Header Tingkat 2 - Abu Muda */}
-                <tr className="bg-[#f1f5f9] text-slate-700 font-extrabold text-center text-[10px]">
-                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#eff6ff] text-[#1e40af]">WAJIB</th>
-                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#eff6ff] text-[#1e40af]">SUKARELA</th>
-                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#eff6ff] text-[#1e40af]">QURBAN</th>
-                  <th title="Urutan angsuran pinjaman berjalan anggota" className="border border-slate-300 py-2 px-2 w-20 bg-[#f8fafc] text-slate-700">
+                <tr className="bg-[#f1f5f9] text-slate-800 font-black text-center text-[10px]">
+                  <th className="border border-slate-400 py-2 px-2.5 w-24 bg-[#f1f5f9] text-slate-800">WAJIB</th>
+                  <th className="border border-slate-400 py-2 px-2.5 w-24 bg-[#f1f5f9] text-slate-800">SUKARELA</th>
+                  <th className="border border-slate-400 py-2 px-2.5 w-24 bg-[#f1f5f9] text-slate-800">QURBAN</th>
+                  <th title="Urutan angsuran pinjaman berjalan anggota" className="border border-slate-400 py-2 px-2 w-20 bg-[#f1f5f9] text-slate-800">
                     CICILAN KE
                   </th>
-                  <th className="border border-slate-300 py-2 px-2.5 w-28 bg-[#f8fafc] text-slate-700">POKOK</th>
-                  <th title="Bunga pinjaman anggota" className="border border-slate-300 py-2 px-2.5 w-24 bg-[#f8fafc] text-slate-700">
+                  <th className="border border-slate-400 py-2 px-2.5 w-28 bg-[#f1f5f9] text-slate-800">POKOK</th>
+                  <th title="Bunga pinjaman anggota" className="border border-slate-400 py-2 px-2.5 w-24 bg-[#f1f5f9] text-slate-800">
                     JASA
                   </th>
-                  <th className="border border-slate-300 py-2 px-2.5 w-24 bg-[#f8fafc] text-slate-700">SEMBAKO</th>
+                  <th className="border border-slate-400 py-2 px-2.5 w-24 bg-[#f1f5f9] text-slate-800">SEMBAKO</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-700">
