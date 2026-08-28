@@ -7,15 +7,6 @@ import { excelExport } from '../../lib/excelExport';
 import { pdfExport } from '../../lib/pdfExport';
 
 export default function LaporanPage() {
-  const d = new Date();
-  const currentYear = d.getFullYear();
-  const currentMonthNum = String(d.getMonth() + 1).padStart(2, '0');
-  const currentMonthStr = `${currentYear}-${currentMonthNum}`;
-  const firstMonthOfYear = `${currentYear}-01`;
-
-  const [bulanMulai, setBulanMulai] = useState(firstMonthOfYear);
-  const [bulanSelesai, setBulanSelesai] = useState(currentMonthStr);
-
   const [laporan, setLaporan] = useState({
     arusKas: {
       totalSimpananMasuk: 0,
@@ -54,30 +45,24 @@ export default function LaporanPage() {
 
   const [settings, setSettings] = useState({});
 
-  const formatBulanTahun = (ym) => {
-    if (!ym) return '';
-    const [year, month] = ym.split('-');
+  const getPeriodeLabel = () => {
+    const d = new Date();
     const monthNames = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
-    const monthIndex = parseInt(month, 10) - 1;
-    return `${monthNames[monthIndex] || month} ${year}`;
+    return `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
   };
 
   const loadLaporan = () => {
-    const startDate = bulanMulai ? `${bulanMulai}-01` : '';
-    let endDate = '';
-    if (bulanSelesai) {
-      const [y, m] = bulanSelesai.split('-');
-      const lastDay = new Date(Number(y), Number(m), 0).getDate();
-      endDate = `${bulanSelesai}-${String(lastDay).padStart(2, '0')}`;
-    }
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const lastDay = new Date(y, d.getMonth() + 1, 0).getDate();
+    const startDate = `${y}-${m}-01`;
+    const endDate = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
 
-    const data = dataService.getLaporanData({
-      startDate,
-      endDate
-    });
+    const data = dataService.getLaporanData({ startDate, endDate });
     const s = dataService.getSettings();
     setLaporan(data);
     setSettings(s);
@@ -92,7 +77,7 @@ export default function LaporanPage() {
 
     window.addEventListener('koperasi_db_updated', handleUpdate);
     return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
-  }, [bulanMulai, bulanSelesai]);
+  }, []);
 
   const formatRupiah = (num) => {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
@@ -100,27 +85,6 @@ export default function LaporanPage() {
 
   const handleExportPDF = () => {
     pdfExport.exportLaporanKeuanganPDF(laporan, settings, getPeriodeLabel());
-  };
-
-  const setPresetBulanIni = () => {
-    setBulanMulai(currentMonthStr);
-    setBulanSelesai(currentMonthStr);
-  };
-
-  const setPresetTahunIni = () => {
-    setBulanMulai(firstMonthOfYear);
-    setBulanSelesai(currentMonthStr);
-  };
-
-  const setPresetSemuaWaktu = () => {
-    setBulanMulai('');
-    setBulanSelesai('');
-  };
-
-  const getPeriodeLabel = () => {
-    if (!bulanMulai && !bulanSelesai) return 'Semua Periode (Semua Waktu)';
-    if (bulanMulai === bulanSelesai) return `Bulan ${formatBulanTahun(bulanMulai)}`;
-    return `${formatBulanTahun(bulanMulai) || 'Awal'} s/d ${formatBulanTahun(bulanSelesai) || 'Sekarang'}`;
   };
 
   // Export Professional Excel Document
@@ -131,7 +95,7 @@ export default function LaporanPage() {
   return (
     <AppLayout
       title="Laporan Keuangan & Rekapitulasi"
-      subtitle="Pilih kalender bulan dan tahun untuk merekapitulasi arus kas, neraca saldo, dan alokasi SHU."
+      subtitle="Rekapitulasi otomatis arus kas, neraca saldo, dan alokasi SHU periode berjalan."
       rightAction={
         <div className="flex items-center gap-2">
           <button
@@ -153,67 +117,6 @@ export default function LaporanPage() {
         </div>
       }
     >
-      {/* Month & Year Calendar Filter Bar */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-xs mb-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        {/* Month Picker Inputs */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#2563eb] text-2xl">calendar_month</span>
-            <span className="text-xs font-extrabold text-slate-700">Pilih Periode:</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Dari Bulan</label>
-              <input
-                type="month"
-                value={bulanMulai}
-                onChange={(e) => setBulanMulai(e.target.value)}
-                className="px-3.5 py-1.5 bg-[#f8fafc] border border-slate-200 rounded-full text-xs focus:border-[#2563eb] outline-none font-bold text-[#0f172a] cursor-pointer shadow-2xs"
-              />
-            </div>
-
-            <span className="text-slate-400 font-bold self-end mb-2">s/d</span>
-
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Sampai Bulan</label>
-              <input
-                type="month"
-                value={bulanSelesai}
-                onChange={(e) => setBulanSelesai(e.target.value)}
-                className="px-3.5 py-1.5 bg-[#f8fafc] border border-slate-200 rounded-full text-xs focus:border-[#2563eb] outline-none font-bold text-[#0f172a] cursor-pointer shadow-2xs"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Presets */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-          <span className="text-[11px] font-bold text-slate-400 mr-1">Preset:</span>
-          <button
-            type="button"
-            onClick={setPresetBulanIni}
-            className="px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-[#f8fafc] text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
-          >
-            Bulan Ini ({formatBulanTahun(currentMonthStr)})
-          </button>
-          <button
-            type="button"
-            onClick={setPresetTahunIni}
-            className="px-3.5 py-1.5 rounded-full bg-[#eff6ff] border border-[#2563eb]/30 hover:bg-[#dbeafe] text-[11px] font-extrabold text-[#2563eb] transition-colors cursor-pointer"
-          >
-            Tahun {currentYear} (Jan - Des)
-          </button>
-          <button
-            type="button"
-            onClick={setPresetSemuaWaktu}
-            className="px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-[#f8fafc] text-[11px] font-semibold text-slate-600 transition-colors cursor-pointer"
-          >
-            Semua Waktu
-          </button>
-        </div>
-      </div>
-
       {/* Printable Report Container */}
       <div id="laporanContainer" className="flex flex-col gap-6">
         {/* Report Header for Print */}
@@ -223,7 +126,7 @@ export default function LaporanPage() {
             <p className="text-xs text-slate-500">{settings.alamat}{settings.telepon ? ` • Telp: ${settings.telepon}` : ''}</p>
           )}
           <div className="inline-flex items-center gap-1.5 bg-[#eff6ff] border border-[#2563eb]/20 px-4 py-1.5 rounded-full text-xs font-bold text-[#2563eb] mt-2 shadow-2xs">
-            <span className="material-symbols-outlined text-sm">date_range</span>
+            <span className="material-symbols-outlined text-sm">calendar_month</span>
             <span>
               Periode Laporan: {getPeriodeLabel()}
             </span>
