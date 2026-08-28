@@ -844,17 +844,17 @@ export default function PengaturanPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {usersList.map((u) => {
-                    const isSelf = currentUser && currentUser.id === u.id;
+                  {(usersList || []).filter(Boolean).map((u) => {
+                    const isSelf = currentUser && currentUser.id === u?.id;
                     return (
-                      <tr key={u.id} className="hover:bg-[#f8fafc]/60 transition-colors">
+                      <tr key={u?.id} className="hover:bg-[#f8fafc]/60 transition-colors">
                         <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-full bg-[#2563eb] text-white flex items-center justify-center font-extrabold text-xs">
-                              {u.avatar || 'US'}
+                              {u?.avatar || 'US'}
                             </div>
                             <div className="font-extrabold text-[#0f172a]">
-                              {u.nama} {isSelf && <span className="text-[10px] text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 rounded-full ml-1 font-bold">(Anda)</span>}
+                              {u?.nama || 'User'} {isSelf && <span className="text-[10px] text-[#2563eb] bg-[#eff6ff] px-2 py-0.5 rounded-full ml-1 font-bold">(Anda)</span>}
                             </div>
                           </div>
                         </td>

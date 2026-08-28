@@ -64,6 +64,7 @@ export default function DaftarAnggotaPage() {
 
   // Open Edit Modal
   const handleOpenEdit = (item) => {
+    if (!item) return;
     setEditFormData({
       id: item.id || item.nomor_anggota,
       nomor_anggota: item.nomor_anggota || item.id,
@@ -83,13 +84,14 @@ export default function DaftarAnggotaPage() {
     e.preventDefault();
     dataService.updateAnggota(editFormData.id, editFormData);
     setEditModalOpen(false);
-    showToast(`Data anggota ${editFormData.nama} berhasil diperbarui!`);
+    showToast(`Data anggota ${editFormData?.nama || ''} berhasil diperbarui!`);
   };
 
   // Delete Anggota
   const handleDelete = (item) => {
+    if (!item) return;
     const id = item.nomor_anggota || item.id;
-    if (confirm(`Apakah Anda yakin ingin menghapus data anggota "${item.nama || item.nama_lengkap}" (${id})?`)) {
+    if (confirm(`Apakah Anda yakin ingin menghapus data anggota "${item?.nama || item?.nama_lengkap || 'Anggota'}" (${id})?`)) {
       dataService.deleteAnggota(id);
       showToast(`Data anggota ${id} berhasil dihapus.`);
     }
@@ -260,24 +262,24 @@ export default function DaftarAnggotaPage() {
                 </tr>
               ) : (
                 filteredAnggota.map((item) => (
-                  <tr key={item.id || item.nomor_anggota} className="hover:bg-[#f8fafc]/60 transition-colors">
+                  <tr key={item?.id || item?.nomor_anggota} className="hover:bg-[#f8fafc]/60 transition-colors">
                     <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
-                      {item.nomor_anggota || item.id}
+                      {item?.nomor_anggota || item?.id}
                     </td>
                     <td className="px-4 py-3.5 font-extrabold text-[#0f172a] whitespace-nowrap">
-                      {item.nama || item.nama_lengkap}
+                      {item?.nama || item?.nama_lengkap || '-'}
                     </td>
                     <td className="px-4 py-3.5 text-slate-600 whitespace-nowrap">
-                      {item.nomor_hp || '-'}
+                      {item?.nomor_hp || '-'}
                     </td>
-                    <td className="px-4 py-3.5 text-slate-600 max-w-[200px] truncate" title={item.alamat || item.alamat_lengkap}>
-                      {item.alamat || item.alamat_lengkap || '-'}
+                    <td className="px-4 py-3.5 text-slate-600 max-w-[200px] truncate" title={item?.alamat || item?.alamat_lengkap || ''}>
+                      {item?.alamat || item?.alamat_lengkap || '-'}
                     </td>
                     <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap">
-                      {item.tanggal_daftar || '-'}
+                      {item?.tanggal_daftar || '-'}
                     </td>
                     <td className="px-4 py-3.5 text-center whitespace-nowrap">
-                      {getStatusBadge(item.status || item.status_keanggotaan)}
+                      {getStatusBadge(item?.status || item?.status_keanggotaan)}
                     </td>
                     <td className="px-4 py-3.5 text-center whitespace-nowrap">
                       <div className="flex items-center justify-center gap-1">
@@ -322,11 +324,11 @@ export default function DaftarAnggotaPage() {
             <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[32px]">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center font-bold text-base border border-white/30">
-                  {(selectedAnggota.nama || selectedAnggota.nama_lengkap || 'A').charAt(0)}
+                  {(selectedAnggota?.nama || selectedAnggota?.nama_lengkap || 'A').charAt(0)}
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold">{selectedAnggota.nama || selectedAnggota.nama_lengkap}</h3>
-                  <p className="text-xs text-blue-100 font-mono">No. {selectedAnggota.nomor_anggota || selectedAnggota.id}</p>
+                  <h3 className="text-base font-extrabold">{selectedAnggota?.nama || selectedAnggota?.nama_lengkap || 'Anggota'}</h3>
+                  <p className="text-xs text-blue-100 font-mono">No. {selectedAnggota?.nomor_anggota || selectedAnggota?.id}</p>
                 </div>
               </div>
               <button
@@ -343,35 +345,35 @@ export default function DaftarAnggotaPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe]">
                 <div>
                   <span className="text-slate-400 font-bold block">Nomor HP / WA:</span>
-                  <span className="font-extrabold text-slate-800">{selectedAnggota.nomor_hp || '-'}</span>
+                  <span className="font-extrabold text-slate-800">{selectedAnggota?.nomor_hp || '-'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Pekerjaan:</span>
-                  <span className="font-extrabold text-slate-800">{selectedAnggota.pekerjaan || '-'}</span>
+                  <span className="font-extrabold text-slate-800">{selectedAnggota?.pekerjaan || '-'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Tempat, Tgl Lahir:</span>
                   <span className="font-extrabold text-slate-800">
-                    {selectedAnggota.tempat_lahir || '-'}, {selectedAnggota.tanggal_lahir || '-'}
+                    {selectedAnggota?.tempat_lahir || '-'}, {selectedAnggota?.tanggal_lahir || '-'}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Tanggal Bergabung:</span>
-                  <span className="font-extrabold text-slate-800">{selectedAnggota.tanggal_daftar || '-'}</span>
+                  <span className="font-extrabold text-slate-800">{selectedAnggota?.tanggal_daftar || '-'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Status Keanggotaan:</span>
-                  <span className="font-bold">{getStatusBadge(selectedAnggota.status || selectedAnggota.status_keanggotaan)}</span>
+                  <span className="font-bold">{getStatusBadge(selectedAnggota?.status || selectedAnggota?.status_keanggotaan)}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Total Saldo Simpanan:</span>
                   <span className="font-extrabold text-[#2563eb] text-sm">
-                    Rp {Number(selectedAnggota.totalSimpanan || 0).toLocaleString('id-ID')}
+                    Rp {Number(selectedAnggota?.totalSimpanan || 0).toLocaleString('id-ID')}
                   </span>
                 </div>
                 <div className="col-span-2 sm:col-span-3">
                   <span className="text-slate-400 font-bold block">Alamat Lengkap:</span>
-                  <span className="font-medium text-slate-800">{selectedAnggota.alamat || selectedAnggota.alamat_lengkap || '-'}</span>
+                  <span className="font-medium text-slate-800">{selectedAnggota?.alamat || selectedAnggota?.alamat_lengkap || '-'}</span>
                 </div>
               </div>
 

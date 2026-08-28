@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const user = authService.login(username, password);
-      setSuccessMessage(`Selamat datang kembali, ${user.nama}!`);
+      setSuccessMessage(`Selamat datang kembali, ${user?.nama || 'Pengguna'}!`);
       setTimeout(() => {
         router.push('/');
       }, 700);

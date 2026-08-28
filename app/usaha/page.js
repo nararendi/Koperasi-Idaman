@@ -185,10 +185,10 @@ export default function UsahaPage() {
     let nomorAnggotaFinal = '-';
 
     if (kasirForm.tipePembeli === 'Anggota') {
-      const a = anggotaList.find((x) => x.id === kasirForm.anggotaId || x.nomor_anggota === kasirForm.anggotaId);
+      const a = (anggotaList || []).find((x) => x && (x.id === kasirForm.anggotaId || x.nomor_anggota === kasirForm.anggotaId));
       if (a) {
-        namaPembeliFinal = a.nama_lengkap || a.nama;
-        nomorAnggotaFinal = a.nomor_anggota || a.id;
+        namaPembeliFinal = a.nama_lengkap || a.nama || 'Anggota';
+        nomorAnggotaFinal = a.nomor_anggota || a.id || '-';
       }
     }
 
@@ -227,10 +227,10 @@ export default function UsahaPage() {
     let noAnggotaFinal = '-';
 
     if (pesertaQurbanForm.tipePeserta === 'Anggota') {
-      const a = anggotaList.find((x) => x.id === pesertaQurbanForm.anggotaId || x.nomor_anggota === pesertaQurbanForm.anggotaId);
+      const a = (anggotaList || []).find((x) => x && (x.id === pesertaQurbanForm.anggotaId || x.nomor_anggota === pesertaQurbanForm.anggotaId));
       if (a) {
-        namaFinal = a.nama_lengkap || a.nama;
-        noAnggotaFinal = a.nomor_anggota || a.id;
+        namaFinal = a.nama_lengkap || a.nama || 'Anggota';
+        noAnggotaFinal = a.nomor_anggota || a.id || '-';
       }
     }
 
@@ -1303,11 +1303,11 @@ export default function UsahaPage() {
             <form onSubmit={handleSaveSetorQurban} className="p-5 space-y-3.5 text-xs">
               <div className="p-3.5 bg-[#eff6ff] rounded-2xl border border-[#bfdbfe]">
                 <span className="text-[10px] text-slate-500 font-bold block">Peserta Qurban:</span>
-                <h4 className="text-sm font-extrabold text-[#0f172a]">{selectedPesertaQurban.nama}</h4>
-                <p className="text-[11px] text-slate-600">{selectedPesertaQurban.tipe_hewan}</p>
+                <h4 className="text-sm font-extrabold text-[#0f172a]">{selectedPesertaQurban?.nama || 'Peserta'}</h4>
+                <p className="text-[11px] text-slate-600">{selectedPesertaQurban?.tipe_hewan || '-'}</p>
                 <div className="flex justify-between text-[11px] mt-2 pt-2 border-t border-blue-200/50">
-                  <span>Saldo Saat Ini: <strong>{formatRupiah(selectedPesertaQurban.total_terkumpul)}</strong></span>
-                  <span>Target: {formatRupiah(selectedPesertaQurban.target_nominal)}</span>
+                  <span>Saldo Saat Ini: <strong>{formatRupiah(selectedPesertaQurban?.total_terkumpul || 0)}</strong></span>
+                  <span>Target: {formatRupiah(selectedPesertaQurban?.target_nominal || 0)}</span>
                 </div>
               </div>
 

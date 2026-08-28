@@ -383,8 +383,8 @@ export default function TagihanPage() {
           <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono font-bold text-slate-400 block">{selectedMember.nomor_anggota}</span>
-                <h3 className="font-extrabold text-sm text-[#0f172a]">Penyesuaian Tagihan: {selectedMember.nama}</h3>
+                <span className="text-[10px] font-mono font-bold text-slate-400 block">{selectedMember?.nomor_anggota || '-'}</span>
+                <h3 className="font-extrabold text-sm text-[#0f172a]">Penyesuaian Tagihan: {selectedMember?.nama || 'Anggota'}</h3>
               </div>
               <button
                 type="button"

@@ -498,27 +498,27 @@ export default function SimpananPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">No. Anggota:</span>
-                  <span className="font-mono font-bold text-[#2563eb]">{selectedKuitansi.nomor_anggota}</span>
+                  <span className="font-mono font-bold text-[#2563eb]">{selectedKuitansi?.nomor_anggota || '-'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Nama Anggota:</span>
-                  <span className="font-extrabold text-slate-800">{selectedKuitansi.nama_anggota || selectedKuitansi.nama}</span>
+                  <span className="font-extrabold text-slate-800">{selectedKuitansi?.nama_anggota || selectedKuitansi?.nama || '-'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Jenis Transaksi:</span>
-                  <span className="font-bold text-[#2563eb]">Simpanan {selectedKuitansi.jenis}</span>
+                  <span className="font-bold text-[#2563eb]">Simpanan {selectedKuitansi?.jenis || '-'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Metode:</span>
-                  <span className="text-slate-800">{selectedKuitansi.metode || 'Tunai'}</span>
+                  <span className="text-slate-800">{selectedKuitansi?.metode || 'Tunai'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Keterangan:</span>
-                  <span className="text-slate-800">{selectedKuitansi.keterangan}</span>
+                  <span className="text-slate-800">{selectedKuitansi?.keterangan || '-'}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-dashed border-slate-300 text-sm font-bold">
                   <span>Nominal Transaksi:</span>
-                  <span className="text-[#2563eb] font-extrabold">{formatRupiah(selectedKuitansi.jumlah)}</span>
+                  <span className="text-[#2563eb] font-extrabold">{formatRupiah(selectedKuitansi?.jumlah || 0)}</span>
                 </div>
               </div>
 
@@ -526,12 +526,12 @@ export default function SimpananPage() {
                 <div>
                   <p>Penyetor / Anggota,</p>
                   <div className="h-10"></div>
-                  <p className="font-bold text-slate-700">({selectedKuitansi.nama_anggota || selectedKuitansi.nama})</p>
+                  <p className="font-bold text-slate-700">({selectedKuitansi?.nama_anggota || selectedKuitansi?.nama || 'Anggota'})</p>
                 </div>
                 <div>
                   <p>Petugas Kasir,</p>
                   <div className="h-10"></div>
-                  <p className="font-bold text-slate-700">({selectedKuitansi.pencatat || 'Kasir Koperasi'})</p>
+                  <p className="font-bold text-slate-700">({selectedKuitansi?.pencatat || 'Kasir Koperasi'})</p>
                 </div>
               </div>
             </div>

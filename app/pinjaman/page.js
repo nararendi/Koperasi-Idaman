@@ -684,15 +684,15 @@ export default function PinjamanPage() {
                 <div className="bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe] space-y-1">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Peminjam:</span>
-                    <span className="font-extrabold text-[#0f172a]">{selectedPinjamanBayar.nama}</span>
+                    <span className="font-extrabold text-[#0f172a]">{selectedPinjamanBayar?.nama || '-'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">No. Pinjaman:</span>
-                    <span className="font-mono font-bold text-[#2563eb]">{selectedPinjamanBayar.nomor_pinjaman || selectedPinjamanBayar.id}</span>
+                    <span className="font-mono font-bold text-[#2563eb]">{selectedPinjamanBayar?.nomor_pinjaman || selectedPinjamanBayar?.id || '-'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Sisa Hutang:</span>
-                    <span className="font-extrabold text-rose-500">{formatRupiah(selectedPinjamanBayar.sisa_hutang)}</span>
+                    <span className="font-extrabold text-rose-500">{formatRupiah(selectedPinjamanBayar?.sisa_hutang || 0)}</span>
                   </div>
                 </div>
 
@@ -772,7 +772,7 @@ export default function PinjamanPage() {
               <div className="grid grid-cols-2 gap-3 bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe]">
                 <div>
                   <span className="text-slate-400 font-bold block">Nama Peminjam:</span>
-                  <span className="font-extrabold text-slate-800 text-sm">{selectedPinjamanDetail.nama}</span>
+                  <span className="font-extrabold text-slate-800 text-sm">{selectedPinjamanDetail?.nama || '-'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Status Pinjaman:</span>
