@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
+import { pdfExport } from '../../lib/pdfExport';
 
 export default function SimpananPage() {
   const [summary, setSummary] = useState({
@@ -546,11 +547,11 @@ export default function SimpananPage() {
               </button>
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => pdfExport.exportKuitansiSimpananPDF(selectedKuitansi, settings)}
                 className="px-4 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] flex items-center gap-1.5 shadow-sm"
               >
-                <span className="material-symbols-outlined text-base">print</span>
-                Cetak Kuitansi
+                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+                Ekspor PDF Kuitansi
               </button>
             </div>
           </div>

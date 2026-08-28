@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
+import { pdfExport } from '../../lib/pdfExport';
 
 export default function LaporanPage() {
   const d = new Date();
@@ -97,8 +98,8 @@ export default function LaporanPage() {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleExportPDF = () => {
+    pdfExport.exportLaporanKeuanganPDF(laporan, settings, getPeriodeLabel());
   };
 
   const setPresetBulanIni = () => {
@@ -143,11 +144,11 @@ export default function LaporanPage() {
           </button>
           <button
             type="button"
-            onClick={handlePrint}
+            onClick={handleExportPDF}
             className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">print</span>
-            Cetak Laporan / PDF
+            <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            Ekspor PDF
           </button>
         </div>
       }
