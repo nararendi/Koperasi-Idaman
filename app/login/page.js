@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '../../lib/authService';
 import AppLogo from '../../components/AppLogo';
@@ -12,6 +12,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Sinkronkan daftar pengguna dari Supabase Cloud begitu halaman login dimuat
+  useEffect(() => {
+    authService.fetchUsersFromSupabase().catch(() => {});
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
