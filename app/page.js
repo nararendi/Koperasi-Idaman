@@ -38,6 +38,13 @@ export default function HomePage() {
   useEffect(() => {
     loadDashboardData();
 
+    // Auto pull from Supabase if connected
+    dataService.fetchFromSupabase().then((res) => {
+      if (res && res.success) {
+        loadDashboardData();
+      }
+    });
+
     const handleUpdate = () => {
       loadDashboardData();
     };

@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 import { authService } from '../../lib/authService';
+import { getSupabaseConfig, saveSupabaseConfig, testSupabaseConnection } from '../../lib/supabase';
 
 export default function PengaturanPage() {
-  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'users' | 'profil_saya' | 'database'
+  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'users' | 'profil_saya' | 'supabase' | 'database'
 
   // Tab 1: Koperasi Settings
   const [formData, setFormData] = useState({
@@ -51,16 +52,24 @@ export default function PengaturanPage() {
     confirmPassword: ''
   });
 
+  // Tab 4: Supabase Connection
+  const [supabaseConfig, setSupabaseConfig] = useState({ url: '', anonKey: '' });
+  const [supabaseStatus, setSupabaseStatus] = useState({ checked: false, isConnected: false, message: '' });
+  const [testingSupabase, setTestingSupabase] = useState(false);
+  const [syncingCloud, setSyncingCloud] = useState(false);
+
   const [toastMessage, setToastMessage] = useState('');
 
   const loadData = () => {
     const s = dataService.getSettings();
     const uList = authService.getAllUsers();
     const current = authService.getCurrentUser();
+    const sbConfig = getSupabaseConfig();
 
     setFormData(s);
     setUsersList(uList);
     setCurrentUser(current);
+    setSupabaseConfig(sbConfig);
 
     if (current) {
       setMyProfileForm({
@@ -77,15 +86,25 @@ export default function PengaturanPage() {
   useEffect(() => {
     loadData();
 
-    const handleUsersUpdate = () => {
-      loadData();
+    // Initial check of Supabase connection
+    const checkConn = async () => {
+      const res = await testSupabaseConnection();
+      setSupabaseStatus({
+        checked: true,
+        isConnected: res.success,
+        message: res.message
+      });
     };
+    checkConn();
+
+    const handleUsersUpdate = () => loadData();
+    const handleAuthUpdate = () => loadData();
 
     window.addEventListener('koperasi_users_updated', handleUsersUpdate);
-    window.addEventListener('koperasi_auth_updated', handleUsersUpdate);
+    window.addEventListener('koperasi_auth_updated', handleAuthUpdate);
     return () => {
       window.removeEventListener('koperasi_users_updated', handleUsersUpdate);
-      window.removeEventListener('koperasi_auth_updated', handleUsersUpdate);
+      window.removeEventListener('koperasi_auth_updated', handleAuthUpdate);
     };
   }, []);
 
@@ -110,7 +129,68 @@ export default function PengaturanPage() {
     showToast('Konfigurasi dan profil koperasi berhasil disimpan!');
   };
 
-  // Open Add User Modal
+  // Save Supabase Config
+  const handleSaveSupabaseConfig = async (e) => {
+    e.preventDefault();
+    setTestingSupabase(true);
+    saveSupabaseConfig(supabaseConfig.url, supabaseConfig.anonKey);
+    const res = await testSupabaseConnection(supabaseConfig.url, supabaseConfig.anonKey);
+    setSupabaseStatus({
+      checked: true,
+      isConnected: res.success,
+      message: res.message
+    });
+    setTestingSupabase(false);
+    if (res.success) {
+      showToast('Koneksi Supabase berhasil disimpan dan terhubung!');
+    } else {
+      alert(res.message);
+    }
+  };
+
+  // Test Supabase Connection Button
+  const handleTestSupabase = async () => {
+    setTestingSupabase(true);
+    const res = await testSupabaseConnection(supabaseConfig.url, supabaseConfig.anonKey);
+    setSupabaseStatus({
+      checked: true,
+      isConnected: res.success,
+      message: res.message
+    });
+    setTestingSupabase(false);
+    if (res.success) {
+      showToast('Koneksi ke Supabase berhasil terhubung!');
+    } else {
+      alert(res.message);
+    }
+  };
+
+  // Pull from Supabase
+  const handlePullSupabase = async () => {
+    setSyncingCloud(true);
+    const res = await dataService.fetchFromSupabase();
+    setSyncingCloud(false);
+    if (res.success) {
+      loadData();
+      showToast(res.message);
+    } else {
+      alert(res.message);
+    }
+  };
+
+  // Push to Supabase
+  const handlePushSupabase = async () => {
+    setSyncingCloud(true);
+    const res = await dataService.pushAllToSupabase();
+    setSyncingCloud(false);
+    if (res.success) {
+      showToast(res.message);
+    } else {
+      alert(res.message);
+    }
+  };
+
+  // User Management Handlers
   const handleOpenAddUser = () => {
     setIsEditingUser(false);
     setUserFormData({
@@ -125,7 +205,6 @@ export default function PengaturanPage() {
     setUserModalOpen(true);
   };
 
-  // Open Edit User Modal
   const handleOpenEditUser = (user) => {
     setIsEditingUser(true);
     setUserFormData({
@@ -140,7 +219,6 @@ export default function PengaturanPage() {
     setUserModalOpen(true);
   };
 
-  // Save User (Add / Edit)
   const handleSaveUser = (e) => {
     e.preventDefault();
     try {
@@ -171,7 +249,6 @@ export default function PengaturanPage() {
     }
   };
 
-  // Delete User
   const handleDeleteUser = (user) => {
     if (confirm(`Apakah Anda yakin ingin menghapus akun admin "${user.nama}" (${user.username})?`)) {
       try {
@@ -184,7 +261,6 @@ export default function PengaturanPage() {
     }
   };
 
-  // Save My Profile & Change Password
   const handleSaveMyProfile = (e) => {
     e.preventDefault();
     try {
@@ -223,7 +299,6 @@ export default function PengaturanPage() {
     }
   };
 
-  // Backup & Database
   const handleExportBackup = () => {
     const json = dataService.exportDatabaseJSON();
     const blob = new Blob([json], { type: 'application/json' });
@@ -265,7 +340,7 @@ export default function PengaturanPage() {
   return (
     <AppLayout
       title="Pengaturan & Manajemen Sistem"
-      subtitle="Kelola konfigurasi koperasi, manajemen pengguna admin/operator, profil akun, dan database."
+      subtitle="Kelola konfigurasi koperasi, koneksi Supabase Cloud, manajemen pengguna admin, profil akun, dan database."
     >
       {/* Toast */}
       {toastMessage && (
@@ -288,7 +363,21 @@ export default function PengaturanPage() {
             }`}
           >
             <span className="material-symbols-outlined text-lg">account_balance</span>
-            Profil & Parameter Koperasi
+            Profil Koperasi
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('supabase')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'supabase'
+                ? 'bg-[#002045] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg text-emerald-400">cloud_sync</span>
+            Koneksi Supabase Cloud
+            <span className={`w-2 h-2 rounded-full ${supabaseStatus.isConnected ? 'bg-emerald-500' : 'bg-amber-400'}`}></span>
           </button>
 
           <button
@@ -510,7 +599,152 @@ export default function PengaturanPage() {
           </form>
         )}
 
-        {/* TAB 2: KELOLA PENGGUNA ADMIN */}
+        {/* TAB 2: KONEKSI SUPABASE CLOUD */}
+        {activeTab === 'supabase' && (
+          <div className="flex flex-col gap-6">
+            {/* Status Connection Banner */}
+            <div className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+              supabaseStatus.isConnected
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-amber-50 border-amber-200 text-amber-900'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shrink-0 ${
+                  supabaseStatus.isConnected ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'
+                }`}>
+                  <span className="material-symbols-outlined">
+                    {supabaseStatus.isConnected ? 'cloud_done' : 'cloud_off'}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">
+                    Status Koneksi: {supabaseStatus.isConnected ? 'Terhubung ke Supabase Cloud' : 'Belum Terhubung / Mode Offline'}
+                  </h3>
+                  <p className="text-xs mt-0.5 opacity-90">{supabaseStatus.message || 'Memeriksa status...'}</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTestSupabase}
+                disabled={testingSupabase}
+                className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0"
+              >
+                <span className={`material-symbols-outlined text-base ${testingSupabase ? 'animate-spin' : ''}`}>sync</span>
+                {testingSupabase ? 'Menguji...' : 'Uji Koneksi Ulang'}
+              </button>
+            </div>
+
+            {/* Supabase Credentials Form */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-600">key</span>
+                <h2 className="text-sm font-bold text-[#002045]">Kredensial & API Project Supabase</h2>
+              </div>
+
+              <form onSubmit={handleSaveSupabaseConfig} className="p-6 flex flex-col gap-4 text-xs">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Supabase Project URL (NEXT_PUBLIC_SUPABASE_URL) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co"
+                    value={supabaseConfig.url}
+                    onChange={(e) => setSupabaseConfig({ ...supabaseConfig, url: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono text-slate-800"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">
+                    Dapat dilihat di Supabase Dashboard &rarr; Project Settings &rarr; API &rarr; Project URL
+                  </span>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Supabase Anon Key (NEXT_PUBLIC_SUPABASE_ANON_KEY) *
+                  </label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    value={supabaseConfig.anonKey}
+                    onChange={(e) => setSupabaseConfig({ ...supabaseConfig, anonKey: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono text-slate-800 resize-none text-[11px]"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">
+                    Dapat dilihat di Supabase Dashboard &rarr; Project Settings &rarr; API &rarr; Project API Keys &rarr; `anon` `public`
+                  </span>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                  <button
+                    type="submit"
+                    disabled={testingSupabase}
+                    className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold shadow-sm flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-base">save</span>
+                    Simpan & Sambungkan Kredensial
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Cloud Sync Actions */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-700">sync_alt</span>
+                <h2 className="text-sm font-bold text-[#002045]">Sinkronisasi Data Cloud</h2>
+              </div>
+
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-3">
+                  <div>
+                    <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-emerald-600">cloud_upload</span>
+                      Unggah Data Lokal ke Supabase Cloud
+                    </h4>
+                    <p className="text-slate-500 mt-1 text-[11px]">
+                      Kirim seluruh data anggota, simpanan, pinjaman, dan buku kas lokal yang ada saat ini ke database Supabase Cloud.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handlePushSupabase}
+                    disabled={syncingCloud}
+                    className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold shadow-sm flex items-center justify-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-base">upload</span>
+                    {syncingCloud ? 'Sedang Sinkron...' : 'Unggah Data ke Supabase'}
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-3">
+                  <div>
+                    <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-blue-600">cloud_download</span>
+                      Tarik Data dari Supabase Cloud
+                    </h4>
+                    <p className="text-slate-500 mt-1 text-[11px]">
+                      Muat ulang seluruh data terbaru dari tabel Supabase ke dalam aplikasi koperasi.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handlePullSupabase}
+                    disabled={syncingCloud}
+                    className="w-full py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold shadow-sm flex items-center justify-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-base">download</span>
+                    {syncingCloud ? 'Sedang Memuat...' : 'Tarik Data dari Supabase'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: KELOLA PENGGUNA ADMIN */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-4 md:p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
@@ -618,7 +852,7 @@ export default function PengaturanPage() {
           </div>
         )}
 
-        {/* TAB 3: PROFIL SAYA & PASSWORD */}
+        {/* TAB 4: PROFIL SAYA & PASSWORD */}
         {activeTab === 'profil_saya' && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-4 md:p-5 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
@@ -685,7 +919,6 @@ export default function PengaturanPage() {
                 </div>
               </div>
 
-              {/* Password Change Box */}
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                 <span className="font-bold text-slate-700 block text-xs flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-base text-amber-600">lock_reset</span>
@@ -740,7 +973,7 @@ export default function PengaturanPage() {
           </div>
         )}
 
-        {/* TAB 4: DATABASE & BACKUP */}
+        {/* TAB 5: DATABASE & BACKUP */}
         {activeTab === 'database' && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
