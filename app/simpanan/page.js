@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
+import { excelExport } from '../../lib/excelExport';
 
 export default function SimpananPage() {
   const [summary, setSummary] = useState({
@@ -15,6 +16,7 @@ export default function SimpananPage() {
 
   const [simpananList, setSimpananList] = useState([]);
   const [anggotaList, setAnggotaList] = useState([]);
+  const [settings, setSettings] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [jenisFilter, setJenisFilter] = useState('all');
 
@@ -38,10 +40,12 @@ export default function SimpananPage() {
     const s = dataService.getSimpananSummary();
     const list = dataService.getSimpananList();
     const anggota = dataService.getAnggotaList();
+    const sett = dataService.getSettings();
 
     setSummary(s);
     setSimpananList(list);
     setAnggotaList(anggota);
+    setSettings(sett);
 
     if (anggota.length > 0 && !formData.nomor_anggota) {
       setFormData((prev) => ({
@@ -131,14 +135,24 @@ export default function SimpananPage() {
       title="Manajemen Simpanan Anggota"
       subtitle="Pencatatan saldo simpanan pokok, wajib, dan sukarela beserta mutasi rekening anggota."
       rightAction={
-        <button
-          type="button"
-          onClick={handleOpenModal}
-          className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          Catat Setoran / Penarikan
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => excelExport.exportSimpanan(filteredSimpanan, summary, settings)}
+            className="px-3.5 py-2.5 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px] text-emerald-700">description</span>
+            Ekspor Excel
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenModal}
+            className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            Catat Setoran / Penarikan
+          </button>
+        </div>
       }
     >
       {/* Toast */}

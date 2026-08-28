@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
+import { excelExport } from '../../lib/excelExport';
 
 export default function PinjamanPage() {
   const [summary, setSummary] = useState({
@@ -195,14 +196,24 @@ export default function PinjamanPage() {
       title="Manajemen Pinjaman Koperasi"
       subtitle="Kelola pengajuan kredit, persetujuan, pencairan dana, dan penerimaan angsuran."
       rightAction={
-        <button
-          type="button"
-          onClick={handleOpenApplyModal}
-          className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_task</span>
-          Ajukan Pinjaman Baru
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => excelExport.exportPinjaman(filteredPinjaman, summary, settings)}
+            className="px-3.5 py-2.5 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px] text-emerald-700">description</span>
+            Ekspor Excel
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenApplyModal}
+            className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_task</span>
+            Ajukan Pinjaman Baru
+          </button>
+        </div>
       }
     >
       {/* Toast */}

@@ -3,15 +3,15 @@
 import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
+import { excelExport } from '../../lib/excelExport';
 
 export default function LaporanPage() {
   const d = new Date();
   const currentYear = d.getFullYear();
   const currentMonthNum = String(d.getMonth() + 1).padStart(2, '0');
-  const currentMonthStr = `${currentYear}-${currentMonthNum}`; // '2026-08'
+  const currentMonthStr = `${currentYear}-${currentMonthNum}`;
   const firstMonthOfYear = `${currentYear}-01`;
 
-  // State in YYYY-MM format
   const [bulanMulai, setBulanMulai] = useState(firstMonthOfYear);
   const [bulanSelesai, setBulanSelesai] = useState(currentMonthStr);
 
@@ -53,7 +53,6 @@ export default function LaporanPage() {
 
   const [settings, setSettings] = useState({});
 
-  // Helper to format YYYY-MM into Indonesian Month-Year string
   const formatBulanTahun = (ym) => {
     if (!ym) return '';
     const [year, month] = ym.split('-');
@@ -66,7 +65,6 @@ export default function LaporanPage() {
   };
 
   const loadLaporan = () => {
-    // Convert YYYY-MM to full start and end dates
     const startDate = bulanMulai ? `${bulanMulai}-01` : '';
     let endDate = '';
     if (bulanSelesai) {
@@ -103,7 +101,6 @@ export default function LaporanPage() {
     window.print();
   };
 
-  // Quick Preset Helper Functions
   const setPresetBulanIni = () => {
     setBulanMulai(currentMonthStr);
     setBulanSelesai(currentMonthStr);
@@ -119,60 +116,15 @@ export default function LaporanPage() {
     setBulanSelesai('');
   };
 
-  // Periode Label Text
   const getPeriodeLabel = () => {
     if (!bulanMulai && !bulanSelesai) return 'Semua Periode (Semua Waktu)';
     if (bulanMulai === bulanSelesai) return `Bulan ${formatBulanTahun(bulanMulai)}`;
     return `${formatBulanTahun(bulanMulai) || 'Awal'} s/d ${formatBulanTahun(bulanSelesai) || 'Sekarang'}`;
   };
 
-  // Export CSV of Financial Summary
-  const handleExportCSV = () => {
-    const labelPeriode = getPeriodeLabel();
-
-    const rows = [
-      ['LAPORAN KEUANGAN KOPERASI IDAMAN'],
-      ['Periode Bulan & Tahun', labelPeriode],
-      [''],
-      ['1. LAPORAN ARUS KAS'],
-      ['Pemasukan Simpanan', laporan.arusKas.totalSimpananMasuk],
-      ['Pemasukan Angsuran Pinjaman', laporan.arusKas.totalAngsuranMasuk],
-      ['Pendapatan Lain', laporan.arusKas.totalPendapatanLain],
-      ['Total Pemasukan Kas', laporan.arusKas.totalPemasukan],
-      ['Penyaluran Pinjaman Baru', laporan.arusKas.totalPenyaluranPinjaman],
-      ['Penarikan Simpanan', laporan.arusKas.totalPenarikanSimpanan],
-      ['Biaya Operasional', laporan.arusKas.totalBiayaOperasional],
-      ['Total Pengeluaran Kas', laporan.arusKas.totalPengeluaran],
-      ['Saldo Kas Bersih Periode Ini', laporan.arusKas.saldoKasBersih],
-      [''],
-      ['2. NERACA KEUANGAN'],
-      ['Aset Kas', laporan.neraca.kas],
-      ['Piutang Pinjaman Anggota', laporan.neraca.piutangPinjaman],
-      ['Total Aset', laporan.neraca.totalAset],
-      ['Simpanan Pokok', laporan.neraca.simpananPokok],
-      ['Simpanan Wajib', laporan.neraca.simpananWajib],
-      ['Simpanan Sukarela', laporan.neraca.simpananSukarela],
-      ['Total Kewajiban Simpanan', laporan.neraca.totalKewajibanModal],
-      [''],
-      ['3. SIMULASI SHU'],
-      ['Pendapatan Jasa Bunga', laporan.shu.pendapatanBunga],
-      ['Pendapatan Lain', laporan.shu.pendapatanLain],
-      ['Beban Operasional', laporan.shu.biayaOperasional],
-      ['SHU Bersih Koperasi', laporan.shu.shuBersih],
-      ['Alokasi Jasa Anggota', laporan.shu.alokasi.anggota],
-      ['Alokasi Jasa Modal', laporan.shu.alokasi.modal],
-      ['Alokasi Pengurus', laporan.shu.alokasi.pengurus],
-      ['Alokasi Dana Cadangan', laporan.shu.alokasi.cadangan]
-    ];
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${bulanMulai || 'Awal'}_sd_${bulanSelesai || 'Sekarang'}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Export Professional Excel Document
+  const handleExportExcel = () => {
+    excelExport.exportLaporanKeuangan(laporan, settings, getPeriodeLabel());
   };
 
   return (
@@ -183,11 +135,11 @@ export default function LaporanPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleExportCSV}
-            className="px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+            onClick={handleExportExcel}
+            className="px-3.5 py-2 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">table_view</span>
-            Ekspor CSV
+            <span className="material-symbols-outlined text-[18px] text-emerald-700">description</span>
+            Ekspor Excel
           </button>
           <button
             type="button"

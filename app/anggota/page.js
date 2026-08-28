@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
+import { excelExport } from '../../lib/excelExport';
 
 export default function DaftarAnggotaPage() {
   const [anggotaList, setAnggotaList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [settings, setSettings] = useState({});
 
   // Modal States
   const [selectedAnggota, setSelectedAnggota] = useState(null);
@@ -19,7 +21,9 @@ export default function DaftarAnggotaPage() {
 
   const loadAnggota = () => {
     const list = dataService.getAnggotaList();
+    const sett = dataService.getSettings();
     setAnggotaList(list);
+    setSettings(sett);
   };
 
   useEffect(() => {
@@ -132,13 +136,23 @@ export default function DaftarAnggotaPage() {
       title="Manajemen Anggota Koperasi"
       subtitle="Kelola data pendaftaran, keanggotaan aktif, dan profil anggota koperasi."
       rightAction={
-        <Link
-          href="/anggota/tambah"
-          className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[18px]">person_add</span>
-          Tambah Anggota Baru
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => excelExport.exportAnggota(filteredAnggota, settings)}
+            className="px-3.5 py-2.5 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px] text-emerald-700">description</span>
+            Ekspor Excel
+          </button>
+          <Link
+            href="/anggota/tambah"
+            className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">person_add</span>
+            Tambah Anggota Baru
+          </Link>
+        </div>
       }
     >
       {/* Toast Notification */}
