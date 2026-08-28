@@ -27,6 +27,10 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
     setCurrentUser(user);
     setIsAuthReady(true);
 
+    // Auto sync data dari Supabase Cloud setiap kali aplikasi dibuka
+    dataService.fetchFromSupabase().catch(() => {});
+    authService.fetchUsersFromSupabase().catch(() => {});
+
     const handleAuthUpdate = () => {
       const u = authService.getCurrentUser();
       if (!u && pathname !== '/login') {
