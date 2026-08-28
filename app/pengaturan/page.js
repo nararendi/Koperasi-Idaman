@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
+import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { authService } from '../../lib/authService';
 import { getSupabaseConfig, saveSupabaseConfig, testSupabaseConnection } from '../../lib/supabase';
@@ -515,34 +516,18 @@ export default function PengaturanPage() {
               <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Pokok (Rp)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
-                    <input
-                      type="number"
-                      value={formData.simpananPokok || 0}
-                      onChange={(e) => setFormData({ ...formData, simpananPokok: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                    />
-                  </div>
-                  <span className="text-[10px] text-blue-700 font-bold mt-1 block">
-                    Format: {Number(formData.simpananPokok || 0).toLocaleString('id-ID')}
-                  </span>
+                  <RupiahInput
+                    value={formData.simpananPokok}
+                    onChange={(val) => setFormData({ ...formData, simpananPokok: val })}
+                  />
                 </div>
 
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Tarif Simpanan Wajib (Rp / Bln)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
-                    <input
-                      type="number"
-                      value={formData.simpananWajib || 0}
-                      onChange={(e) => setFormData({ ...formData, simpananWajib: e.target.value })}
-                      className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
-                    />
-                  </div>
-                  <span className="text-[10px] text-blue-700 font-bold mt-1 block">
-                    Format: {Number(formData.simpananWajib || 0).toLocaleString('id-ID')}
-                  </span>
+                  <RupiahInput
+                    value={formData.simpananWajib}
+                    onChange={(val) => setFormData({ ...formData, simpananWajib: val })}
+                  />
                 </div>
 
                 <div>
@@ -552,9 +537,9 @@ export default function PengaturanPage() {
                     step="0.1"
                     value={formData.sukuBungaPinjaman || 1.5}
                     onChange={(e) => setFormData({ ...formData, sukuBungaPinjaman: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900 text-xs"
                   />
-                  <span className="text-[10px] text-slate-400 mt-0.5 block">Bunga pinjaman flat per bulan</span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">Bunga pinjaman flat per bulan</span>
                 </div>
               </div>
             </div>

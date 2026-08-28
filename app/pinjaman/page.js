@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
+import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 import { hitungSimulasiPinjaman, formatRupiah } from '../../lib/formatters';
@@ -475,23 +476,12 @@ export default function PinjamanPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="sm:col-span-1">
                     <label className="font-bold text-slate-700 block mb-1">Plafon Pinjaman (Rp) *</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 font-bold text-slate-400 text-xs">Rp</span>
-                      <input
-                        type="number"
-                        required
-                        min="500000"
-                        step="500000"
-                        value={applyForm.jumlah}
-                        onChange={(e) => setApplyForm({ ...applyForm, jumlah: e.target.value })}
-                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900 text-xs"
-                      />
-                    </div>
-                    {applyForm.jumlah && (
-                      <p className="text-[10px] text-blue-700 font-bold mt-1">
-                        {formatRupiah(applyForm.jumlah)}
-                      </p>
-                    )}
+                    <RupiahInput
+                      required
+                      value={applyForm.jumlah}
+                      onChange={(val) => setApplyForm({ ...applyForm, jumlah: val })}
+                      className="font-bold text-blue-900"
+                    />
                   </div>
 
                   <div>
@@ -712,22 +702,12 @@ export default function PinjamanPage() {
 
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Nominal Pembayaran (Rp) *</label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-2.5 font-bold text-slate-400 text-sm">Rp</span>
-                    <input
-                      type="number"
-                      required
-                      min="1000"
-                      value={bayarForm.jumlahBayar}
-                      onChange={(e) => setBayarForm({ ...bayarForm, jumlahBayar: e.target.value })}
-                      className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-amber-600 outline-none text-base font-bold text-amber-800"
-                    />
-                  </div>
-                  {bayarForm.jumlahBayar && (
-                    <p className="text-[11px] text-amber-700 font-bold mt-1">
-                      Format: {formatRupiah(bayarForm.jumlahBayar)}
-                    </p>
-                  )}
+                  <RupiahInput
+                    required
+                    value={bayarForm.jumlahBayar}
+                    onChange={(val) => setBayarForm({ ...bayarForm, jumlahBayar: val })}
+                    className="focus:border-amber-600 font-bold text-amber-800"
+                  />
                 </div>
 
                 <div>

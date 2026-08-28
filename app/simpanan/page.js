@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
+import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 import { pdfExport } from '../../lib/pdfExport';
@@ -413,24 +414,12 @@ export default function SimpananPage() {
                 {/* Nominal */}
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Nominal Jumlah (Rp) *</label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-2.5 font-bold text-slate-400 text-sm">Rp</span>
-                    <input
-                      type="number"
-                      required
-                      min="1000"
-                      step="1000"
-                      value={formData.jumlah}
-                      onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
-                      placeholder="Contoh: 20000"
-                      className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none text-sm font-bold text-emerald-800"
-                    />
-                  </div>
-                  {formData.jumlah && Number(formData.jumlah) > 0 && (
-                    <p className="mt-1 text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100 flex items-center justify-between">
-                      <span>Format: {formatRupiah(formData.jumlah)}</span>
-                    </p>
-                  )}
+                  <RupiahInput
+                    required
+                    value={formData.jumlah}
+                    onChange={(val) => setFormData({ ...formData, jumlah: val })}
+                    className="focus:border-emerald-600 font-bold text-emerald-800 text-sm"
+                  />
                 </div>
 
                 {/* Metode Pembayaran */}
