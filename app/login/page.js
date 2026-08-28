@@ -13,18 +13,18 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
 
     try {
-      const user = authService.login(username, password);
+      const user = await authService.login(username, password);
       setSuccessMessage(`Selamat datang kembali, ${user?.nama || 'Pengguna'}!`);
       setTimeout(() => {
         router.push('/');
-      }, 700);
+      }, 500);
     } catch (err) {
       setErrorMessage(err.message || 'Login gagal. Periksa kembali username dan password Anda.');
     } finally {
