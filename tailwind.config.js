@@ -10,18 +10,18 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          teal: '#139a8c',
-          'teal-dark': '#0d8074',
-          'teal-deep': '#095e55',
-          'teal-light': '#e0f7f4',
-          'teal-subtle': '#f0faf8',
-          mint: '#e6f4f1',
+          blue: '#2563eb', // Antigravity Commit Blue
+          'blue-dark': '#1d4ed8',
+          'blue-deep': '#1e40af',
+          'blue-light': '#eff6ff',
+          'blue-subtle': '#f0f7ff',
+          canvas: '#eaf2fc',
           yellow: '#ffd159',
           'yellow-hover': '#f7be38',
           'yellow-light': '#fef8e7',
-          navy: '#14293d',
-          'navy-muted': '#627d98',
-          slate: '#8295a8',
+          navy: '#0f172a',
+          'navy-muted': '#475569',
+          slate: '#64748b',
           card: '#ffffff'
         }
       },

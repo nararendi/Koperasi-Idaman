@@ -99,7 +99,7 @@ export default function TambahAnggotaPage() {
       rightAction={
         <Link
           href="/anggota"
-          className="px-4 py-2 border border-[#139a8c]/30 bg-[#e0f7f4] rounded-full text-xs font-bold text-[#139a8c] hover:bg-[#c9f1eb] flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="px-4 py-2 border border-[#2563eb]/30 bg-[#eff6ff] rounded-full text-xs font-bold text-[#2563eb] hover:bg-[#dbeafe] flex items-center gap-1.5 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
           Kembali ke Daftar
@@ -108,11 +108,11 @@ export default function TambahAnggotaPage() {
     >
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
         {successMessage && (
-          <div className="bg-[#e0f7f4] border border-[#a7f3d0] text-[#0f766e] p-4 rounded-2xl flex items-center gap-3 text-xs font-bold animate-in fade-in">
-            <span className="material-symbols-outlined text-xl text-[#139a8c]">check_circle</span>
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] text-[#1d4ed8] p-4 rounded-2xl flex items-center gap-3 text-xs font-bold animate-in fade-in">
+            <span className="material-symbols-outlined text-xl text-[#2563eb]">check_circle</span>
             <div>
               <p className="font-extrabold">{successMessage}</p>
-              <p className="text-teal-700">Mengalihkan kembali ke daftar anggota...</p>
+              <p className="text-blue-700 font-medium">Mengalihkan kembali ke daftar anggota...</p>
             </div>
           </div>
         )}
@@ -125,7 +125,7 @@ export default function TambahAnggotaPage() {
         )}
 
         <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-5 bg-[#139a8c] text-white flex justify-between items-center">
+          <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center">
             <div className="flex items-center gap-2.5">
               <span className="material-symbols-outlined text-xl text-[#ffd159]">badge</span>
               <h2 className="text-sm font-extrabold">Informasi Identitas Anggota</h2>
@@ -151,7 +151,7 @@ export default function TambahAnggotaPage() {
                     name="nomor_anggota"
                     value={formData.nomor_anggota}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl font-mono font-bold text-[#139a8c] outline-none"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl font-mono font-bold text-[#2563eb] outline-none"
                     placeholder="ANG-XXXX-XXX"
                   />
                 </div>
@@ -168,7 +168,7 @@ export default function TambahAnggotaPage() {
                     name="tanggal_daftar"
                     value={formData.tanggal_daftar}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function TambahAnggotaPage() {
                     value={formData.nama_lengkap}
                     onChange={handleChange}
                     placeholder="Contoh: Muhammad Farhan"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
               </div>
@@ -211,7 +211,7 @@ export default function TambahAnggotaPage() {
                     value={formData.nomor_hp}
                     onChange={handleChange}
                     placeholder="08123456789"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function TambahAnggotaPage() {
                   value={formData.tempat_lahir}
                   onChange={handleChange}
                   placeholder="Kota Kelahiran"
-                  className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                 />
               </div>
 
@@ -238,7 +238,7 @@ export default function TambahAnggotaPage() {
                   name="tanggal_lahir"
                   value={formData.tanggal_lahir}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                 />
               </div>
 
@@ -250,7 +250,7 @@ export default function TambahAnggotaPage() {
                   value={formData.pekerjaan}
                   onChange={handleChange}
                   placeholder="Karyawan / Wiraswasta / dll"
-                  className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                 />
               </div>
             </div>
@@ -264,25 +264,25 @@ export default function TambahAnggotaPage() {
                 value={formData.alamat_lengkap}
                 onChange={handleChange}
                 placeholder="Jl. Nama Jalan, No. Rumah, RT/RW, Kelurahan, Kecamatan, Kota"
-                className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none resize-none font-medium"
+                className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none resize-none font-medium"
               />
             </div>
 
             {/* Simpanan Pokok Checkbox & Notice */}
-            <div className="bg-[#e0f7f4] border border-[#a7f3d0] rounded-2xl p-4 flex items-start gap-3">
+            <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 flex items-start gap-3">
               <input
                 type="checkbox"
                 id="setorSimpananPokok"
                 name="setorSimpananPokok"
                 checked={formData.setorSimpananPokok}
                 onChange={handleChange}
-                className="mt-1 w-4 h-4 text-[#139a8c] rounded border-slate-300 focus:ring-[#139a8c] cursor-pointer"
+                className="mt-1 w-4 h-4 text-[#2563eb] rounded border-slate-300 focus:ring-[#2563eb] cursor-pointer"
               />
               <label htmlFor="setorSimpananPokok" className="cursor-pointer">
-                <span className="font-extrabold text-[#14293d] block">
+                <span className="font-extrabold text-[#0f172a] block">
                   Otomatis Catat Setoran Simpanan Pokok Awal (Rp {Number(settings.simpananPokok || 500000).toLocaleString('id-ID')})
                 </span>
-                <span className="text-slate-600 block text-[11px] mt-0.5">
+                <span className="text-slate-600 block text-[11px] mt-0.5 font-medium">
                   Mencatat mutasi Simpanan Pokok sebesar biaya pendaftaran awal dan membukukan langsung ke Penerimaan Kas Koperasi.
                 </span>
               </label>
@@ -299,7 +299,7 @@ export default function TambahAnggotaPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                className="px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full font-extrabold shadow-sm flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">how_to_reg</span>
                 {loading ? 'Menyimpan...' : 'Daftarkan Anggota'}

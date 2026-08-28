@@ -74,7 +74,6 @@ export default function SimpananPage() {
   };
 
   const handleOpenModal = () => {
-    const settings = dataService.getSettings();
     setFormData({
       nomor_anggota: anggotaList.length > 0 ? (anggotaList[0].nomor_anggota || anggotaList[0].id) : '',
       jenis: 'Sukarela',
@@ -97,7 +96,7 @@ export default function SimpananPage() {
       return;
     }
 
-    const newTx = dataService.addSimpananTransaction({
+    dataService.addSimpananTransaction({
       nomor_anggota: formData.nomor_anggota,
       jenis: formData.jenis,
       tipe: formData.tipe,
@@ -140,8 +139,8 @@ export default function SimpananPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => excelExport.exportSimpanan(filteredSimpanan, summary, settings)}
-            className="px-4 py-2 border border-[#139a8c]/30 bg-[#e0f7f4] hover:bg-[#cbf1ea] text-[#139a8c] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            onClick={() => excelExport.exportSimpanan(filteredList, summary, settings)}
+            className="px-4 py-2 border border-[#2563eb]/30 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">description</span>
             Ekspor Excel
@@ -149,7 +148,7 @@ export default function SimpananPage() {
           <button
             type="button"
             onClick={handleOpenModal}
-            className="bg-[#139a8c] hover:bg-[#0e8074] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
             + Catat Setoran / Penarikan
@@ -159,7 +158,7 @@ export default function SimpananPage() {
     >
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-[#139a8c] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
+        <div className="fixed top-20 right-6 z-50 bg-[#2563eb] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
           <span className="material-symbols-outlined text-base text-[#ffd159]">check_circle</span>
           <span>{toastMessage}</span>
         </div>
@@ -167,25 +166,25 @@ export default function SimpananPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-xs">
+        <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Simpanan Pokok</span>
-            <div className="w-8 h-8 rounded-xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-white text-[#2563eb] flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-base">lock</span>
             </div>
           </div>
-          <p className="text-xl font-extrabold text-[#14293d]">{formatRupiah(summary.pokok)}</p>
+          <p className="text-xl font-extrabold text-[#0f172a]">{formatRupiah(summary.pokok)}</p>
           <p className="text-[10px] text-slate-400 mt-1">Setoran wajib pendaftaran</p>
         </div>
 
-        <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-xs">
+        <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Simpanan Wajib</span>
-            <div className="w-8 h-8 rounded-xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-white text-[#2563eb] flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-base">calendar_month</span>
             </div>
           </div>
-          <p className="text-xl font-extrabold text-[#139a8c]">{formatRupiah(summary.wajib)}</p>
+          <p className="text-xl font-extrabold text-[#2563eb]">{formatRupiah(summary.wajib)}</p>
           <p className="text-[10px] text-slate-400 mt-1">Iuran rutin bulanan anggota</p>
         </div>
 
@@ -200,14 +199,14 @@ export default function SimpananPage() {
           <p className="text-[10px] text-slate-400 mt-1">Dapat disetor & ditarik kapanpun</p>
         </div>
 
-        <div className="bg-[#139a8c] text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-[#1d4ed8] to-[#2563eb] text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold text-white/80 uppercase tracking-wider">Total Simpanan</span>
             <span className="material-symbols-outlined text-[#ffd159]">account_balance</span>
           </div>
           <div>
             <p className="text-xl font-extrabold text-white mt-2">{formatRupiah(summary.total)}</p>
-            <p className="text-[10px] text-white/80 mt-0.5">Kekayaan dana simpanan anggota</p>
+            <p className="text-[10px] text-blue-100 mt-0.5 font-medium">Kekayaan dana simpanan anggota</p>
           </div>
         </div>
       </div>
@@ -215,7 +214,7 @@ export default function SimpananPage() {
       {/* Table Container */}
       <div className="bg-white border border-slate-100 rounded-3xl shadow-xs overflow-hidden flex flex-col">
         {/* Filters */}
-        <div className="p-4 border-b border-slate-100 bg-[#fafdfc] flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+        <div className="p-4 border-b border-slate-100 bg-[#f8fafc] flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs font-extrabold text-slate-500 mr-1">Jenis:</span>
             {['all', 'pokok', 'wajib', 'sukarela'].map((j) => (
@@ -225,8 +224,8 @@ export default function SimpananPage() {
                 onClick={() => setJenisFilter(j)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
                   jenisFilter === j
-                    ? 'bg-[#139a8c] text-white shadow-xs'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-[#f4faf8]'
+                    ? 'bg-[#2563eb] text-white shadow-xs'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-[#f8fafc]'
                 }`}
               >
                 {j === 'all' ? 'Semua' : j.charAt(0).toUpperCase() + j.slice(1)}
@@ -243,7 +242,7 @@ export default function SimpananPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama atau No. Anggota..."
-              className="w-full pl-10 pr-4 py-2 bg-[#f4faf8] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#139a8c] focus:bg-white transition-all shadow-inner"
+              className="w-full pl-10 pr-4 py-2 bg-[#f8fafc] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#2563eb] focus:bg-white transition-all shadow-inner"
             />
           </div>
         </div>
@@ -252,7 +251,7 @@ export default function SimpananPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#fafdfc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
+              <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
                 <th className="px-4 py-3.5">Tanggal</th>
                 <th className="px-4 py-3.5">No. Anggota</th>
                 <th className="px-4 py-3.5">Nama Anggota</th>
@@ -274,23 +273,23 @@ export default function SimpananPage() {
                 filteredList.map((item) => {
                   const isWithdrawal = item.tipe === 'Penarikan' || (item.keterangan || '').toLowerCase().includes('tarik');
                   return (
-                    <tr key={item.id} className="hover:bg-[#f4faf8]/60 transition-colors">
+                    <tr key={item.id} className="hover:bg-[#f8fafc]/60 transition-colors">
                       <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-medium">
                         {item.tanggal}
                       </td>
-                      <td className="px-4 py-3.5 font-mono font-bold text-[#139a8c] whitespace-nowrap">
+                      <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
                         {item.nomor_anggota}
                       </td>
-                      <td className="px-4 py-3.5 font-extrabold text-[#14293d] whitespace-nowrap">
+                      <td className="px-4 py-3.5 font-extrabold text-[#0f172a] whitespace-nowrap">
                         {item.nama_anggota || item.nama}
                       </td>
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full font-extrabold text-[10px] uppercase ${
                             (item.jenis || '').toLowerCase().includes('pokok')
-                              ? 'bg-[#e0f7f4] text-[#139a8c]'
+                              ? 'bg-[#eff6ff] text-[#2563eb]'
                               : (item.jenis || '').toLowerCase().includes('wajib')
-                              ? 'bg-[#e0f2fe] text-[#0369a1]'
+                              ? 'bg-[#e0e7ff] text-[#4338ca]'
                               : 'bg-[#fef8e7] text-[#b88000]'
                           }`}
                         >
@@ -305,7 +304,7 @@ export default function SimpananPage() {
                       </td>
                       <td
                         className={`px-4 py-3.5 text-right font-extrabold whitespace-nowrap ${
-                          isWithdrawal ? 'text-rose-500' : 'text-[#139a8c]'
+                          isWithdrawal ? 'text-rose-500' : 'text-[#2563eb]'
                         }`}
                       >
                         {isWithdrawal ? `-${formatRupiah(item.jumlah)}` : `+${formatRupiah(item.jumlah)}`}
@@ -314,7 +313,7 @@ export default function SimpananPage() {
                         <button
                           type="button"
                           onClick={() => handlePrintKuitansi(item)}
-                          className="p-1.5 text-[#139a8c] hover:bg-[#e0f7f4] rounded-xl transition-colors"
+                          className="p-1.5 text-[#2563eb] hover:bg-[#eff6ff] rounded-xl transition-colors"
                           title="Cetak Bukti Kuitansi"
                         >
                           <span className="material-symbols-outlined text-[18px]">receipt</span>
@@ -333,7 +332,7 @@ export default function SimpananPage() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-[32px] max-w-lg w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
-            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center shrink-0">
+            <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-xl text-[#ffd159]">payments</span>
                 <h3 className="text-base font-extrabold">Catat Transaksi Simpanan</h3>
@@ -358,8 +357,8 @@ export default function SimpananPage() {
                       onClick={() => setFormData({ ...formData, tipe: 'Setoran' })}
                       className={`py-2.5 rounded-2xl font-extrabold border transition-all ${
                         formData.tipe === 'Setoran'
-                          ? 'bg-[#139a8c] text-white border-[#139a8c] shadow-xs'
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-[#f4faf8]'
+                          ? 'bg-[#2563eb] text-white border-[#2563eb] shadow-xs'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-[#f8fafc]'
                       }`}
                     >
                       + Setoran Masuk
@@ -370,7 +369,7 @@ export default function SimpananPage() {
                       className={`py-2.5 rounded-2xl font-extrabold border transition-all ${
                         formData.tipe === 'Penarikan'
                           ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-[#f4faf8]'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-[#f8fafc]'
                       }`}
                     >
                       - Penarikan Saldo
@@ -385,7 +384,7 @@ export default function SimpananPage() {
                     required
                     value={formData.nomor_anggota}
                     onChange={(e) => setFormData({ ...formData, nomor_anggota: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   >
                     <option value="">-- Pilih Anggota --</option>
                     {anggotaList.map((a) => (
@@ -403,7 +402,7 @@ export default function SimpananPage() {
                     value={formData.jenis}
                     disabled={formData.tipe === 'Penarikan'}
                     onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all disabled:bg-slate-100"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all disabled:bg-slate-100"
                   >
                     <option value="Sukarela">Simpanan Sukarela (Bebas Setor/Tarik)</option>
                     <option value="Wajib">Simpanan Wajib (Bulanan)</option>
@@ -418,7 +417,7 @@ export default function SimpananPage() {
                     required
                     value={formData.jumlah}
                     onChange={(val) => setFormData({ ...formData, jumlah: val })}
-                    className="focus:border-[#139a8c] font-extrabold text-[#139a8c] text-sm bg-[#f4faf8] rounded-2xl"
+                    className="focus:border-[#2563eb] font-extrabold text-[#2563eb] text-sm bg-[#f8fafc] rounded-2xl"
                   />
                 </div>
 
@@ -428,7 +427,7 @@ export default function SimpananPage() {
                   <select
                     value={formData.metode}
                     onChange={(e) => setFormData({ ...formData, metode: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   >
                     <option value="Tunai">Tunai / Kasir</option>
                     <option value="Transfer Bank">Transfer Bank / QRIS</option>
@@ -444,7 +443,7 @@ export default function SimpananPage() {
                     value={formData.keterangan}
                     onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
                     placeholder="Contoh: Setoran sukarela tabungan qurban"
-                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
               </div>
@@ -459,7 +458,7 @@ export default function SimpananPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
+                  className="px-6 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
                 >
                   Simpan Transaksi
                 </button>
@@ -473,7 +472,7 @@ export default function SimpananPage() {
       {kuitansiModalOpen && selectedKuitansi && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-[32px] max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
-            <div className="p-5 bg-[#139a8c] text-white flex justify-between items-center">
+            <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center">
               <span className="text-xs font-extrabold uppercase tracking-wider">Kuitansi Resmi Transaksi</span>
               <button
                 type="button"
@@ -486,7 +485,7 @@ export default function SimpananPage() {
 
             <div id="printArea" className="p-6 flex flex-col gap-4 text-xs">
               <div className="text-center border-b border-slate-200 pb-3">
-                <h3 className="font-extrabold text-sm text-[#14293d]">KOPERASI SIMPAN PINJAM IDAMAN</h3>
+                <h3 className="font-extrabold text-sm text-[#0f172a]">KOPERASI SIMPAN PINJAM IDAMAN</h3>
                 <p className="text-[11px] text-slate-500 font-medium">Bukti Penerimaan / Penarikan Simpanan</p>
                 <p className="font-mono text-[10px] text-slate-400 mt-1">No. Bukti: {selectedKuitansi.id}</p>
               </div>
@@ -498,7 +497,7 @@ export default function SimpananPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">No. Anggota:</span>
-                  <span className="font-mono font-bold text-[#139a8c]">{selectedKuitansi.nomor_anggota}</span>
+                  <span className="font-mono font-bold text-[#2563eb]">{selectedKuitansi.nomor_anggota}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Nama Anggota:</span>
@@ -506,7 +505,7 @@ export default function SimpananPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Jenis Transaksi:</span>
-                  <span className="font-bold text-[#139a8c]">Simpanan {selectedKuitansi.jenis}</span>
+                  <span className="font-bold text-[#2563eb]">Simpanan {selectedKuitansi.jenis}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Metode:</span>
@@ -518,7 +517,7 @@ export default function SimpananPage() {
                 </div>
                 <div className="flex justify-between pt-3 border-t border-dashed border-slate-300 text-sm font-bold">
                   <span>Nominal Transaksi:</span>
-                  <span className="text-[#139a8c] font-extrabold">{formatRupiah(selectedKuitansi.jumlah)}</span>
+                  <span className="text-[#2563eb] font-extrabold">{formatRupiah(selectedKuitansi.jumlah)}</span>
                 </div>
               </div>
 
@@ -547,7 +546,7 @@ export default function SimpananPage() {
               <button
                 type="button"
                 onClick={() => pdfExport.exportKuitansiSimpananPDF(selectedKuitansi, settings)}
-                className="px-5 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full font-bold flex items-center gap-1.5 shadow-sm transition-all"
               >
                 <span className="material-symbols-outlined text-base">picture_as_pdf</span>
                 Ekspor PDF Kuitansi

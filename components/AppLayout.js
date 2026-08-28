@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '../lib/authService';
+import AppLogo from './AppLogo';
 
 export default function AppLayout({ children, title, subtitle, rightAction }) {
   const pathname = usePathname();
@@ -53,23 +54,21 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#dff0ed] p-2 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center font-sans antialiased text-[#14293d]">
+    <div className="min-h-screen bg-[#eaf2fc] p-2 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center font-sans antialiased text-[#0f172a]">
       {/* Outer App Shell Container */}
-      <div className="w-full max-w-[1560px] bg-[#139a8c] rounded-[28px] sm:rounded-[36px] p-2 sm:p-3 md:p-4 shadow-2xl flex flex-col md:flex-row relative min-h-[94vh] border-[3px] border-[#108c7f]">
+      <div className="w-full max-w-[1560px] bg-gradient-to-br from-[#1e40af] via-[#1d4ed8] to-[#2563eb] rounded-[28px] sm:rounded-[36px] p-2 sm:p-3 md:p-4 shadow-2xl flex flex-col md:flex-row relative min-h-[94vh] border-[3px] border-[#1d4ed8]">
         
         {/* DESKTOP SIDEBAR */}
         <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 text-white pt-4 pb-3 pr-0 pl-3 justify-between z-20">
           <div>
             {/* App Brand Logo */}
             <div className="px-3 mb-7 flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-inner">
-                <span className="material-symbols-outlined text-2xl text-white">savings</span>
-              </div>
+              <AppLogo className="w-9 h-9" />
               <div className="flex flex-col">
                 <h1 className="text-base font-extrabold tracking-tight text-white leading-tight">
                   Koperasi<span className="text-[#ffd159]">.id</span>
                 </h1>
-                <span className="text-[10px] text-white/70 font-semibold tracking-wider uppercase">Sistem Terpadu</span>
+                <span className="text-[10px] text-blue-100/80 font-semibold tracking-wider uppercase">Sistem Terpadu</span>
               </div>
             </div>
 
@@ -83,11 +82,11 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-2.5 text-xs font-bold transition-all duration-200 ${
                       active
-                        ? 'bg-white text-[#139a8c] rounded-l-full -mr-[13px] md:-mr-[17px] pl-5 shadow-sm z-30 font-extrabold'
-                        : 'text-white/80 hover:text-white hover:bg-white/10 rounded-2xl'
+                        ? 'bg-white text-[#2563eb] rounded-l-full -mr-[13px] md:-mr-[17px] pl-5 shadow-sm z-30 font-extrabold'
+                        : 'text-white/85 hover:text-white hover:bg-white/10 rounded-2xl'
                     }`}
                   >
-                    <span className={`material-symbols-outlined text-[20px] ${active ? 'text-[#139a8c]' : 'text-white/80'}`}>
+                    <span className={`material-symbols-outlined text-[20px] ${active ? 'text-[#2563eb]' : 'text-white/80'}`}>
                       {item.icon}
                     </span>
                     <span className="tracking-wide">{item.label}</span>
@@ -99,25 +98,21 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
 
           {/* Bottom Sidebar: Mascot / Promo Card & User Quick Action */}
           <div className="flex flex-col gap-3 pr-3 pt-4 mt-auto">
-            {/* Modern Illustrated Info Card */}
-            <div className="bg-[#0e7f73] rounded-2xl p-3.5 relative overflow-hidden border border-white/15 shadow-inner">
-              {/* Cute Cat Silhouette & Geometric Peach Circle */}
+            {/* Modern Info Card */}
+            <div className="bg-[#172554]/50 rounded-2xl p-3.5 relative overflow-hidden border border-white/15 shadow-inner backdrop-blur-sm">
               <div className="flex justify-between items-start mb-2 relative">
-                <div className="w-10 h-10 rounded-full bg-[#fca5a5]/30 absolute top-0 right-0 blur-xs"></div>
-                <div className="w-12 h-12 flex items-center justify-center text-[#ffd159]">
-                  {/* Stylized Cat Icon */}
-                  <svg className="w-10 h-10 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12c0 2.85 1.2 5.41 3.12 7.23L4 21l3.5-.88C9.09 21.32 10.5 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-5 0C8.83 6.5 9.5 7.17 9.5 8S8.83 9.5 8 9.5 6.5 8.83 6.5 8 7.17 6.5 8 6.5zm4 11c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z"/>
-                  </svg>
+                <div className="w-10 h-10 rounded-full bg-blue-400/20 absolute top-0 right-0 blur-xs"></div>
+                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center text-[#ffd159]">
+                  <span className="material-symbols-outlined text-xl text-[#ffd159]">verified_user</span>
                 </div>
-                <div className="w-5 h-5 rounded-full bg-[#fca5a5] border-2 border-white/30"></div>
+                <div className="w-4 h-4 rounded-full bg-[#ffd159] border-2 border-white/40"></div>
               </div>
               <h4 className="text-xs font-extrabold text-white">Koperasi Idaman</h4>
-              <p className="text-[10px] text-white/70 mt-0.5 leading-snug">Amanah, Transparan & Berkelanjutan</p>
+              <p className="text-[10px] text-blue-100/80 mt-0.5 leading-snug">Amanah, Transparan & Berkelanjutan</p>
               
               <Link
                 href="/laporan"
-                className="mt-2.5 inline-block w-full py-1.5 text-center bg-[#ffd159] hover:bg-[#f7be38] text-[#14293d] rounded-xl font-bold text-[11px] shadow-sm transition-all cursor-pointer"
+                className="mt-2.5 inline-block w-full py-1.5 text-center bg-[#ffd159] hover:bg-[#f7be38] text-[#0f172a] rounded-xl font-extrabold text-[11px] shadow-sm transition-all cursor-pointer"
               >
                 Lihat Rekap
               </Link>
@@ -128,7 +123,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
               <button
                 type="button"
                 onClick={() => setLogoutModalOpen(true)}
-                className="flex items-center gap-2 text-white/80 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors w-full font-bold"
+                className="flex items-center gap-2 text-white/80 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors w-full font-bold cursor-pointer"
               >
                 <span className="material-symbols-outlined text-lg">logout</span>
                 <span>LogOut</span>
@@ -140,9 +135,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
         {/* MOBILE HEADER BAR */}
         <div className="md:hidden flex items-center justify-between p-3 text-white">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl text-white">savings</span>
-            </div>
+            <AppLogo className="w-8 h-8" />
             <span className="font-extrabold text-base tracking-tight">Koperasi Idaman</span>
           </div>
 
@@ -169,14 +162,14 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
 
         {/* MOBILE DRAWER */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#0e7f73] rounded-2xl p-4 text-white mb-3 shadow-xl space-y-1">
+          <div className="md:hidden bg-[#1e40af] rounded-2xl p-4 text-white mb-3 shadow-xl space-y-1">
             <div className="flex items-center gap-3 p-2 bg-white/10 rounded-xl mb-3">
-              <div className="w-8 h-8 rounded-full bg-[#ffd159] text-[#14293d] flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-full bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-bold text-xs">
                 {currentUser.avatar || 'AD'}
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-bold">{currentUser.nama}</span>
-                <span className="text-[10px] text-white/70">{currentUser.role}</span>
+                <span className="text-[10px] text-blue-100">{currentUser.role}</span>
               </div>
             </div>
 
@@ -188,7 +181,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold ${
-                    active ? 'bg-white text-[#139a8c]' : 'text-white/80 hover:bg-white/10'
+                    active ? 'bg-white text-[#2563eb]' : 'text-white/80 hover:bg-white/10'
                   }`}
                 >
                   <span className="material-symbols-outlined text-lg">{item.icon}</span>
@@ -214,7 +207,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
                 placeholder="Search..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#f4faf8] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#139a8c] focus:bg-white transition-all shadow-inner"
+                className="w-full pl-10 pr-4 py-2 bg-[#f8fafc] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#2563eb] focus:bg-white transition-all shadow-inner"
               />
             </div>
 
@@ -222,10 +215,10 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
             <div className="flex items-center justify-end gap-3 self-end sm:self-auto">
               <Link
                 href="/pengaturan"
-                className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-2.5 p-1 rounded-full hover:bg-[#f8fafc] transition-colors"
               >
-                <span className="text-xs font-bold text-[#14293d]">{currentUser.nama || 'Johathan Stinson'}</span>
-                <div className="w-8 h-8 rounded-full bg-[#139a8c] text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-[#e0f7f4]">
+                <span className="text-xs font-extrabold text-[#0f172a]">{currentUser.nama || 'Administrator'}</span>
+                <div className="w-8 h-8 rounded-full bg-[#2563eb] text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-[#eff6ff]">
                   {currentUser.avatar || 'AD'}
                 </div>
               </Link>
@@ -235,11 +228,11 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
                 <button
                   type="button"
                   title="Notifikasi Sistem"
-                  className="w-8 h-8 rounded-full bg-[#f4faf8] flex items-center justify-center text-slate-600 hover:text-[#139a8c] hover:bg-[#e0f7f4] transition-colors"
+                  className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-slate-600 hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">notifications</span>
                 </button>
-                <span className="w-2 h-2 rounded-full bg-[#ff6b81] absolute top-0.5 right-0.5 ring-2 ring-white"></span>
+                <span className="w-2 h-2 rounded-full bg-[#ef4444] absolute top-0.5 right-0.5 ring-2 ring-white"></span>
               </div>
             </div>
           </div>
@@ -249,7 +242,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
             <div className="py-4 md:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 {title && (
-                  <h1 className="text-xl md:text-2xl font-extrabold text-[#14293d] tracking-tight">
+                  <h1 className="text-xl md:text-2xl font-extrabold text-[#0f172a] tracking-tight">
                     {title}
                   </h1>
                 )}
@@ -271,8 +264,8 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           <footer className="mt-8 pt-4 border-t border-slate-100 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>&copy; {new Date().getFullYear()} <strong>Koperasi Idaman</strong> &bull; Sistem Terintegrasi</span>
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 text-[#139a8c] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#139a8c] animate-ping"></span>
+              <span className="inline-flex items-center gap-1 text-[#2563eb] font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] animate-ping"></span>
                 Online: {currentUser.role}
               </span>
             </div>
@@ -284,7 +277,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
       {logoutModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col text-xs animate-in fade-in zoom-in duration-150">
-            <div className="p-5 bg-[#139a8c] text-white flex items-center gap-3">
+            <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
                 <span className="material-symbols-outlined text-2xl text-[#ffd159]">logout</span>
               </div>
@@ -309,7 +302,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
               <button
                 type="button"
                 onClick={handleLogoutConfirm}
-                className="px-5 py-2 bg-[#ff6b81] hover:bg-[#e85369] text-white rounded-full font-bold shadow-sm transition-colors cursor-pointer"
+                className="px-5 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-full font-bold shadow-sm transition-colors cursor-pointer"
               >
                 Ya, Keluar
               </button>

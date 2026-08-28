@@ -10,11 +10,11 @@ body {
   font-family: var(--font-jakarta);
   margin: 0;
   padding: 0;
-  background-color: #dff0ed;
+  background-color: #eaf2fc;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(19, 154, 140, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(19, 154, 140, 0.06) 0%, transparent 45%);
-  color: #14293d;
+    radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(29, 78, 216, 0.06) 0%, transparent 45%);
+  color: #0f172a;
   min-height: 100vh;
 }
 
@@ -44,12 +44,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #139a8c;
+  background: #2563eb;
 }
 
 .active-nav-tab {
   background-color: #ffffff;
-  color: #139a8c;
+  color: #2563eb;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }

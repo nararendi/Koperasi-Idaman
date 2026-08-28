@@ -15,10 +15,10 @@ export default function HomePage() {
 
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [settings, setSettings] = useState({});
-  const [selectedBar, setSelectedBar] = useState(9); // Default active bar like image (day 9)
+  const [selectedBar, setSelectedBar] = useState(9); // Default active bar (day 9)
   const [period, setPeriod] = useState('1 Mar - 14 Mar');
 
-  // Chart daily mock data points for the 14-day visual chart matching the image
+  // Chart daily data points for 14-day visual bar chart
   const chartData = [
     { day: 1, val: 35, amount: 'Rp 3.500.000' },
     { day: 2, val: 50, amount: 'Rp 5.000.000' },
@@ -72,11 +72,11 @@ export default function HomePage() {
 
   // Pastel icon colors for transaction list
   const avatarColors = [
-    'bg-[#ffd6a5] text-[#b45309]',
-    'bg-[#caffbf] text-[#15803d]',
-    'bg-[#9bf6ff] text-[#0369a1]',
-    'bg-[#a0c4ff] text-[#1d4ed8]',
-    'bg-[#bdb2ff] text-[#6d28d9]'
+    'bg-[#dbeafe] text-[#1d4ed8]',
+    'bg-[#dcfce7] text-[#15803d]',
+    'bg-[#fef3c7] text-[#b45309]',
+    'bg-[#e0e7ff] text-[#4338ca]',
+    'bg-[#fae8ff] text-[#86198f]'
   ];
 
   return (
@@ -86,7 +86,7 @@ export default function HomePage() {
       rightAction={
         <Link
           href="/laporan"
-          className="bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full px-5 py-2.5 text-xs font-extrabold flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full px-5 py-2.5 text-xs font-extrabold flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-base">download</span>
           <span>Download report</span>
@@ -101,9 +101,9 @@ export default function HomePage() {
             <span>Period:</span>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f4faf8] border border-slate-200 text-[#14293d] font-bold hover:border-[#139a8c] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] border border-slate-200 text-[#0f172a] font-bold hover:border-[#2563eb] transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-base text-[#139a8c]">calendar_today</span>
+              <span className="material-symbols-outlined text-base text-[#2563eb]">calendar_today</span>
               <span>1 March - 14 March</span>
               <span className="material-symbols-outlined text-sm">expand_more</span>
             </button>
@@ -115,14 +115,14 @@ export default function HomePage() {
               Today (Aktif)
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#a2e0f0]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#93c5fd]"></span>
               Earned (Simpanan & Kas)
             </span>
           </div>
         </div>
 
-        {/* INTERACTIVE VERTICAL BAR CHART (Matching Reference Design) */}
-        <div className="bg-[#fafdfc] border border-slate-100 rounded-3xl p-5 md:p-6 shadow-inner relative">
+        {/* INTERACTIVE VERTICAL BAR CHART */}
+        <div className="bg-[#f8fafc] border border-slate-100 rounded-3xl p-5 md:p-6 shadow-inner relative">
           <div className="relative h-56 flex items-end justify-between gap-1 sm:gap-2 pt-10 pb-4 border-b border-slate-200/80">
             
             {/* Background horizontal grid lines */}
@@ -148,7 +148,7 @@ export default function HomePage() {
                   {/* Floating Tooltip if selected/today */}
                   {isSelected && (
                     <div className="absolute -top-6 bg-white border border-slate-100 px-3 py-1.5 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-in fade-in zoom-in-90 duration-150 z-30">
-                      <span className="text-xs font-extrabold text-[#139a8c]">{item.amount}</span>
+                      <span className="text-xs font-extrabold text-[#2563eb]">{item.amount}</span>
                       <span className="text-[9px] text-slate-400 font-semibold">Total per day</span>
                       <div className="w-2 h-2 bg-white rotate-45 border-r border-b border-slate-100 absolute -bottom-1"></div>
                     </div>
@@ -160,7 +160,7 @@ export default function HomePage() {
                     className={`w-3 sm:w-4 md:w-5 rounded-t-lg transition-all duration-300 ${
                       isSelected
                         ? 'bg-[#ffd159] shadow-md scale-y-105 ring-2 ring-[#ffd159]/40'
-                        : 'bg-[#b6e4ef] hover:bg-[#9bdced] group-hover:scale-y-105'
+                        : 'bg-[#bfdbfe] hover:bg-[#93c5fd] group-hover:scale-y-105'
                     }`}
                   ></div>
                 </div>
@@ -175,7 +175,7 @@ export default function HomePage() {
                 key={item.day}
                 onClick={() => setSelectedBar(item.day)}
                 className={`flex-1 text-center cursor-pointer transition-colors ${
-                  selectedBar === item.day ? 'text-[#14293d] font-extrabold underline' : 'hover:text-slate-600'
+                  selectedBar === item.day ? 'text-[#0f172a] font-extrabold underline' : 'hover:text-slate-600'
                 }`}
               >
                 {item.day}
@@ -187,33 +187,33 @@ export default function HomePage() {
         {/* 4 SUMMARY STAT CARDS */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Anggota */}
-          <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Anggota Aktif</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#139a8c] shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs">
                 <span className="material-symbols-outlined text-lg">group</span>
               </div>
             </div>
-            <div className="text-xl font-extrabold text-[#14293d] mt-2">
+            <div className="text-xl font-extrabold text-[#0f172a] mt-2">
               {stats.totalAnggota} <span className="text-xs font-semibold text-slate-400">Orang</span>
             </div>
-            <Link href="/anggota" className="mt-2 text-[11px] font-bold text-[#139a8c] hover:underline flex items-center gap-1">
+            <Link href="/anggota" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1">
               Kelola Data &rarr;
             </Link>
           </div>
 
           {/* Total Simpanan */}
-          <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Simpanan</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#139a8c] shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs">
                 <span className="material-symbols-outlined text-lg">savings</span>
               </div>
             </div>
-            <div className="text-xl font-extrabold text-[#139a8c] mt-2">
+            <div className="text-xl font-extrabold text-[#2563eb] mt-2">
               {formatRupiah(stats.totalSimpanan)}
             </div>
-            <Link href="/simpanan" className="mt-2 text-[11px] font-bold text-[#139a8c] hover:underline flex items-center gap-1">
+            <Link href="/simpanan" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1">
               Buku Simpanan &rarr;
             </Link>
           </div>
@@ -235,39 +235,39 @@ export default function HomePage() {
           </div>
 
           {/* Saldo Kas */}
-          <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Saldo Kas</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#139a8c] shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs">
                 <span className="material-symbols-outlined text-lg">account_balance</span>
               </div>
             </div>
-            <div className="text-xl font-extrabold text-[#14293d] mt-2">
+            <div className="text-xl font-extrabold text-[#0f172a] mt-2">
               {formatRupiah(stats.saldoKas)}
             </div>
-            <Link href="/kas" className="mt-2 text-[11px] font-bold text-[#139a8c] hover:underline flex items-center gap-1">
+            <Link href="/kas" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1">
               Arus Kas &rarr;
             </Link>
           </div>
         </section>
 
-        {/* LOWER SECTION: ARRIVING TODAY LIST & PROMO BANNER (Matching Reference) */}
+        {/* LOWER SECTION: ARRIVING TODAY LIST & PROMO BANNER */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
           
           {/* Left 2 Cols: "Arriving today" Style Activity List */}
           <div className="lg:col-span-2 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-[#14293d]">
+              <h3 className="text-base font-extrabold text-[#0f172a]">
                 Arriving today <span className="text-xs font-semibold text-slate-400">(Transaksi Terkini)</span>
               </h3>
-              <Link href="/kas" className="text-xs font-bold text-[#139a8c] hover:underline flex items-center gap-0.5">
+              <Link href="/kas" className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-0.5">
                 Show all &gt;
               </Link>
             </div>
 
             <div className="space-y-2.5">
               {recentTransactions.length === 0 ? (
-                <div className="p-8 text-center bg-[#fafdfc] rounded-2xl border border-slate-100 text-xs text-slate-400 font-semibold">
+                <div className="p-8 text-center bg-[#f8fafc] rounded-2xl border border-slate-100 text-xs text-slate-400 font-semibold">
                   Belum ada transaksi terbaru hari ini.
                 </div>
               ) : (
@@ -278,7 +278,7 @@ export default function HomePage() {
                   return (
                     <div
                       key={tx.id || idx}
-                      className="bg-white border border-slate-100 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xs hover:border-[#139a8c]/40 hover:shadow-sm transition-all"
+                      className="bg-white border border-slate-100 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xs hover:border-[#2563eb]/40 hover:shadow-sm transition-all"
                     >
                       {/* Left: Avatar / Art icon & Info */}
                       <div className="flex items-center gap-3 min-w-0">
@@ -288,7 +288,7 @@ export default function HomePage() {
                           </span>
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-bold text-[#14293d] truncate">
+                          <span className="text-xs font-bold text-[#0f172a] truncate">
                             {tx.keterangan || tx.kategori || 'Transaksi Keuangan'}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium truncate">
@@ -302,7 +302,7 @@ export default function HomePage() {
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold ${
                             isPenerimaan
-                              ? 'bg-[#e0f7f4] text-[#139a8c]'
+                              ? 'bg-[#eff6ff] text-[#2563eb]'
                               : 'bg-[#fef8e7] text-[#b88000]'
                           }`}
                         >
@@ -313,7 +313,7 @@ export default function HomePage() {
                       {/* Right: Amount & Timestamp */}
                       <div className="flex items-center gap-4 text-right">
                         <div className="flex flex-col">
-                          <span className={`text-xs font-extrabold ${isPenerimaan ? 'text-[#139a8c]' : 'text-slate-800'}`}>
+                          <span className={`text-xs font-extrabold ${isPenerimaan ? 'text-[#2563eb]' : 'text-slate-800'}`}>
                             {formatRupiah(tx.jumlah)}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium">
@@ -334,18 +334,18 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right 1 Col: Illustrated Summary Banner ("Low occupancy!" style) */}
-          <div className="bg-[#dff3f0] border border-[#c3e8e1] rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xs min-h-[220px]">
+          {/* Right 1 Col: Summary Banner */}
+          <div className="bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border border-[#bfdbfe] rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xs min-h-[220px]">
             {/* Background Decorative Palms & Geometric Art */}
             <div className="absolute -bottom-6 -right-6 w-36 h-36 opacity-70 pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-[#139a8c]/40 fill-current">
+              <svg viewBox="0 0 100 100" className="w-full h-full text-[#2563eb]/20 fill-current">
                 <path d="M50 0 C40 30 10 40 0 50 C30 60 40 90 50 100 C60 70 90 60 100 50 C70 40 60 10 50 0 Z" />
               </svg>
             </div>
             
             {/* Top Text Content */}
             <div className="relative z-10">
-              <h4 className="text-base font-extrabold text-[#14293d]">
+              <h4 className="text-base font-extrabold text-[#0f172a]">
                 Kinerja Koperasi!
               </h4>
               <p className="text-xs text-slate-600 mt-1.5 leading-relaxed font-medium">
@@ -357,7 +357,7 @@ export default function HomePage() {
             <div className="pt-6 relative z-10">
               <Link
                 href="/kas"
-                className="inline-block px-5 py-2 bg-[#ffd159] hover:bg-[#f7be38] text-[#14293d] rounded-xl font-extrabold text-xs shadow-sm transition-all"
+                className="inline-block px-5 py-2 bg-[#ffd159] hover:bg-[#f7be38] text-[#0f172a] rounded-xl font-extrabold text-xs shadow-sm transition-all"
               >
                 Kelola Kas
               </Link>

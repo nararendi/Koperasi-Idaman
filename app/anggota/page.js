@@ -112,7 +112,7 @@ export default function DaftarAnggotaPage() {
     const s = (status || '').toLowerCase();
     if (s === 'aktif') {
       return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#e0f7f4] text-[#139a8c] text-[10px] font-extrabold uppercase">
+        <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#eff6ff] text-[#2563eb] text-[10px] font-extrabold uppercase">
           Aktif
         </span>
       );
@@ -140,14 +140,14 @@ export default function DaftarAnggotaPage() {
           <button
             type="button"
             onClick={() => excelExport.exportAnggota(filteredAnggota, settings)}
-            className="px-4 py-2 border border-[#139a8c]/30 bg-[#e0f7f4] hover:bg-[#cbf1ea] text-[#139a8c] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            className="px-4 py-2 border border-[#2563eb]/30 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">description</span>
             Ekspor Excel
           </button>
           <Link
             href="/anggota/tambah"
-            className="bg-[#139a8c] hover:bg-[#0e8074] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             + Tambah Anggota
@@ -157,7 +157,7 @@ export default function DaftarAnggotaPage() {
     >
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-[#139a8c] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
+        <div className="fixed top-20 right-6 z-50 bg-[#2563eb] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
           <span className="material-symbols-outlined text-base text-[#ffd159]">check_circle</span>
           <span>{toastMessage}</span>
         </div>
@@ -165,29 +165,29 @@ export default function DaftarAnggotaPage() {
 
       {/* Top Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-xs flex items-center justify-between">
+        <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-xs flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Anggota</div>
-            <div className="text-xl font-extrabold text-[#14293d] mt-1">{anggotaList.length} Orang</div>
+            <div className="text-xl font-extrabold text-[#0f172a] mt-1">{anggotaList.length} Orang</div>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
+          <div className="w-10 h-10 rounded-2xl bg-white text-[#2563eb] flex items-center justify-center shadow-xs">
             <span className="material-symbols-outlined text-xl">group</span>
           </div>
         </div>
 
-        <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-xs flex items-center justify-between">
+        <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-xs flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Anggota Aktif</div>
-            <div className="text-xl font-extrabold text-[#139a8c] mt-1">
+            <div className="text-xl font-extrabold text-[#2563eb] mt-1">
               {anggotaList.filter((a) => (a.status || a.status_keanggotaan || '').toLowerCase() === 'aktif').length} Orang
             </div>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
+          <div className="w-10 h-10 rounded-2xl bg-white text-[#2563eb] flex items-center justify-center shadow-xs">
             <span className="material-symbols-outlined text-xl">verified_user</span>
           </div>
         </div>
 
-        <div className="bg-[#fafdfc] border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+        <div className="bg-[#f8fafc] border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tidak Aktif / Keluar</div>
             <div className="text-xl font-extrabold text-slate-600 mt-1">
@@ -203,7 +203,7 @@ export default function DaftarAnggotaPage() {
       {/* Main Table Container */}
       <div className="bg-white border border-slate-100 rounded-3xl shadow-xs overflow-hidden flex flex-col">
         {/* Search & Filter Bar */}
-        <div className="p-4 border-b border-slate-100 bg-[#fafdfc] flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+        <div className="p-4 border-b border-slate-100 bg-[#f8fafc] flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs font-extrabold text-slate-500 mr-1">Status:</span>
             {['all', 'aktif', 'keluar', 'berhenti'].map((st) => (
@@ -213,8 +213,8 @@ export default function DaftarAnggotaPage() {
                 onClick={() => setStatusFilter(st)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
                   statusFilter === st
-                    ? 'bg-[#139a8c] text-white shadow-xs'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-[#f4faf8]'
+                    ? 'bg-[#2563eb] text-white shadow-xs'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-[#f8fafc]'
                 }`}
               >
                 {st === 'all' ? 'Semua' : st.charAt(0).toUpperCase() + st.slice(1)}
@@ -231,7 +231,7 @@ export default function DaftarAnggotaPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama, no. anggota, alamat..."
-              className="w-full pl-10 pr-4 py-2 bg-[#f4faf8] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#139a8c] focus:bg-white transition-all shadow-inner"
+              className="w-full pl-10 pr-4 py-2 bg-[#f8fafc] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#2563eb] focus:bg-white transition-all shadow-inner"
             />
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function DaftarAnggotaPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#fafdfc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
+              <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
                 <th className="px-4 py-3.5">No. Anggota</th>
                 <th className="px-4 py-3.5">Nama Anggota</th>
                 <th className="px-4 py-3.5">No. HP / WA</th>
@@ -259,11 +259,11 @@ export default function DaftarAnggotaPage() {
                 </tr>
               ) : (
                 filteredAnggota.map((item) => (
-                  <tr key={item.id || item.nomor_anggota} className="hover:bg-[#f4faf8]/60 transition-colors">
-                    <td className="px-4 py-3.5 font-mono font-bold text-[#139a8c] whitespace-nowrap">
+                  <tr key={item.id || item.nomor_anggota} className="hover:bg-[#f8fafc]/60 transition-colors">
+                    <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
                       {item.nomor_anggota || item.id}
                     </td>
-                    <td className="px-4 py-3.5 font-extrabold text-[#14293d] whitespace-nowrap">
+                    <td className="px-4 py-3.5 font-extrabold text-[#0f172a] whitespace-nowrap">
                       {item.nama || item.nama_lengkap}
                     </td>
                     <td className="px-4 py-3.5 text-slate-600 whitespace-nowrap">
@@ -284,7 +284,7 @@ export default function DaftarAnggotaPage() {
                           type="button"
                           onClick={() => handleOpenDetail(item)}
                           title="Lihat Detail & Tabungan"
-                          className="p-1.5 text-[#139a8c] hover:bg-[#e0f7f4] rounded-xl transition-colors"
+                          className="p-1.5 text-[#2563eb] hover:bg-[#eff6ff] rounded-xl transition-colors"
                         >
                           <span className="material-symbols-outlined text-[18px]">visibility</span>
                         </button>
@@ -318,14 +318,14 @@ export default function DaftarAnggotaPage() {
       {detailModalOpen && selectedAnggota && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-[32px] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-in fade-in zoom-in duration-150">
-            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center rounded-t-[32px]">
+            <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[32px]">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center font-bold text-base border border-white/30">
                   {(selectedAnggota.nama || selectedAnggota.nama_lengkap || 'A').charAt(0)}
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold">{selectedAnggota.nama || selectedAnggota.nama_lengkap}</h3>
-                  <p className="text-xs text-white/80 font-mono">No. {selectedAnggota.nomor_anggota || selectedAnggota.id}</p>
+                  <p className="text-xs text-blue-100 font-mono">No. {selectedAnggota.nomor_anggota || selectedAnggota.id}</p>
                 </div>
               </div>
               <button
@@ -339,7 +339,7 @@ export default function DaftarAnggotaPage() {
 
             <div className="p-6 flex flex-col gap-6 text-xs">
               {/* Profile Details Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-[#f4faf8] p-4 rounded-2xl border border-[#d8eee8]">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe]">
                 <div>
                   <span className="text-slate-400 font-bold block">Nomor HP / WA:</span>
                   <span className="font-extrabold text-slate-800">{selectedAnggota.nomor_hp || '-'}</span>
@@ -364,7 +364,7 @@ export default function DaftarAnggotaPage() {
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block">Total Saldo Simpanan:</span>
-                  <span className="font-extrabold text-[#139a8c] text-sm">
+                  <span className="font-extrabold text-[#2563eb] text-sm">
                     Rp {Number(selectedAnggota.totalSimpanan || 0).toLocaleString('id-ID')}
                   </span>
                 </div>
@@ -376,16 +376,16 @@ export default function DaftarAnggotaPage() {
 
               {/* Savings History for this member */}
               <div>
-                <h4 className="text-sm font-extrabold text-[#14293d] mb-2 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-[#139a8c]">savings</span>
+                <h4 className="text-sm font-extrabold text-[#0f172a] mb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-[#2563eb]">savings</span>
                   Riwayat Simpanan Anggota ({selectedAnggota.simpananList?.length || 0})
                 </h4>
                 {selectedAnggota.simpananList?.length === 0 ? (
-                  <p className="text-slate-400 italic bg-[#fafdfc] p-3 rounded-xl border border-slate-100">Belum ada transaksi simpanan tercatat.</p>
+                  <p className="text-slate-400 italic bg-[#f8fafc] p-3 rounded-xl border border-slate-100">Belum ada transaksi simpanan tercatat.</p>
                 ) : (
                   <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
                     <table className="w-full text-left">
-                      <thead className="bg-[#f4faf8] text-slate-500 font-bold border-b border-slate-100">
+                      <thead className="bg-[#eff6ff] text-slate-500 font-bold border-b border-slate-100">
                         <tr>
                           <th className="px-3 py-2">Tgl</th>
                           <th className="px-3 py-2">Jenis</th>
@@ -397,7 +397,7 @@ export default function DaftarAnggotaPage() {
                         {selectedAnggota.simpananList.map((s) => (
                           <tr key={s.id}>
                             <td className="px-3 py-2 text-slate-600">{s.tanggal}</td>
-                            <td className="px-3 py-2 font-bold text-[#139a8c]">{s.jenis}</td>
+                            <td className="px-3 py-2 font-bold text-[#2563eb]">{s.jenis}</td>
                             <td className="px-3 py-2 text-right font-extrabold">Rp {Number(s.jumlah || 0).toLocaleString('id-ID')}</td>
                             <td className="px-3 py-2 text-slate-500">{s.keterangan}</td>
                           </tr>
@@ -410,16 +410,16 @@ export default function DaftarAnggotaPage() {
 
               {/* Loan History for this member */}
               <div>
-                <h4 className="text-sm font-extrabold text-[#14293d] mb-2 flex items-center gap-1.5">
+                <h4 className="text-sm font-extrabold text-[#0f172a] mb-2 flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-base text-amber-600">payments</span>
                   Riwayat Pinjaman Anggota ({selectedAnggota.pinjamanList?.length || 0})
                 </h4>
                 {selectedAnggota.pinjamanList?.length === 0 ? (
-                  <p className="text-slate-400 italic bg-[#fafdfc] p-3 rounded-xl border border-slate-100">Tidak ada pengajuan pinjaman aktif/lunas.</p>
+                  <p className="text-slate-400 italic bg-[#f8fafc] p-3 rounded-xl border border-slate-100">Tidak ada pengajuan pinjaman aktif/lunas.</p>
                 ) : (
                   <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
                     <table className="w-full text-left">
-                      <thead className="bg-[#f4faf8] text-slate-500 font-bold border-b border-slate-100">
+                      <thead className="bg-[#eff6ff] text-slate-500 font-bold border-b border-slate-100">
                         <tr>
                           <th className="px-3 py-2">No. Pinjaman</th>
                           <th className="px-3 py-2">Plafon</th>
@@ -430,7 +430,7 @@ export default function DaftarAnggotaPage() {
                       <tbody className="divide-y divide-slate-100">
                         {selectedAnggota.pinjamanList.map((p) => (
                           <tr key={p.id}>
-                            <td className="px-3 py-2 font-mono font-bold text-[#139a8c]">{p.nomor_pinjaman || p.id}</td>
+                            <td className="px-3 py-2 font-mono font-bold text-[#2563eb]">{p.nomor_pinjaman || p.id}</td>
                             <td className="px-3 py-2 font-extrabold">Rp {Number(p.jumlah || 0).toLocaleString('id-ID')}</td>
                             <td className="px-3 py-2 font-bold text-amber-600">{p.status}</td>
                             <td className="px-3 py-2 text-right font-extrabold text-rose-600">Rp {Number(p.sisa_hutang || 0).toLocaleString('id-ID')}</td>
@@ -447,7 +447,7 @@ export default function DaftarAnggotaPage() {
               <button
                 type="button"
                 onClick={() => setDetailModalOpen(false)}
-                className="px-5 py-2 bg-[#139a8c] text-white rounded-full text-xs font-extrabold hover:bg-[#0e8074] transition-all cursor-pointer"
+                className="px-5 py-2 bg-[#2563eb] text-white rounded-full text-xs font-extrabold hover:bg-[#1d4ed8] transition-all cursor-pointer"
               >
                 Tutup Detail
               </button>
@@ -460,7 +460,7 @@ export default function DaftarAnggotaPage() {
       {editModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
-            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center shrink-0">
+            <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined">edit_square</span>
                 <h3 className="text-base font-extrabold">Edit Data Anggota</h3>
@@ -494,7 +494,7 @@ export default function DaftarAnggotaPage() {
                       required
                       value={editFormData.nama || ''}
                       onChange={(e) => setEditFormData({ ...editFormData, nama: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     />
                   </div>
 
@@ -505,7 +505,7 @@ export default function DaftarAnggotaPage() {
                       required
                       value={editFormData.nomor_hp || ''}
                       onChange={(e) => setEditFormData({ ...editFormData, nomor_hp: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     />
                   </div>
 
@@ -515,7 +515,7 @@ export default function DaftarAnggotaPage() {
                       type="text"
                       value={editFormData.pekerjaan || ''}
                       onChange={(e) => setEditFormData({ ...editFormData, pekerjaan: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     />
                   </div>
 
@@ -525,7 +525,7 @@ export default function DaftarAnggotaPage() {
                       type="text"
                       value={editFormData.tempat_lahir || ''}
                       onChange={(e) => setEditFormData({ ...editFormData, tempat_lahir: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     />
                   </div>
 
@@ -534,7 +534,7 @@ export default function DaftarAnggotaPage() {
                     <select
                       value={editFormData.status || 'Aktif'}
                       onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-extrabold text-slate-800 transition-all"
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-extrabold text-slate-800 transition-all"
                     >
                       <option value="Aktif">Aktif</option>
                       <option value="Keluar">Keluar</option>
@@ -548,7 +548,7 @@ export default function DaftarAnggotaPage() {
                       rows={3}
                       value={editFormData.alamat || ''}
                       onChange={(e) => setEditFormData({ ...editFormData, alamat: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none resize-none font-medium"
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none resize-none font-medium"
                     />
                   </div>
                 </div>
@@ -564,7 +564,7 @@ export default function DaftarAnggotaPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
+                  className="px-6 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
                 >
                   Simpan Perubahan
                 </button>

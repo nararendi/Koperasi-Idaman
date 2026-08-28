@@ -137,7 +137,7 @@ export default function LaporanPage() {
           <button
             type="button"
             onClick={handleExportExcel}
-            className="px-4 py-2 border border-[#139a8c]/30 bg-[#e0f7f4] hover:bg-[#cbf1ea] text-[#139a8c] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            className="px-4 py-2 border border-[#2563eb]/30 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">description</span>
             Ekspor Excel
@@ -145,7 +145,7 @@ export default function LaporanPage() {
           <button
             type="button"
             onClick={handleExportPDF}
-            className="bg-[#139a8c] hover:bg-[#0e8074] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
             Ekspor PDF
@@ -158,7 +158,7 @@ export default function LaporanPage() {
         {/* Month Picker Inputs */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#139a8c] text-2xl">calendar_month</span>
+            <span className="material-symbols-outlined text-[#2563eb] text-2xl">calendar_month</span>
             <span className="text-xs font-extrabold text-slate-700">Pilih Periode:</span>
           </div>
 
@@ -169,7 +169,7 @@ export default function LaporanPage() {
                 type="month"
                 value={bulanMulai}
                 onChange={(e) => setBulanMulai(e.target.value)}
-                className="px-3.5 py-1.5 bg-[#f4faf8] border border-slate-200 rounded-full text-xs focus:border-[#139a8c] outline-none font-bold text-[#14293d] cursor-pointer shadow-2xs"
+                className="px-3.5 py-1.5 bg-[#f8fafc] border border-slate-200 rounded-full text-xs focus:border-[#2563eb] outline-none font-bold text-[#0f172a] cursor-pointer shadow-2xs"
               />
             </div>
 
@@ -181,7 +181,7 @@ export default function LaporanPage() {
                 type="month"
                 value={bulanSelesai}
                 onChange={(e) => setBulanSelesai(e.target.value)}
-                className="px-3.5 py-1.5 bg-[#f4faf8] border border-slate-200 rounded-full text-xs focus:border-[#139a8c] outline-none font-bold text-[#14293d] cursor-pointer shadow-2xs"
+                className="px-3.5 py-1.5 bg-[#f8fafc] border border-slate-200 rounded-full text-xs focus:border-[#2563eb] outline-none font-bold text-[#0f172a] cursor-pointer shadow-2xs"
               />
             </div>
           </div>
@@ -193,21 +193,21 @@ export default function LaporanPage() {
           <button
             type="button"
             onClick={setPresetBulanIni}
-            className="px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-[#f4faf8] text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-[#f8fafc] text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
           >
             Bulan Ini ({formatBulanTahun(currentMonthStr)})
           </button>
           <button
             type="button"
             onClick={setPresetTahunIni}
-            className="px-3.5 py-1.5 rounded-full bg-[#e0f7f4] border border-[#139a8c]/30 hover:bg-[#cbf1ea] text-[11px] font-extrabold text-[#139a8c] transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full bg-[#eff6ff] border border-[#2563eb]/30 hover:bg-[#dbeafe] text-[11px] font-extrabold text-[#2563eb] transition-colors cursor-pointer"
           >
             Tahun {currentYear} (Jan - Des)
           </button>
           <button
             type="button"
             onClick={setPresetSemuaWaktu}
-            className="px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-[#f4faf8] text-[11px] font-semibold text-slate-600 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-[#f8fafc] text-[11px] font-semibold text-slate-600 transition-colors cursor-pointer"
           >
             Semua Waktu
           </button>
@@ -218,9 +218,9 @@ export default function LaporanPage() {
       <div id="laporanContainer" className="flex flex-col gap-6">
         {/* Report Header for Print */}
         <div className="text-center pb-4 border-b border-slate-100">
-          <h2 className="text-lg font-black text-[#14293d] tracking-wide">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
+          <h2 className="text-lg font-black text-[#0f172a] tracking-wide">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
           <p className="text-xs text-slate-500">{settings.alamat || 'Jakarta, Indonesia'}</p>
-          <div className="inline-flex items-center gap-1.5 bg-[#e0f7f4] border border-[#139a8c]/20 px-4 py-1.5 rounded-full text-xs font-bold text-[#139a8c] mt-2 shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 bg-[#eff6ff] border border-[#2563eb]/20 px-4 py-1.5 rounded-full text-xs font-bold text-[#2563eb] mt-2 shadow-2xs">
             <span className="material-symbols-outlined text-sm">date_range</span>
             <span>
               Periode Laporan: {getPeriodeLabel()}
@@ -235,10 +235,10 @@ export default function LaporanPage() {
             <div>
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#139a8c]">receipt_long</span>
-                  <h3 className="text-sm font-extrabold text-[#14293d]">Laporan Arus Kas (Cashflow)</h3>
+                  <span className="material-symbols-outlined text-[#2563eb]">receipt_long</span>
+                  <h3 className="text-sm font-extrabold text-[#0f172a]">Laporan Arus Kas (Cashflow)</h3>
                 </div>
-                <span className="text-[11px] font-extrabold text-[#139a8c] bg-[#e0f7f4] px-2.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-extrabold text-[#2563eb] bg-[#eff6ff] px-2.5 py-0.5 rounded-full">
                   Realisasi Periode
                 </span>
               </div>
@@ -247,17 +247,17 @@ export default function LaporanPage() {
                 <div className="font-extrabold text-slate-400 uppercase tracking-wider text-[10px]">Arus Kas Masuk:</div>
                 <div className="flex justify-between pl-2">
                   <span className="text-slate-600">Penerimaan Setoran Simpanan</span>
-                  <span className="font-semibold text-[#139a8c]">{formatRupiah(laporan.arusKas.totalSimpananMasuk)}</span>
+                  <span className="font-semibold text-[#2563eb]">{formatRupiah(laporan.arusKas.totalSimpananMasuk)}</span>
                 </div>
                 <div className="flex justify-between pl-2">
                   <span className="text-slate-600">Penerimaan Angsuran Pinjaman</span>
-                  <span className="font-semibold text-[#139a8c]">{formatRupiah(laporan.arusKas.totalAngsuranMasuk)}</span>
+                  <span className="font-semibold text-[#2563eb]">{formatRupiah(laporan.arusKas.totalAngsuranMasuk)}</span>
                 </div>
                 <div className="flex justify-between pl-2">
                   <span className="text-slate-600">Pendapatan Lain / Administrasi</span>
-                  <span className="font-semibold text-[#139a8c]">{formatRupiah(laporan.arusKas.totalPendapatanLain)}</span>
+                  <span className="font-semibold text-[#2563eb]">{formatRupiah(laporan.arusKas.totalPendapatanLain)}</span>
                 </div>
-                <div className="flex justify-between pt-1.5 border-t border-slate-100 font-extrabold text-[#139a8c]">
+                <div className="flex justify-between pt-1.5 border-t border-slate-100 font-extrabold text-[#2563eb]">
                   <span>Total Pemasukan Kas</span>
                   <span>{formatRupiah(laporan.arusKas.totalPemasukan)}</span>
                 </div>
@@ -283,8 +283,8 @@ export default function LaporanPage() {
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-sm font-extrabold">
-              <span className="text-[#14293d]">Saldo Bersih Kas Periode Ini:</span>
-              <span className={`text-base ${laporan.arusKas.saldoKasBersih >= 0 ? 'text-[#139a8c]' : 'text-rose-500'}`}>
+              <span className="text-[#0f172a]">Saldo Bersih Kas Periode Ini:</span>
+              <span className={`text-base ${laporan.arusKas.saldoKasBersih >= 0 ? 'text-[#2563eb]' : 'text-rose-500'}`}>
                 {formatRupiah(laporan.arusKas.saldoKasBersih)}
               </span>
             </div>
@@ -295,10 +295,10 @@ export default function LaporanPage() {
             <div>
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#139a8c]">balance</span>
-                  <h3 className="text-sm font-extrabold text-[#14293d]">Neraca Keuangan Koperasi</h3>
+                  <span className="material-symbols-outlined text-[#2563eb]">balance</span>
+                  <h3 className="text-sm font-extrabold text-[#0f172a]">Neraca Keuangan Koperasi</h3>
                 </div>
-                <span className="text-[11px] font-extrabold text-[#139a8c] bg-[#e0f7f4] px-2.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-extrabold text-[#2563eb] bg-[#eff6ff] px-2.5 py-0.5 rounded-full">
                   Posisi Keuangan
                 </span>
               </div>
@@ -313,7 +313,7 @@ export default function LaporanPage() {
                   <span className="text-slate-600">Piutang Pinjaman Anggota (Kredit)</span>
                   <span className="font-semibold text-slate-800">{formatRupiah(laporan.neraca.piutangPinjaman)}</span>
                 </div>
-                <div className="flex justify-between pt-1.5 border-t border-slate-100 font-extrabold text-[#139a8c]">
+                <div className="flex justify-between pt-1.5 border-t border-slate-100 font-extrabold text-[#2563eb]">
                   <span>Total Aset Koperasi</span>
                   <span>{formatRupiah(laporan.neraca.totalAset)}</span>
                 </div>
@@ -331,7 +331,7 @@ export default function LaporanPage() {
                   <span className="text-slate-600">Simpanan Sukarela Anggota</span>
                   <span className="font-semibold text-slate-800">{formatRupiah(laporan.neraca.simpananSukarela)}</span>
                 </div>
-                <div className="flex justify-between pt-1.5 border-t border-slate-100 font-extrabold text-[#14293d]">
+                <div className="flex justify-between pt-1.5 border-t border-slate-100 font-extrabold text-[#0f172a]">
                   <span>Total Dana Simpanan Anggota</span>
                   <span>{formatRupiah(laporan.neraca.totalKewajibanModal)}</span>
                 </div>
@@ -348,10 +348,10 @@ export default function LaporanPage() {
         <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#139a8c]">pie_chart</span>
-              <h3 className="text-sm font-extrabold text-[#14293d]">Simulasi Perhitungan Sisa Hasil Usaha (SHU)</h3>
+              <span className="material-symbols-outlined text-[#2563eb]">pie_chart</span>
+              <h3 className="text-sm font-extrabold text-[#0f172a]">Simulasi Perhitungan Sisa Hasil Usaha (SHU)</h3>
             </div>
-            <span className="text-[11px] font-extrabold text-[#139a8c] bg-[#e0f7f4] px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] font-extrabold text-[#2563eb] bg-[#eff6ff] px-2.5 py-0.5 rounded-full">
               Alokasi RAT
             </span>
           </div>
@@ -360,39 +360,39 @@ export default function LaporanPage() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-slate-600">Pendapatan Jasa Bunga Pinjaman:</span>
-                <span className="font-semibold text-[#139a8c]">{formatRupiah(laporan.shu.pendapatanBunga)}</span>
+                <span className="font-semibold text-[#2563eb]">{formatRupiah(laporan.shu.pendapatanBunga)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600">Pendapatan Administrasi & Lainnya:</span>
-                <span className="font-semibold text-[#139a8c]">{formatRupiah(laporan.shu.pendapatanLain)}</span>
+                <span className="font-semibold text-[#2563eb]">{formatRupiah(laporan.shu.pendapatanLain)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600">Beban Biaya Operasional:</span>
                 <span className="font-semibold text-rose-500">-{formatRupiah(laporan.shu.biayaOperasional)}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-slate-100 font-extrabold text-sm text-[#14293d]">
+              <div className="flex justify-between pt-2 border-t border-slate-100 font-extrabold text-sm text-[#0f172a]">
                 <span>Estimasi SHU Bersih Koperasi:</span>
-                <span className="text-[#139a8c]">{formatRupiah(laporan.shu.shuBersih)}</span>
+                <span className="text-[#2563eb]">{formatRupiah(laporan.shu.shuBersih)}</span>
               </div>
             </div>
 
-            <div className="bg-[#f4faf8] p-4 rounded-2xl border border-[#d8eee8] space-y-2">
-              <span className="font-extrabold text-[#14293d] block">Rencana Alokasi Pembagian Sesuai AD/ART:</span>
+            <div className="bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe] space-y-2">
+              <span className="font-extrabold text-[#0f172a] block">Rencana Alokasi Pembagian Sesuai AD/ART:</span>
               <div className="flex justify-between">
                 <span className="text-slate-600">Jasa Anggota ({settings.shuPersenAnggota || 40}%):</span>
-                <span className="font-bold text-[#139a8c]">{formatRupiah(laporan.shu.alokasi.anggota)}</span>
+                <span className="font-bold text-[#2563eb]">{formatRupiah(laporan.shu.alokasi.anggota)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600">Jasa Modal / Simpanan ({settings.shuPersenModal || 30}%):</span>
-                <span className="font-bold text-[#139a8c]">{formatRupiah(laporan.shu.alokasi.modal)}</span>
+                <span className="font-bold text-[#2563eb]">{formatRupiah(laporan.shu.alokasi.modal)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600">Dana Pengurus & Pengawas ({settings.shuPersenPengurus || 20}%):</span>
-                <span className="font-bold text-[#139a8c]">{formatRupiah(laporan.shu.alokasi.pengurus)}</span>
+                <span className="font-bold text-[#2563eb]">{formatRupiah(laporan.shu.alokasi.pengurus)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600">Dana Cadangan Koperasi ({settings.shuPersenCadangan || 10}%):</span>
-                <span className="font-bold text-[#139a8c]">{formatRupiah(laporan.shu.alokasi.cadangan)}</span>
+                <span className="font-bold text-[#2563eb]">{formatRupiah(laporan.shu.alokasi.cadangan)}</span>
               </div>
             </div>
           </div>
