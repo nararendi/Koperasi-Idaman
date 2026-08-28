@@ -28,9 +28,7 @@ export default function TambahAnggotaPage() {
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    const year = new Date().getFullYear();
-    const currentList = dataService.getAnggotaList();
-    const autoNumber = `ANG-${year}-${String(currentList.length + 1).padStart(3, '0')}`;
+    const autoNumber = dataService.getNextNomorAnggota();
     const s = dataService.getSettings();
 
     setSettings(s);
@@ -152,7 +150,7 @@ export default function TambahAnggotaPage() {
                     value={formData.nomor_anggota}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl font-mono font-bold text-[#2563eb] outline-none"
-                    placeholder="ANG-XXXX-XXX"
+                    placeholder="Contoh: KI-01"
                   />
                 </div>
               </div>
