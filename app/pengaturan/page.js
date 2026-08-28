@@ -174,13 +174,16 @@ export default function PengaturanPage() {
   // Pull from Supabase
   const handlePullSupabase = async () => {
     setSyncingCloud(true);
-    const res = await dataService.fetchFromSupabase();
+    const [resData, resUsers] = await Promise.all([
+      dataService.fetchFromSupabase(),
+      authService.fetchUsersFromSupabase()
+    ]);
     setSyncingCloud(false);
-    if (res.success) {
+    if (resData.success || resUsers.success) {
       loadData();
-      showToast(res.message);
+      showToast('Data berhasil disinkronkan dari Cloud Supabase!');
     } else {
-      alert(res.message);
+      alert(resData.message || resUsers.message || 'Gagal sinkronisasi data.');
     }
   };
 
