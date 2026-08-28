@@ -44,6 +44,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
     { name: 'Pinjaman', label: 'Pinjaman', href: '/pinjaman', icon: 'payments' },
     { name: 'Kas & Buku', label: 'Transaksi Kas', href: '/kas', icon: 'receipt_long' },
     { name: 'Usaha & Qurban', label: 'Usaha & Qurban', href: '/usaha', icon: 'storefront' },
+    { name: 'Daftar Tagihan', label: 'Daftar Tagihan', href: '/tagihan', icon: 'fact_check' },
     { name: 'Laporan', label: 'Laporan', href: '/laporan', icon: 'bar_chart' },
     { name: 'Pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: 'settings' }
   ];
