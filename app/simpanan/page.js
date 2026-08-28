@@ -331,8 +331,8 @@ export default function SimpananPage() {
       {/* MODAL CATAT TRANSAKSI SIMPANAN */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 flex flex-col">
-            <div className="p-5 bg-emerald-800 text-white flex justify-between items-center rounded-t-2xl">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-emerald-800 text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined">payments</span>
                 <h3 className="text-base font-bold">Catat Transaksi Simpanan</h3>
@@ -346,119 +346,121 @@ export default function SimpananPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmitTransaction} className="p-6 flex flex-col gap-4 text-xs">
-              {/* Tipe Transaksi */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Tipe Transaksi</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, tipe: 'Setoran' })}
-                    className={`py-2 rounded-lg font-bold border transition-all ${
-                      formData.tipe === 'Setoran'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    + Setoran Masuk
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, tipe: 'Penarikan', jenis: 'Sukarela' })}
-                    className={`py-2 rounded-lg font-bold border transition-all ${
-                      formData.tipe === 'Penarikan'
-                        ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    - Penarikan Saldo
-                  </button>
+            <form onSubmit={handleSubmitTransaction} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto flex flex-col gap-4 text-xs flex-1">
+                {/* Tipe Transaksi */}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Tipe Transaksi</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipe: 'Setoran' })}
+                      className={`py-2 rounded-lg font-bold border transition-all ${
+                        formData.tipe === 'Setoran'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      + Setoran Masuk
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipe: 'Penarikan', jenis: 'Sukarela' })}
+                      className={`py-2 rounded-lg font-bold border transition-all ${
+                        formData.tipe === 'Penarikan'
+                          ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      - Penarikan Saldo
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Pilih Anggota */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Pilih Anggota Koperasi *</label>
-                <select
-                  required
-                  value={formData.nomor_anggota}
-                  onChange={(e) => setFormData({ ...formData, nomor_anggota: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium"
-                >
-                  <option value="">-- Pilih Anggota --</option>
-                  {anggotaList.map((a) => (
-                    <option key={a.id || a.nomor_anggota} value={a.nomor_anggota || a.id}>
-                      {a.nomor_anggota || a.id} - {a.nama || a.nama_lengkap}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Jenis Simpanan */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Jenis Simpanan</label>
-                <select
-                  value={formData.jenis}
-                  disabled={formData.tipe === 'Penarikan'}
-                  onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium disabled:bg-slate-100"
-                >
-                  <option value="Sukarela">Simpanan Sukarela (Bebas Setor/Tarik)</option>
-                  <option value="Wajib">Simpanan Wajib (Bulanan)</option>
-                  <option value="Pokok">Simpanan Pokok</option>
-                </select>
-              </div>
-
-              {/* Nominal */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Nominal Jumlah (Rp) *</label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-2.5 font-bold text-slate-400 text-sm">Rp</span>
-                  <input
-                    type="number"
+                {/* Pilih Anggota */}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Pilih Anggota Koperasi *</label>
+                  <select
                     required
-                    min="1000"
-                    step="1000"
-                    value={formData.jumlah}
-                    onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
-                    placeholder="Contoh: 20000"
-                    className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none text-sm font-bold text-emerald-800"
+                    value={formData.nomor_anggota}
+                    onChange={(e) => setFormData({ ...formData, nomor_anggota: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium"
+                  >
+                    <option value="">-- Pilih Anggota --</option>
+                    {anggotaList.map((a) => (
+                      <option key={a.id || a.nomor_anggota} value={a.nomor_anggota || a.id}>
+                        {a.nomor_anggota || a.id} - {a.nama || a.nama_lengkap}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Jenis Simpanan */}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Jenis Simpanan</label>
+                  <select
+                    value={formData.jenis}
+                    disabled={formData.tipe === 'Penarikan'}
+                    onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium disabled:bg-slate-100"
+                  >
+                    <option value="Sukarela">Simpanan Sukarela (Bebas Setor/Tarik)</option>
+                    <option value="Wajib">Simpanan Wajib (Bulanan)</option>
+                    <option value="Pokok">Simpanan Pokok</option>
+                  </select>
+                </div>
+
+                {/* Nominal */}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nominal Jumlah (Rp) *</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-2.5 font-bold text-slate-400 text-sm">Rp</span>
+                    <input
+                      type="number"
+                      required
+                      min="1000"
+                      step="1000"
+                      value={formData.jumlah}
+                      onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
+                      placeholder="Contoh: 20000"
+                      className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none text-sm font-bold text-emerald-800"
+                    />
+                  </div>
+                  {formData.jumlah && Number(formData.jumlah) > 0 && (
+                    <p className="mt-1 text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100 flex items-center justify-between">
+                      <span>Format: {formatRupiah(formData.jumlah)}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Metode Pembayaran */}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Metode Penerimaan / Pembayaran</label>
+                  <select
+                    value={formData.metode}
+                    onChange={(e) => setFormData({ ...formData, metode: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium"
+                  >
+                    <option value="Tunai">Tunai / Kasir</option>
+                    <option value="Transfer Bank">Transfer Bank / QRIS</option>
+                    <option value="Potong Gaji">Potong Gaji Otomatis</option>
+                  </select>
+                </div>
+
+                {/* Keterangan */}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Keterangan / Catatan</label>
+                  <input
+                    type="text"
+                    value={formData.keterangan}
+                    onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
+                    placeholder="Contoh: Setoran sukarela tabungan qurban"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none"
                   />
                 </div>
-                {formData.jumlah && Number(formData.jumlah) > 0 && (
-                  <p className="mt-1 text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100 flex items-center justify-between">
-                    <span>Format: {formatRupiah(formData.jumlah)}</span>
-                  </p>
-                )}
               </div>
 
-              {/* Metode Pembayaran */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Metode Penerimaan / Pembayaran</label>
-                <select
-                  value={formData.metode}
-                  onChange={(e) => setFormData({ ...formData, metode: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium"
-                >
-                  <option value="Tunai">Tunai / Kasir</option>
-                  <option value="Transfer Bank">Transfer Bank / QRIS</option>
-                  <option value="Potong Gaji">Potong Gaji Otomatis</option>
-                </select>
-              </div>
-
-              {/* Keterangan */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Keterangan / Catatan</label>
-                <input
-                  type="text"
-                  value={formData.keterangan}
-                  onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                  placeholder="Contoh: Setoran sukarela tabungan qurban"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none"
-                />
-              </div>
-
-              <div className="pt-4 border-t border-slate-200 flex justify-end gap-2">
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
@@ -468,7 +470,7 @@ export default function SimpananPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-700 text-white rounded-lg font-bold hover:bg-emerald-800 shadow-sm"
+                  className="px-5 py-2 bg-emerald-700 text-white rounded-lg font-bold hover:bg-emerald-800 shadow-sm cursor-pointer"
                 >
                   Simpan Transaksi
                 </button>

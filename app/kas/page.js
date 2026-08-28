@@ -266,8 +266,8 @@ export default function KasPage() {
       {/* MODAL CATAT MUTASI KAS MANUAL */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined">receipt_long</span>
                 <h3 className="text-base font-bold">Catat Mutasi Kas Manual</h3>
@@ -281,77 +281,79 @@ export default function KasPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Jenis Mutasi *</label>
-                  <select
-                    value={formData.jenis}
-                    onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
-                  >
-                    <option value="Pengeluaran">Pengeluaran (Kas Keluar)</option>
-                    <option value="Penerimaan">Penerimaan (Kas Masuk)</option>
-                  </select>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto flex flex-col gap-4 text-xs flex-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Jenis Mutasi *</label>
+                    <select
+                      value={formData.jenis}
+                      onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                    >
+                      <option value="Pengeluaran">Pengeluaran (Kas Keluar)</option>
+                      <option value="Penerimaan">Penerimaan (Kas Masuk)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Tanggal Transaksi</label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.tanggal}
+                      onChange={(e) => setFormData({ ...formData, tanggal: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Tanggal Transaksi</label>
+                  <label className="font-bold text-slate-700 block mb-1">Kategori Transaksi</label>
                   <input
-                    type="date"
+                    type="text"
                     required
-                    value={formData.tanggal}
-                    onChange={(e) => setFormData({ ...formData, tanggal: e.target.value })}
+                    placeholder="Contoh: Operasional, ATK, Listrik, Konsumsi, dll"
+                    value={formData.kategori}
+                    onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Kategori Transaksi</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Operasional, ATK, Listrik, Konsumsi, dll"
-                  value={formData.kategori}
-                  onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                />
-              </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nominal Transaksi (Rp) *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
+                    <input
+                      type="number"
+                      required
+                      min="1000"
+                      placeholder="Contoh: 20000"
+                      value={formData.jumlah}
+                      onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none text-sm font-bold text-[#002045]"
+                    />
+                  </div>
+                  {formData.jumlah && (
+                    <p className="text-[11px] text-blue-800 font-bold mt-1">
+                      Format: {formatRupiah(formData.jumlah)}
+                    </p>
+                  )}
+                </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Nominal Transaksi (Rp) *</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 font-bold text-slate-400 text-xs">Rp</span>
-                  <input
-                    type="number"
-                    required
-                    min="1000"
-                    placeholder="Contoh: 20000"
-                    value={formData.jumlah}
-                    onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
-                    className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none text-sm font-bold text-[#002045]"
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Keterangan / Rincian</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Tuliskan keterangan detail transaksi..."
+                    value={formData.keterangan}
+                    onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
                   />
                 </div>
-                {formData.jumlah && (
-                  <p className="text-[11px] text-blue-800 font-bold mt-1">
-                    Format: {formatRupiah(formData.jumlah)}
-                  </p>
-                )}
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Keterangan / Rincian</label>
-                <textarea
-                  rows={2}
-                  placeholder="Tuliskan keterangan detail transaksi..."
-                  value={formData.keterangan}
-                  onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
@@ -361,7 +363,7 @@ export default function KasPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm"
+                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm cursor-pointer"
                 >
                   Simpan Transaksi Kas
                 </button>

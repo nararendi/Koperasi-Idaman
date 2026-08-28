@@ -459,8 +459,8 @@ export default function DaftarAnggotaPage() {
       {/* EDIT MODAL */}
       {editModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center rounded-t-2xl">
+          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined">edit_square</span>
                 <h3 className="text-base font-bold">Edit Data Anggota</h3>
@@ -474,85 +474,87 @@ export default function DaftarAnggotaPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} className="p-6 flex flex-col gap-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor Anggota (ID)</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={editFormData.nomor_anggota || ''}
-                    className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg font-mono text-slate-600 outline-none"
-                  />
-                </div>
+            <form onSubmit={handleSaveEdit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto flex flex-col gap-4 text-xs flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Nomor Anggota (ID)</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={editFormData.nomor_anggota || ''}
+                      className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg font-mono text-slate-600 outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editFormData.nama || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, nama: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                  />
-                </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editFormData.nama || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, nama: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor HP / WhatsApp *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editFormData.nomor_hp || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, nomor_hp: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                  />
-                </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Nomor HP / WhatsApp *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editFormData.nomor_hp || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, nomor_hp: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Pekerjaan</label>
-                  <input
-                    type="text"
-                    value={editFormData.pekerjaan || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, pekerjaan: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                  />
-                </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Pekerjaan</label>
+                    <input
+                      type="text"
+                      value={editFormData.pekerjaan || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, pekerjaan: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Tempat Lahir</label>
-                  <input
-                    type="text"
-                    value={editFormData.tempat_lahir || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, tempat_lahir: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                  />
-                </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Tempat Lahir</label>
+                    <input
+                      type="text"
+                      value={editFormData.tempat_lahir || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, tempat_lahir: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    />
+                  </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Status Keanggotaan</label>
-                  <select
-                    value={editFormData.status || 'Aktif'}
-                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-semibold"
-                  >
-                    <option value="Aktif">Aktif</option>
-                    <option value="Keluar">Keluar</option>
-                    <option value="Berhenti">Berhenti</option>
-                  </select>
-                </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Status Keanggotaan</label>
+                    <select
+                      value={editFormData.status || 'Aktif'}
+                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-semibold"
+                    >
+                      <option value="Aktif">Aktif</option>
+                      <option value="Keluar">Keluar</option>
+                      <option value="Berhenti">Berhenti</option>
+                    </select>
+                  </div>
 
-                <div className="sm:col-span-2">
-                  <label className="font-bold text-slate-700 block mb-1">Alamat Lengkap</label>
-                  <textarea
-                    rows={3}
-                    value={editFormData.alamat || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, alamat: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
-                  />
+                  <div className="sm:col-span-2">
+                    <label className="font-bold text-slate-700 block mb-1">Alamat Lengkap</label>
+                    <textarea
+                      rows={3}
+                      value={editFormData.alamat || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, alamat: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 flex justify-end gap-2">
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setEditModalOpen(false)}
@@ -562,7 +564,7 @@ export default function DaftarAnggotaPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d]"
+                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] cursor-pointer"
                 >
                   Simpan Perubahan
                 </button>

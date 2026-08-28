@@ -1064,8 +1064,8 @@ export default function PengaturanPage() {
       {/* MODAL TAMBAH / EDIT PENGGUNA ADMIN */}
       {userModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined">person</span>
                 <h3 className="text-base font-bold">{isEditingUser ? 'Edit Pengguna Admin' : 'Tambah Pengguna Admin Baru'}</h3>
@@ -1079,89 +1079,91 @@ export default function PengaturanPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveUser} className="p-6 flex flex-col gap-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
-                <input
-                  type="text"
-                  required
-                  value={userFormData.nama}
-                  onChange={(e) => setUserFormData({ ...userFormData, nama: e.target.value })}
-                  placeholder="Contoh: Siti Rahayu"
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Alamat Email *</label>
-                <input
-                  type="email"
-                  required
-                  value={userFormData.email}
-                  onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                  placeholder="siti@koperasi-idaman.co.id"
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleSaveUser} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto flex flex-col gap-4 text-xs flex-1">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Username *</label>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
                   <input
                     type="text"
                     required
-                    disabled={isEditingUser}
-                    value={userFormData.username}
-                    onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
-                    placeholder="kasir1"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono disabled:bg-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    {isEditingUser ? 'Kata Sandi Baru (Opsional)' : 'Kata Sandi *'}
-                  </label>
-                  <input
-                    type="password"
-                    required={!isEditingUser}
-                    value={userFormData.password}
-                    onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
-                    placeholder="••••••••"
+                    value={userFormData.nama}
+                    onChange={(e) => setUserFormData({ ...userFormData, nama: e.target.value })}
+                    placeholder="Contoh: Siti Rahayu"
                     className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Role / Peran</label>
-                  <select
-                    value={userFormData.role}
-                    onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
-                  >
-                    <option value="Super Admin">Super Admin</option>
-                    <option value="Bendahara">Bendahara</option>
-                    <option value="Kasir & Teller">Kasir & Teller</option>
-                    <option value="Pengawas">Pengawas</option>
-                  </select>
-                </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Status Akun</label>
-                  <select
-                    value={userFormData.status}
-                    onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
-                  >
-                    <option value="Aktif">Aktif</option>
-                    <option value="Nonaktif">Nonaktif</option>
-                  </select>
+                  <label className="font-bold text-slate-700 block mb-1">Alamat Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={userFormData.email}
+                    onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                    placeholder="siti@koperasi-idaman.co.id"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Username *</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={isEditingUser}
+                      value={userFormData.username}
+                      onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
+                      placeholder="kasir1"
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono disabled:bg-slate-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">
+                      {isEditingUser ? 'Kata Sandi Baru (Opsional)' : 'Kata Sandi *'}
+                    </label>
+                    <input
+                      type="password"
+                      required={!isEditingUser}
+                      value={userFormData.password}
+                      onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Role / Peran</label>
+                    <select
+                      value={userFormData.role}
+                      onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                    >
+                      <option value="Super Admin">Super Admin</option>
+                      <option value="Bendahara">Bendahara</option>
+                      <option value="Kasir & Teller">Kasir & Teller</option>
+                      <option value="Pengawas">Pengawas</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Status Akun</label>
+                    <select
+                      value={userFormData.status}
+                      onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value })}
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                    >
+                      <option value="Aktif">Aktif</option>
+                      <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setUserModalOpen(false)}
@@ -1171,7 +1173,7 @@ export default function PengaturanPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm"
+                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm cursor-pointer"
                 >
                   {isEditingUser ? 'Simpan Perubahan' : 'Tambah Pengguna'}
                 </button>
