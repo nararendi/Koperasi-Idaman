@@ -78,12 +78,13 @@ export default function KasPage() {
     showToast(`Transaksi ${formData.jenis} sebesar Rp ${Number(formData.jumlah).toLocaleString('id-ID')} berhasil dicatat.`);
   };
 
-  const filteredKas = kasList.filter((item) => {
-    const kat = (item.kategori || '').toLowerCase();
-    const ket = (item.keterangan || '').toLowerCase();
+  const filteredKas = (kasList || []).filter((item) => {
+    if (!item) return false;
+    const kat = (item?.kategori || '').toLowerCase();
+    const ket = (item?.keterangan || '').toLowerCase();
     const query = searchQuery.toLowerCase();
     const matchSearch = kat.includes(query) || ket.includes(query);
-    const matchJenis = filterJenis === 'all' || item.jenis.toLowerCase() === filterJenis.toLowerCase();
+    const matchJenis = filterJenis === 'all' || (item?.jenis || '').toLowerCase() === filterJenis.toLowerCase();
     return matchSearch && matchJenis;
   });
 

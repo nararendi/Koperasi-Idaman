@@ -50,11 +50,12 @@ export default function TagihanPage() {
 
   const formatRupiah = (num) => `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
 
-  const filteredList = (tagihanData.list || []).filter((row) => {
+  const filteredList = (tagihanData?.list || []).filter((row) => {
+    if (!row) return false;
     const q = searchQuery.toLowerCase();
     return (
-      (row.nama || '').toLowerCase().includes(q) ||
-      (row.nomor_anggota || '').toLowerCase().includes(q)
+      (row?.nama || '').toLowerCase().includes(q) ||
+      (row?.nomor_anggota || '').toLowerCase().includes(q)
     );
   });
 

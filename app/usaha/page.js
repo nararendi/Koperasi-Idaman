@@ -285,7 +285,8 @@ export default function UsahaPage() {
 
   const handleSaveSalurQurban = (e) => {
     e.preventDefault();
-    if (confirm(`Konfirmasi penyaluran dana qurban sebesar ${formatRupiah(selectedPesertaQurban.total_terkumpul)} untuk ${selectedPesertaQurban.nama}? Dana kas akan dicatat keluar.`)) {
+    if (!selectedPesertaQurban) return;
+    if (confirm(`Konfirmasi penyaluran dana qurban sebesar ${formatRupiah(selectedPesertaQurban?.total_terkumpul || 0)} untuk ${selectedPesertaQurban?.nama || 'Peserta'}? Dana kas akan dicatat keluar.`)) {
       dataService.salurkanQurban(salurQurbanForm);
       setModalSalurQurbanOpen(false);
       loadData();

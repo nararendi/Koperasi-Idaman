@@ -95,14 +95,15 @@ export default function DaftarAnggotaPage() {
     }
   };
 
-  const filteredAnggota = anggotaList.filter((item) => {
-    const nama = (item.nama || item.nama_lengkap || '').toLowerCase();
-    const id = (item.nomor_anggota || item.id || '').toLowerCase();
-    const alamat = (item.alamat || item.alamat_lengkap || '').toLowerCase();
+  const filteredAnggota = (anggotaList || []).filter((item) => {
+    if (!item) return false;
+    const nama = (item?.nama || item?.nama_lengkap || '').toLowerCase();
+    const id = (item?.nomor_anggota || item?.id || '').toLowerCase();
+    const alamat = (item?.alamat || item?.alamat_lengkap || '').toLowerCase();
     const query = searchQuery.toLowerCase();
 
     const matchesSearch = nama.includes(query) || id.includes(query) || alamat.includes(query);
-    const itemStatus = (item.status || item.status_keanggotaan || 'aktif').toLowerCase();
+    const itemStatus = (item?.status || item?.status_keanggotaan || 'aktif').toLowerCase();
     const matchesStatus = statusFilter === 'all' || itemStatus === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;

@@ -114,15 +114,16 @@ export default function SimpananPage() {
     setKuitansiModalOpen(true);
   };
 
-  const filteredList = simpananList.filter((item) => {
-    const nama = (item.nama_anggota || item.nama || '').toLowerCase();
-    const noAnggota = (item.nomor_anggota || '').toLowerCase();
+  const filteredList = (simpananList || []).filter((item) => {
+    if (!item) return false;
+    const nama = (item?.nama_anggota || item?.nama || '').toLowerCase();
+    const noAnggota = (item?.nomor_anggota || '').toLowerCase();
     const query = searchQuery.toLowerCase();
     const matchSearch = nama.includes(query) || noAnggota.includes(query);
 
     const matchJenis =
       jenisFilter === 'all' ||
-      (item.jenis || '').toLowerCase() === jenisFilter.toLowerCase();
+      (item?.jenis || '').toLowerCase() === jenisFilter.toLowerCase();
 
     return matchSearch && matchJenis;
   });

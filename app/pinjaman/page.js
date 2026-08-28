@@ -180,12 +180,13 @@ export default function PinjamanPage() {
     }
   };
 
-  const filteredList = pinjamanList.filter((item) => {
-    const nama = (item.nama || '').toLowerCase();
-    const noPj = (item.nomor_pinjaman || item.id || '').toLowerCase();
+  const filteredList = (pinjamanList || []).filter((item) => {
+    if (!item) return false;
+    const nama = (item?.nama || '').toLowerCase();
+    const noPj = (item?.nomor_pinjaman || item?.id || '').toLowerCase();
     const query = searchQuery.toLowerCase();
     const matchSearch = nama.includes(query) || noPj.includes(query);
-    const matchStatus = statusFilter === 'Semua' || item.status === statusFilter;
+    const matchStatus = statusFilter === 'Semua' || item?.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
