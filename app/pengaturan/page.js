@@ -454,32 +454,24 @@ export default function PengaturanPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor SK / Badan Hukum</label>
-                  <input
-                    type="text"
-                    value={formData.badanHukum || ''}
-                    onChange={(e) => setFormData({ ...formData, badanHukum: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-mono font-semibold text-slate-800 transition-all"
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-700 block mb-1">Alamat Kantor Koperasi</label>
+                  <textarea
+                    rows={2}
+                    value={formData.alamat || ''}
+                    onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
+                    placeholder="Contoh: Jl. Situtarate - Cibaduyut, Bandung"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-medium text-slate-800 resize-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor Telepon Kantor</label>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor Telepon Kantor / WA</label>
                   <input
                     type="text"
                     value={formData.telepon || ''}
                     onChange={(e) => setFormData({ ...formData, telepon: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Email Resmi Koperasi</label>
-                  <input
-                    type="email"
-                    value={formData.email || ''}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Contoh: 085323066335"
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
@@ -490,17 +482,19 @@ export default function PengaturanPage() {
                     type="text"
                     value={formData.ketua || ''}
                     onChange={(e) => setFormData({ ...formData, ketua: e.target.value })}
+                    placeholder="Contoh: Asep Solehudin, S.Pd."
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="font-bold text-slate-700 block mb-1">Alamat Kantor Koperasi</label>
-                  <textarea
-                    rows={2}
-                    value={formData.alamat || ''}
-                    onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-medium text-slate-800 resize-none transition-all"
+                  <label className="font-bold text-slate-700 block mb-1">Nama Bendahara</label>
+                  <input
+                    type="text"
+                    value={formData.bendahara || ''}
+                    onChange={(e) => setFormData({ ...formData, bendahara: e.target.value })}
+                    placeholder="Contoh: Siti Rahayu, S.E."
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
               </div>

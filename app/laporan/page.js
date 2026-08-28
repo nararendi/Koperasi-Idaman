@@ -218,8 +218,10 @@ export default function LaporanPage() {
       <div id="laporanContainer" className="flex flex-col gap-6">
         {/* Report Header for Print */}
         <div className="text-center pb-4 border-b border-slate-100">
-          <h2 className="text-lg font-black text-[#0f172a] tracking-wide">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
-          <p className="text-xs text-slate-500">{settings.alamat || 'Jakarta, Indonesia'}</p>
+          <h2 className="text-lg font-black text-[#0f172a] tracking-wide">{settings.namaKoperasi || 'KOPERASI IDAMAN'}</h2>
+          {settings.alamat && (
+            <p className="text-xs text-slate-500">{settings.alamat}{settings.telepon ? ` • Telp: ${settings.telepon}` : ''}</p>
+          )}
           <div className="inline-flex items-center gap-1.5 bg-[#eff6ff] border border-[#2563eb]/20 px-4 py-1.5 rounded-full text-xs font-bold text-[#2563eb] mt-2 shadow-2xs">
             <span className="material-symbols-outlined text-sm">date_range</span>
             <span>
