@@ -166,17 +166,17 @@ export default function PinjamanPage() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Berjalan':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">Berjalan</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-[#e0f7f4] text-[#139a8c]">Berjalan</span>;
       case 'Diajukan':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800">Diajukan</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-[#fef8e7] text-[#df9800]">Diajukan</span>;
       case 'Disetujui':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800">Disetujui</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-[#e0f2fe] text-[#0369a1]">Disetujui</span>;
       case 'Lunas':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700">Lunas</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-slate-100 text-slate-600">Lunas</span>;
       case 'Ditolak':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-800">Ditolak</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-[#fff1f2] text-[#e11d48]">Ditolak</span>;
       default:
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-800">{status}</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-slate-100 text-slate-800">{status}</span>;
     }
   };
 
@@ -204,99 +204,99 @@ export default function PinjamanPage() {
 
   return (
     <AppLayout
-      title="Manajemen Pinjaman Koperasi"
+      title="Manajemen Pinjaman"
       subtitle="Kelola pengajuan kredit, persetujuan, pencairan dana, dan penerimaan angsuran."
       rightAction={
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => excelExport.exportPinjaman(filteredPinjaman, summary, settings)}
-            className="px-3.5 py-2.5 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+            className="px-4 py-2 border border-[#139a8c]/30 bg-[#e0f7f4] hover:bg-[#cbf1ea] text-[#139a8c] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px] text-emerald-700">description</span>
+            <span className="material-symbols-outlined text-[18px]">description</span>
             Ekspor Excel
           </button>
           <button
             type="button"
             onClick={handleOpenApplyModal}
-            className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+            className="bg-[#139a8c] hover:bg-[#0e8074] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">add_task</span>
-            Ajukan Pinjaman Baru
+            + Ajukan Pinjaman
           </button>
         </div>
       }
     >
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold animate-bounce">
-          <span className="material-symbols-outlined text-base">check_circle</span>
+        <div className="fixed top-20 right-6 z-50 bg-[#139a8c] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
+          <span className="material-symbols-outlined text-base text-[#ffd159]">check_circle</span>
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase">Pinjaman Berjalan</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Pinjaman Berjalan</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-base">trending_up</span>
             </div>
           </div>
-          <p className="text-xl font-extrabold text-emerald-700">{formatRupiah(summary.berjalan)}</p>
-          <p className="text-[11px] text-slate-400 mt-1">Total plafon kredit aktif</p>
+          <p className="text-xl font-extrabold text-[#139a8c]">{formatRupiah(summary.berjalan)}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Total plafon kredit aktif</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-[#fefbf2] border border-[#faecd2] rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase">Sisa Piutang / Tagihan</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sisa Piutang</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-[#df9800] flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-base">receipt_long</span>
             </div>
           </div>
-          <p className="text-xl font-extrabold text-amber-700">{formatRupiah(summary.sisaHutang)}</p>
-          <p className="text-[11px] text-slate-400 mt-1">Belum terbayar dari pinjaman aktif</p>
+          <p className="text-xl font-extrabold text-[#df9800]">{formatRupiah(summary.sisaHutang)}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Belum terbayar pinjaman aktif</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-[#f4faf8] border border-[#d8eee8] rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase">Pinjaman Selesai (Lunas)</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Pinjaman Lunas</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-base">check_circle</span>
             </div>
           </div>
-          <p className="text-xl font-extrabold text-[#002045]">{formatRupiah(summary.lunas)}</p>
-          <p className="text-[11px] text-slate-400 mt-1">Riwayat kredit lunas tuntas</p>
+          <p className="text-xl font-extrabold text-[#14293d]">{formatRupiah(summary.lunas)}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Riwayat kredit lunas tuntas</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-[#fef8e7] border border-[#ffd159]/40 rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase">Menunggu Persetujuan</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Perlu Persetujuan</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-[#b88000] flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-base">pending_actions</span>
             </div>
           </div>
-          <p className="text-xl font-extrabold text-purple-700">{formatRupiah(summary.diajukan)}</p>
-          <p className="text-[11px] text-slate-400 mt-1">Pengajuan baru yang perlu ditinjau</p>
+          <p className="text-xl font-extrabold text-[#b88000]">{formatRupiah(summary.diajukan)}</p>
+          <p className="text-[10px] text-slate-400 mt-1">Pengajuan baru yang perlu ditinjau</p>
         </div>
       </div>
 
       {/* Main Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-xs overflow-hidden flex flex-col">
         {/* Filters */}
-        <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+        <div className="p-4 border-b border-slate-100 bg-[#fafdfc] flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-bold text-slate-500 mr-1">Status:</span>
+            <span className="text-xs font-extrabold text-slate-500 mr-1">Status:</span>
             {['Semua', 'Diajukan', 'Disetujui', 'Berjalan', 'Lunas', 'Ditolak'].map((st) => (
               <button
                 key={st}
                 type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
                   statusFilter === st
-                    ? 'bg-[#002045] text-white shadow-sm'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    ? 'bg-[#139a8c] text-white shadow-xs'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-[#f4faf8]'
                 }`}
               >
                 {st}
@@ -305,7 +305,7 @@ export default function PinjamanPage() {
           </div>
 
           <div className="relative w-full sm:w-72">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
               search
             </span>
             <input
@@ -313,7 +313,7 @@ export default function PinjamanPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari peminjam, nomor kredit..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white"
+              className="w-full pl-10 pr-4 py-2 bg-[#f4faf8] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#139a8c] focus:bg-white transition-all shadow-inner"
             />
           </div>
         </div>
@@ -322,55 +322,55 @@ export default function PinjamanPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
-                <th className="px-4 py-3">No. Pinjaman</th>
-                <th className="px-4 py-3">Peminjam</th>
-                <th className="px-4 py-3 text-right">Plafon Pinjaman</th>
-                <th className="px-4 py-3">Bunga & Tenor</th>
-                <th className="px-4 py-3 text-right">Angsuran / Bln</th>
-                <th className="px-4 py-3 text-right">Sisa Hutang</th>
-                <th className="px-4 py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-center">Aksi / Operasional</th>
+              <tr className="bg-[#fafdfc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
+                <th className="px-4 py-3.5">No. Pinjaman</th>
+                <th className="px-4 py-3.5">Peminjam</th>
+                <th className="px-4 py-3.5 text-right">Plafon Pinjaman</th>
+                <th className="px-4 py-3.5">Bunga & Tenor</th>
+                <th className="px-4 py-3.5 text-right">Angsuran / Bln</th>
+                <th className="px-4 py-3.5 text-right">Sisa Hutang</th>
+                <th className="px-4 py-3.5 text-center">Status</th>
+                <th className="px-4 py-3.5 text-center">Aksi / Operasional</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-slate-400">
+                  <td colSpan={8} className="px-4 py-10 text-center text-slate-400 font-medium">
                     Tidak ditemukan data pinjaman dengan filter saat ini.
                   </td>
                 </tr>
               ) : (
                 filteredList.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-blue-900 whitespace-nowrap">
+                  <tr key={item.id} className="hover:bg-[#f4faf8]/60 transition-colors">
+                    <td className="px-4 py-3.5 font-mono font-bold text-[#139a8c] whitespace-nowrap">
                       {item.nomor_pinjaman || item.id}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="font-bold text-[#002045]">{item.nama}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">{item.nomor_anggota}</div>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <div className="font-extrabold text-[#14293d]">{item.nama}</div>
+                      <div className="text-[10px] text-slate-400 font-mono">{item.nomor_anggota}</div>
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-[#002045] whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-right font-extrabold text-[#14293d] whitespace-nowrap">
                       {formatRupiah(item.jumlah)}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-600">
-                      <div>{item.bunga}% / bln</div>
-                      <div className="text-[11px] font-semibold text-blue-800">{item.tenor} Bulan</div>
+                    <td className="px-4 py-3.5 whitespace-nowrap text-slate-600">
+                      <div className="font-semibold">{item.bunga}% / bln</div>
+                      <div className="text-[10px] font-bold text-[#139a8c]">{item.tenor} Bulan</div>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-right font-bold text-slate-700 whitespace-nowrap">
                       {formatRupiah(item.total_angsuran_bulanan || item.angsuran_pokok)}
                     </td>
-                    <td className="px-4 py-3 text-right font-bold whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-right font-extrabold whitespace-nowrap">
                       {item.status === 'Lunas' ? (
-                        <span className="text-emerald-700">Rp 0 (Lunas)</span>
+                        <span className="text-[#139a8c]">Rp 0 (Lunas)</span>
                       ) : (
-                        <span className="text-rose-600">{formatRupiah(item.sisa_hutang || item.total_pinjaman)}</span>
+                        <span className="text-rose-500">{formatRupiah(item.sisa_hutang || item.total_pinjaman)}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-center whitespace-nowrap">
                       {getStatusBadge(item.status)}
                     </td>
-                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-center whitespace-nowrap">
                       <div className="flex items-center justify-center gap-1.5">
                         {/* Action buttons depending on status */}
                         {item.status === 'Diajukan' && (
@@ -379,7 +379,7 @@ export default function PinjamanPage() {
                               type="button"
                               onClick={() => handleUpdateStatus(item.id, 'Disetujui')}
                               title="Setujui Pengajuan Pinjaman"
-                              className="px-2.5 py-1 bg-blue-700 hover:bg-blue-800 text-white rounded text-[11px] font-bold"
+                              className="px-3 py-1 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full text-[10px] font-extrabold shadow-xs cursor-pointer"
                             >
                               Setujui
                             </button>
@@ -387,7 +387,7 @@ export default function PinjamanPage() {
                               type="button"
                               onClick={() => handleUpdateStatus(item.id, 'Ditolak')}
                               title="Tolak Pinjaman"
-                              className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[11px] font-bold"
+                              className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[10px] font-extrabold shadow-xs cursor-pointer"
                             >
                               Tolak
                             </button>
@@ -399,7 +399,7 @@ export default function PinjamanPage() {
                             type="button"
                             onClick={() => handleUpdateStatus(item.id, 'Berjalan')}
                             title="Cairkan Dana & Potong Kas"
-                            className="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[11px] font-bold flex items-center gap-1 shadow-sm"
+                            className="px-3.5 py-1 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full text-[10px] font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-sm">payments</span>
                             Cairkan Dana
@@ -411,7 +411,7 @@ export default function PinjamanPage() {
                             type="button"
                             onClick={() => handleOpenBayarModal(item)}
                             title="Bayar Angsuran Pinjaman"
-                            className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-[11px] font-bold flex items-center gap-1 shadow-sm"
+                            className="px-3.5 py-1 bg-[#ffd159] hover:bg-[#f7be38] text-[#14293d] rounded-full text-[10px] font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-sm">add_card</span>
                             Bayar Angsuran
@@ -422,7 +422,7 @@ export default function PinjamanPage() {
                           type="button"
                           onClick={() => handleOpenDetailModal(item)}
                           title="Lihat Detail & Jadwal Angsuran"
-                          className="p-1 text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded"
+                          className="p-1.5 text-[#139a8c] hover:bg-[#e0f7f4] rounded-xl transition-colors"
                         >
                           <span className="material-symbols-outlined text-lg">info</span>
                         </button>
@@ -438,17 +438,17 @@ export default function PinjamanPage() {
 
       {/* MODAL AJUKAN PINJAMAN BARU */}
       {applyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center shrink-0">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined">request_quote</span>
-                <h3 className="text-base font-bold">Formulir Pengajuan Pinjaman</h3>
+                <span className="material-symbols-outlined text-xl text-[#ffd159]">request_quote</span>
+                <h3 className="text-base font-extrabold">Formulir Pengajuan Pinjaman</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setApplyModalOpen(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+                className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -462,7 +462,7 @@ export default function PinjamanPage() {
                     required
                     value={applyForm.nomor_anggota}
                     onChange={(e) => setApplyForm({ ...applyForm, nomor_anggota: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   >
                     <option value="">-- Pilih Anggota --</option>
                     {anggotaList.map((a) => (
@@ -480,7 +480,7 @@ export default function PinjamanPage() {
                       required
                       value={applyForm.jumlah}
                       onChange={(val) => setApplyForm({ ...applyForm, jumlah: val })}
-                      className="font-bold text-blue-900"
+                      className="font-extrabold text-[#139a8c] bg-[#f4faf8] rounded-2xl"
                     />
                   </div>
 
@@ -489,7 +489,7 @@ export default function PinjamanPage() {
                     <select
                       value={applyForm.tenor}
                       onChange={(e) => setApplyForm({ ...applyForm, tenor: Number(e.target.value) })}
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-semibold text-xs"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-xs"
                     >
                       <option value={3}>3 Bulan</option>
                       <option value={6}>6 Bulan</option>
@@ -508,19 +508,19 @@ export default function PinjamanPage() {
                       step="0.1"
                       value={applyForm.bunga}
                       onChange={(e) => setApplyForm({ ...applyForm, bunga: Number(e.target.value) })}
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-semibold text-slate-700 text-xs"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-700 text-xs"
                     />
                   </div>
                 </div>
 
                 {/* Metode Bunga & Pembulatan Pokok */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#f4faf8] p-4 rounded-2xl border border-[#d8eee8]">
                   <div>
-                    <label className="font-bold text-[#002045] block mb-1">Sistem Perhitungan Bunga</label>
+                    <label className="font-bold text-[#14293d] block mb-1">Sistem Perhitungan Bunga</label>
                     <select
                       value={applyForm.metodeBunga}
                       onChange={(e) => setApplyForm({ ...applyForm, metodeBunga: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-bold text-[#002045] text-xs cursor-pointer"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-[#139a8c] outline-none bg-white font-extrabold text-[#14293d] text-xs cursor-pointer"
                     >
                       <option value="menurun">Bunga Menurun (Efektif - Dari Sisa Pinjaman) ⭐</option>
                       <option value="flat">Bunga Flat (Tetap Tiap Bulan)</option>
@@ -533,16 +533,16 @@ export default function PinjamanPage() {
                   </div>
 
                   <div>
-                    <label className="font-bold text-[#002045] block mb-1">Pembulatan Pokok / Bulan</label>
+                    <label className="font-bold text-[#14293d] block mb-1">Pembulatan Pokok / Bulan</label>
                     <select
                       value={applyForm.pembulatan}
                       onChange={(e) => setApplyForm({ ...applyForm, pembulatan: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-bold text-[#002045] text-xs cursor-pointer"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-[#139a8c] outline-none bg-white font-extrabold text-[#14293d] text-xs cursor-pointer"
                     >
-                      <option value={50000}>Dibulatkan ke atas Rp 50.000 (contoh: 833.333 &rarr; 850.000)</option>
-                      <option value={10000}>Dibulatkan ke atas Rp 10.000 (contoh: 833.333 &rarr; 840.000)</option>
-                      <option value={1000}>Dibulatkan ke atas Rp 1.000 (contoh: 833.333 &rarr; 834.000)</option>
-                      <option value={0}>Tanpa Pembulatan (Nominal Pas)</option>
+                      <option value={50000}>Dibulatkan ke atas Rp 50.000</option>
+                      <option value={10000}>Dibulatkan ke atas Rp 10.000</option>
+                      <option value={1000}>Dibulatkan ke atas Rp 1.000</option>
+                      <option value={0}>Tanpa Pembulatan (Pas)</option>
                     </select>
                     <span className="text-[10px] text-slate-500 mt-1 block">
                       Mencegah pecahan ganjil agar cicilan bulat dan mudah dibayarkan.
@@ -557,43 +557,43 @@ export default function PinjamanPage() {
                     value={applyForm.keperluan}
                     onChange={(e) => setApplyForm({ ...applyForm, keperluan: e.target.value })}
                     placeholder="Contoh: Tambahan modal usaha warung sembako"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-medium text-slate-800"
                   />
                 </div>
 
-                {/* Real-time Loan Calculator Preview with Declining Interest Details */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50/60 border border-blue-200 rounded-xl p-4 flex flex-col gap-3">
+                {/* Real-time Loan Calculator Preview */}
+                <div className="bg-[#e0f7f4]/60 border border-[#139a8c]/20 rounded-2xl p-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#002045] flex items-center gap-1.5 text-xs">
-                      <span className="material-symbols-outlined text-base text-blue-600">calculate</span>
-                      Simulasi Angsuran Pinjaman {applyForm.metodeBunga === 'menurun' ? '(Bunga Menurun)' : '(Bunga Flat)'}:
+                    <span className="font-extrabold text-[#14293d] flex items-center gap-1.5 text-xs">
+                      <span className="material-symbols-outlined text-base text-[#139a8c]">calculate</span>
+                      Simulasi Angsuran {applyForm.metodeBunga === 'menurun' ? '(Bunga Menurun)' : '(Bunga Flat)'}:
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-                      Pokok Dibulatkan: {formatRupiah(liveSim.pokokPerBulan)}/Bln
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#139a8c] text-white">
+                      Pokok: {formatRupiah(liveSim.pokokPerBulan)}/Bln
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
-                    <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-xs">
                       <span className="text-slate-500 block text-[10px]">Pokok / Bulan:</span>
                       <span className="font-extrabold text-slate-800">{formatRupiah(liveSim.pokokPerBulan)}</span>
                     </div>
-                    <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-xs">
                       <span className="text-slate-500 block text-[10px]">Bunga Bulan ke-1:</span>
-                      <span className="font-extrabold text-emerald-700">{formatRupiah(liveSim.bungaBulanPertama)}</span>
+                      <span className="font-extrabold text-[#139a8c]">{formatRupiah(liveSim.bungaBulanPertama)}</span>
                     </div>
-                    <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
-                      <span className="text-slate-500 block text-[10px]">Angsuran Bulan ke-1:</span>
-                      <span className="font-extrabold text-blue-900">{formatRupiah(liveSim.angsuranBulanPertama)}</span>
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-xs">
+                      <span className="text-slate-500 block text-[10px]">Angsuran Bln 1:</span>
+                      <span className="font-extrabold text-[#139a8c]">{formatRupiah(liveSim.angsuranBulanPertama)}</span>
                     </div>
-                    <div className="bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                    <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-xs">
                       <span className="text-slate-500 block text-[10px]">Total Estimasi:</span>
-                      <span className="font-extrabold text-indigo-900">{formatRupiah(liveSim.totalPengembalian)}</span>
+                      <span className="font-extrabold text-[#14293d]">{formatRupiah(liveSim.totalPengembalian)}</span>
                     </div>
                   </div>
 
                   {applyForm.metodeBunga === 'menurun' && liveSim.jadwal && liveSim.jadwal.length > 1 && (
-                    <div className="text-[11px] bg-emerald-50 border border-emerald-200 rounded-lg p-2 text-emerald-900 flex items-center justify-between">
+                    <div className="text-[11px] bg-white border border-[#139a8c]/20 rounded-xl p-2.5 text-[#0f766e] flex items-center justify-between">
                       <span>
                         📉 <strong>Bulan ke-2 Menurun:</strong> Pokok {formatRupiah(liveSim.jadwal[1].pokok)} + Bunga <strong>{formatRupiah(liveSim.jadwal[1].bunga)}</strong> (Sisa {formatRupiah(liveSim.jadwal[1].sisaAwal)}) = <strong>{formatRupiah(liveSim.jadwal[1].totalAngsuran)}</strong>
                       </span>
@@ -605,36 +605,36 @@ export default function PinjamanPage() {
                     <button
                       type="button"
                       onClick={() => setShowSchedulePreview(!showSchedulePreview)}
-                      className="text-[11px] text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1 cursor-pointer"
+                      className="text-[11px] text-[#139a8c] hover:text-[#0e8074] font-extrabold flex items-center gap-1 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm">
                         {showSchedulePreview ? 'expand_less' : 'expand_more'}
                       </span>
-                      {showSchedulePreview ? 'Sembunyikan Rincian Jadwal Angsuran' : `Lihat Jadwal Angsuran Menurun Lengkap (${liveSim.tenor} Bulan)`}
+                      {showSchedulePreview ? 'Sembunyikan Rincian Jadwal' : `Lihat Jadwal Angsuran Menurun Lengkap (${liveSim.tenor} Bulan)`}
                     </button>
 
                     {showSchedulePreview && (
-                      <div className="mt-2 max-h-48 overflow-y-auto border border-blue-200 rounded-lg bg-white shadow-2xs">
+                      <div className="mt-2 max-h-48 overflow-y-auto border border-slate-200 rounded-2xl bg-white shadow-xs">
                         <table className="w-full text-left border-collapse text-[10px]">
                           <thead>
-                            <tr className="bg-[#002045] text-white font-bold">
-                              <th className="p-1.5 text-center">Bln</th>
-                              <th className="p-1.5 text-right">Sisa Pokok Awal</th>
-                              <th className="p-1.5 text-right">Pokok</th>
-                              <th className="p-1.5 text-right">Bunga ({applyForm.bunga}%)</th>
-                              <th className="p-1.5 text-right">Total Tagihan</th>
-                              <th className="p-1.5 text-right">Sisa Pokok Akhir</th>
+                            <tr className="bg-[#139a8c] text-white font-bold">
+                              <th className="p-2 text-center">Bln</th>
+                              <th className="p-2 text-right">Sisa Pokok Awal</th>
+                              <th className="p-2 text-right">Pokok</th>
+                              <th className="p-2 text-right">Bunga ({applyForm.bunga}%)</th>
+                              <th className="p-2 text-right">Total Tagihan</th>
+                              <th className="p-2 text-right">Sisa Pokok Akhir</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {liveSim.jadwal.map((j) => (
-                              <tr key={j.bulanKe} className="hover:bg-blue-50/50">
-                                <td className="p-1.5 text-center font-bold">{j.bulanKe}</td>
-                                <td className="p-1.5 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
-                                <td className="p-1.5 text-right font-semibold">{formatRupiah(j.pokok)}</td>
-                                <td className="p-1.5 text-right text-emerald-700 font-semibold">{formatRupiah(j.bunga)}</td>
-                                <td className="p-1.5 text-right font-bold text-blue-900">{formatRupiah(j.totalAngsuran)}</td>
-                                <td className="p-1.5 text-right text-slate-500">{formatRupiah(j.sisaAkhir)}</td>
+                              <tr key={j.bulanKe} className="hover:bg-[#f4faf8]">
+                                <td className="p-2 text-center font-bold">{j.bulanKe}</td>
+                                <td className="p-2 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
+                                <td className="p-2 text-right font-semibold">{formatRupiah(j.pokok)}</td>
+                                <td className="p-2 text-right text-[#139a8c] font-semibold">{formatRupiah(j.bunga)}</td>
+                                <td className="p-2 text-right font-extrabold text-[#14293d]">{formatRupiah(j.totalAngsuran)}</td>
+                                <td className="p-2 text-right text-slate-500">{formatRupiah(j.sisaAkhir)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -645,17 +645,17 @@ export default function PinjamanPage() {
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+              <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setApplyModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm cursor-pointer"
+                  className="px-6 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm cursor-pointer transition-all"
                 >
                   Ajukan Pinjaman
                 </button>
@@ -667,17 +667,17 @@ export default function PinjamanPage() {
 
       {/* MODAL BAYAR ANGSURAN */}
       {bayarModalOpen && selectedPinjamanBayar && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-5 bg-amber-600 text-white flex justify-between items-center shrink-0">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+            <div className="p-5 bg-[#139a8c] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined">payments</span>
-                <h3 className="text-base font-bold">Bayar Angsuran Pinjaman</h3>
+                <span className="material-symbols-outlined text-xl text-[#ffd159]">payments</span>
+                <h3 className="text-base font-extrabold">Bayar Angsuran Pinjaman</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setBayarModalOpen(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+                className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -685,18 +685,18 @@ export default function PinjamanPage() {
 
             <form onSubmit={handleSubmitBayar} className="flex flex-col flex-1 overflow-hidden">
               <div className="p-6 overflow-y-auto flex flex-col gap-4 text-xs flex-1">
-                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                <div className="bg-[#f4faf8] p-4 rounded-2xl border border-[#d8eee8] space-y-1">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Peminjam:</span>
-                    <span className="font-bold text-[#002045]">{selectedPinjamanBayar.nama}</span>
+                    <span className="font-extrabold text-[#14293d]">{selectedPinjamanBayar.nama}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">No. Pinjaman:</span>
-                    <span className="font-mono text-slate-700">{selectedPinjamanBayar.nomor_pinjaman || selectedPinjamanBayar.id}</span>
+                    <span className="font-mono font-bold text-[#139a8c]">{selectedPinjamanBayar.nomor_pinjaman || selectedPinjamanBayar.id}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Sisa Hutang:</span>
-                    <span className="font-bold text-rose-600">{formatRupiah(selectedPinjamanBayar.sisa_hutang)}</span>
+                    <span className="font-extrabold text-rose-500">{formatRupiah(selectedPinjamanBayar.sisa_hutang)}</span>
                   </div>
                 </div>
 
@@ -706,7 +706,7 @@ export default function PinjamanPage() {
                     required
                     value={bayarForm.jumlahBayar}
                     onChange={(val) => setBayarForm({ ...bayarForm, jumlahBayar: val })}
-                    className="focus:border-amber-600 font-bold text-amber-800"
+                    className="focus:border-[#139a8c] font-extrabold text-[#139a8c] bg-[#f4faf8] rounded-2xl"
                   />
                 </div>
 
@@ -715,7 +715,7 @@ export default function PinjamanPage() {
                   <select
                     value={bayarForm.metode}
                     onChange={(e) => setBayarForm({ ...bayarForm, metode: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-amber-600 outline-none bg-white font-medium"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   >
                     <option value="Tunai">Tunai / Kasir</option>
                     <option value="Transfer Bank">Transfer Bank</option>
@@ -729,22 +729,22 @@ export default function PinjamanPage() {
                     type="text"
                     value={bayarForm.penerima}
                     onChange={(e) => setBayarForm({ ...bayarForm, penerima: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-amber-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+              <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setBayarModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-600 text-white rounded-lg font-bold hover:bg-amber-700 shadow-sm cursor-pointer"
+                  className="px-6 py-2 bg-[#ffd159] hover:bg-[#f7be38] text-[#14293d] rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
                 >
                   Simpan Angsuran
                 </button>
@@ -756,65 +756,65 @@ export default function PinjamanPage() {
 
       {/* MODAL DETAIL PINJAMAN */}
       {detailModalOpen && selectedPinjamanDetail && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center rounded-t-2xl">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-in fade-in zoom-in duration-150">
+            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center rounded-t-[32px]">
               <div>
-                <h3 className="text-base font-bold">Rincian & Jadwal Pinjaman</h3>
-                <p className="text-xs text-blue-200 font-mono">{selectedPinjamanDetail.nomor_pinjaman || selectedPinjamanDetail.id}</p>
+                <h3 className="text-base font-extrabold">Rincian & Jadwal Pinjaman</h3>
+                <p className="text-xs text-white/80 font-mono">{selectedPinjamanDetail.nomor_pinjaman || selectedPinjamanDetail.id}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setDetailModalOpen(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+                className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
             <div className="p-6 flex flex-col gap-4 text-xs">
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-2 gap-3 bg-[#f4faf8] p-4 rounded-2xl border border-[#d8eee8]">
                 <div>
-                  <span className="text-slate-400 font-semibold block">Nama Peminjam:</span>
-                  <span className="font-bold text-slate-800 text-sm">{selectedPinjamanDetail.nama}</span>
+                  <span className="text-slate-400 font-bold block">Nama Peminjam:</span>
+                  <span className="font-extrabold text-slate-800 text-sm">{selectedPinjamanDetail.nama}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Status Pinjaman:</span>
+                  <span className="text-slate-400 font-bold block">Status Pinjaman:</span>
                   <span>{getStatusBadge(selectedPinjamanDetail.status)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Plafon Pinjaman:</span>
-                  <span className="font-bold text-slate-800">{formatRupiah(selectedPinjamanDetail.jumlah)}</span>
+                  <span className="text-slate-400 font-bold block">Plafon Pinjaman:</span>
+                  <span className="font-extrabold text-slate-800">{formatRupiah(selectedPinjamanDetail.jumlah)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Tenor & Bunga:</span>
-                  <span className="font-bold text-slate-800">{selectedPinjamanDetail.tenor} Bulan ({selectedPinjamanDetail.bunga}% / bln)</span>
+                  <span className="text-slate-400 font-bold block">Tenor & Bunga:</span>
+                  <span className="font-extrabold text-slate-800">{selectedPinjamanDetail.tenor} Bulan ({selectedPinjamanDetail.bunga}% / bln)</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Total Kewajiban:</span>
-                  <span className="font-bold text-slate-800">{formatRupiah(selectedPinjamanDetail.total_pinjaman)}</span>
+                  <span className="text-slate-400 font-bold block">Total Kewajiban:</span>
+                  <span className="font-extrabold text-slate-800">{formatRupiah(selectedPinjamanDetail.total_pinjaman)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Sisa Hutang:</span>
-                  <span className="font-bold text-rose-600">{formatRupiah(selectedPinjamanDetail.sisa_hutang)}</span>
+                  <span className="text-slate-400 font-bold block">Sisa Hutang:</span>
+                  <span className="font-extrabold text-rose-500">{formatRupiah(selectedPinjamanDetail.sisa_hutang)}</span>
                 </div>
               </div>
 
               {/* Installment History Table */}
               <div>
-                <h4 className="text-sm font-bold text-[#002045] mb-2 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-blue-700">history</span>
+                <h4 className="text-sm font-extrabold text-[#14293d] mb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-[#139a8c]">history</span>
                   Riwayat Pembayaran Angsuran ({selectedPinjamanDetail.riwayat_angsuran?.length || 0})
                 </h4>
 
                 {(!selectedPinjamanDetail.riwayat_angsuran || selectedPinjamanDetail.riwayat_angsuran.length === 0) ? (
-                  <p className="text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">
+                  <p className="text-slate-400 italic bg-[#fafdfc] p-3 rounded-xl border border-slate-100">
                     Belum ada riwayat pembayaran angsuran.
                   </p>
                 ) : (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto">
+                  <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
                     <table className="w-full text-left">
-                      <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                      <thead className="bg-[#f4faf8] text-slate-500 font-bold border-b border-slate-100">
                         <tr>
                           <th className="px-3 py-2">Angsuran Ke</th>
                           <th className="px-3 py-2">Tanggal</th>
@@ -825,10 +825,10 @@ export default function PinjamanPage() {
                       <tbody className="divide-y divide-slate-100">
                         {selectedPinjamanDetail.riwayat_angsuran.map((ang) => (
                           <tr key={ang.id}>
-                            <td className="px-3 py-2 font-bold text-blue-900">Ke-{ang.angsuran_ke}</td>
+                            <td className="px-3 py-2 font-bold text-[#139a8c]">Ke-{ang.angsuran_ke}</td>
                             <td className="px-3 py-2 text-slate-600">{ang.tanggal}</td>
                             <td className="px-3 py-2 text-slate-600">{ang.metode}</td>
-                            <td className="px-3 py-2 text-right font-bold text-emerald-700">{formatRupiah(ang.jumlah)}</td>
+                            <td className="px-3 py-2 text-right font-extrabold text-[#139a8c]">{formatRupiah(ang.jumlah)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -840,13 +840,13 @@ export default function PinjamanPage() {
               {/* Projected Schedule if Available */}
               {selectedPinjamanDetail.jadwal_angsuran && selectedPinjamanDetail.jadwal_angsuran.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-bold text-[#002045] mb-2 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm text-indigo-700">calendar_month</span>
+                  <h4 className="text-xs font-bold text-[#14293d] mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm text-[#139a8c]">calendar_month</span>
                     Jadwal Estimasi Angsuran Bunga Menurun ({selectedPinjamanDetail.tenor} Bulan)
                   </h4>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto">
+                  <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
                     <table className="w-full text-left text-[10px]">
-                      <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                      <thead className="bg-[#f4faf8] text-slate-700 font-bold border-b border-slate-100">
                         <tr>
                           <th className="p-1.5 text-center">Bln</th>
                           <th className="p-1.5 text-right">Sisa Pokok Awal</th>
@@ -861,8 +861,8 @@ export default function PinjamanPage() {
                             <td className="p-1.5 text-center font-bold">{j.bulanKe}</td>
                             <td className="p-1.5 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
                             <td className="p-1.5 text-right font-semibold">{formatRupiah(j.pokok)}</td>
-                            <td className="p-1.5 text-right text-emerald-700 font-semibold">{formatRupiah(j.bunga)}</td>
-                            <td className="p-1.5 text-right font-bold text-blue-900">{formatRupiah(j.totalAngsuran)}</td>
+                            <td className="p-1.5 text-right text-[#139a8c] font-semibold">{formatRupiah(j.bunga)}</td>
+                            <td className="p-1.5 text-right font-extrabold text-[#14293d]">{formatRupiah(j.totalAngsuran)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -872,11 +872,11 @@ export default function PinjamanPage() {
               )}
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+            <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end">
               <button
                 type="button"
                 onClick={() => setDetailModalOpen(false)}
-                className="px-4 py-2 bg-[#002045] text-white rounded-lg text-xs font-bold hover:bg-[#1a365d]"
+                className="px-5 py-2 bg-[#139a8c] text-white rounded-full text-xs font-extrabold hover:bg-[#0e8074] transition-all cursor-pointer"
               >
                 Tutup
               </button>

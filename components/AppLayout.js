@@ -10,6 +10,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [currentUser, setCurrentUser] = useState({
     nama: 'Administrator',
     role: 'Super Admin',
@@ -36,13 +37,13 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   };
 
   const navigation = [
-    { name: 'Beranda', href: '/', icon: 'dashboard' },
-    { name: 'Anggota', href: '/anggota', icon: 'group' },
-    { name: 'Simpanan', href: '/simpanan', icon: 'account_balance_wallet' },
-    { name: 'Pinjaman', href: '/pinjaman', icon: 'payments' },
-    { name: 'Transaksi Kas', href: '/kas', icon: 'receipt_long' },
-    { name: 'Laporan', href: '/laporan', icon: 'assessment' },
-    { name: 'Pengaturan & Admin', href: '/pengaturan', icon: 'settings' }
+    { name: 'Home', label: 'Beranda', href: '/', icon: 'grid_view' },
+    { name: 'Anggota', label: 'Anggota', href: '/anggota', icon: 'group' },
+    { name: 'Simpanan', label: 'Simpanan', href: '/simpanan', icon: 'savings' },
+    { name: 'Pinjaman', label: 'Pinjaman', href: '/pinjaman', icon: 'payments' },
+    { name: 'Kas & Buku', label: 'Transaksi Kas', href: '/kas', icon: 'receipt_long' },
+    { name: 'Laporan', label: 'Laporan', href: '/laporan', icon: 'bar_chart' },
+    { name: 'Pengaturan', label: 'Pengaturan', href: '/pengaturan', icon: 'settings' }
   ];
 
   const isActive = (href) => {
@@ -52,115 +53,130 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   };
 
   return (
-    <div className="bg-[#f8fafc] text-[#0f172a] min-h-screen flex flex-col md:flex-row font-sans">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex h-full w-64 fixed left-0 top-0 bg-[#002045] text-white flex-col py-6 shadow-md z-50">
-        <div className="px-5 mb-8 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-inner">
-            <span className="material-symbols-outlined text-2xl text-[#adc7f7]">account_balance</span>
-          </div>
+    <div className="min-h-screen bg-[#dff0ed] p-2 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center font-sans antialiased text-[#14293d]">
+      {/* Outer App Shell Container */}
+      <div className="w-full max-w-[1560px] bg-[#139a8c] rounded-[28px] sm:rounded-[36px] p-2 sm:p-3 md:p-4 shadow-2xl flex flex-col md:flex-row relative min-h-[94vh] border-[3px] border-[#108c7f]">
+        
+        {/* DESKTOP SIDEBAR */}
+        <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 text-white pt-4 pb-3 pr-0 pl-3 justify-between z-20">
           <div>
-            <h1 className="text-base font-bold text-white tracking-wide">Koperasi Idaman</h1>
-            <p className="text-xs text-blue-200/70 font-medium">Sistem Manajemen Terpadu</p>
-          </div>
-        </div>
+            {/* App Brand Logo */}
+            <div className="px-3 mb-7 flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-inner">
+                <span className="material-symbols-outlined text-2xl text-white">savings</span>
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-base font-extrabold tracking-tight text-white leading-tight">
+                  Koperasi<span className="text-[#ffd159]">.id</span>
+                </h1>
+                <span className="text-[10px] text-white/70 font-semibold tracking-wider uppercase">Sistem Terpadu</span>
+              </div>
+            </div>
 
-        <div className="px-3 mb-2">
-          <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-blue-200/60">
-            Menu Utama
+            {/* Navigation Menu Links */}
+            <nav className="flex flex-col gap-1 pr-0">
+              {navigation.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-xs font-bold transition-all duration-200 ${
+                      active
+                        ? 'bg-white text-[#139a8c] rounded-l-full -mr-[13px] md:-mr-[17px] pl-5 shadow-sm z-30 font-extrabold'
+                        : 'text-white/80 hover:text-white hover:bg-white/10 rounded-2xl'
+                    }`}
+                  >
+                    <span className={`material-symbols-outlined text-[20px] ${active ? 'text-[#139a8c]' : 'text-white/80'}`}>
+                      {item.icon}
+                    </span>
+                    <span className="tracking-wide">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-        </div>
 
-        <nav className="flex-1 flex flex-col gap-1.5 px-3">
-          {navigation.map((item) => {
-            const active = isActive(item.href);
-            return (
+          {/* Bottom Sidebar: Mascot / Promo Card & User Quick Action */}
+          <div className="flex flex-col gap-3 pr-3 pt-4 mt-auto">
+            {/* Modern Illustrated Info Card */}
+            <div className="bg-[#0e7f73] rounded-2xl p-3.5 relative overflow-hidden border border-white/15 shadow-inner">
+              {/* Cute Cat Silhouette & Geometric Peach Circle */}
+              <div className="flex justify-between items-start mb-2 relative">
+                <div className="w-10 h-10 rounded-full bg-[#fca5a5]/30 absolute top-0 right-0 blur-xs"></div>
+                <div className="w-12 h-12 flex items-center justify-center text-[#ffd159]">
+                  {/* Stylized Cat Icon */}
+                  <svg className="w-10 h-10 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 2.85 1.2 5.41 3.12 7.23L4 21l3.5-.88C9.09 21.32 10.5 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-5 0C8.83 6.5 9.5 7.17 9.5 8S8.83 9.5 8 9.5 6.5 8.83 6.5 8 7.17 6.5 8 6.5zm4 11c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z"/>
+                  </svg>
+                </div>
+                <div className="w-5 h-5 rounded-full bg-[#fca5a5] border-2 border-white/30"></div>
+              </div>
+              <h4 className="text-xs font-extrabold text-white">Koperasi Idaman</h4>
+              <p className="text-[10px] text-white/70 mt-0.5 leading-snug">Amanah, Transparan & Berkelanjutan</p>
+              
               <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                  active
-                    ? 'bg-white/15 text-white shadow-sm border-l-4 border-[#adc7f7] font-bold'
-                    : 'text-blue-100/70 hover:text-white hover:bg-white/10'
-                }`}
+                href="/laporan"
+                className="mt-2.5 inline-block w-full py-1.5 text-center bg-[#ffd159] hover:bg-[#f7be38] text-[#14293d] rounded-xl font-bold text-[11px] shadow-sm transition-all cursor-pointer"
               >
-                <span className={`material-symbols-outlined text-[20px] ${active ? 'text-[#adc7f7]' : 'text-blue-200/60'}`}>
-                  {item.icon}
-                </span>
-                <span>{item.name}</span>
+                Lihat Rekap
               </Link>
-            );
-          })}
-        </nav>
-
-        {/* User profile info & logout button */}
-        <div className="mt-auto px-4 pt-4 border-t border-white/10 flex items-center justify-between">
-          <Link
-            href="/pengaturan"
-            title="Profil Pengguna & Pengaturan"
-            className="flex items-center gap-2.5 hover:bg-white/5 p-1.5 rounded-lg transition-colors overflow-hidden group flex-1 mr-2"
-          >
-            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs border border-white/20 shrink-0">
-              {currentUser.avatar || 'AD'}
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-white truncate">{currentUser.nama || 'Administrator'}</span>
-              <span className="text-[10px] text-blue-200/70 truncate">{currentUser.role || 'Super Admin'}</span>
+
+            {/* Logout Quick Trigger */}
+            <div className="pt-2 flex items-center justify-between text-xs">
+              <button
+                type="button"
+                onClick={() => setLogoutModalOpen(true)}
+                className="flex items-center gap-2 text-white/80 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors w-full font-bold"
+              >
+                <span className="material-symbols-outlined text-lg">logout</span>
+                <span>LogOut</span>
+              </button>
             </div>
-          </Link>
+          </div>
+        </aside>
 
-          <button
-            type="button"
-            onClick={() => setLogoutModalOpen(true)}
-            title="Keluar / Logout"
-            className="p-1.5 rounded-lg text-rose-300 hover:text-white hover:bg-rose-600/80 transition-all flex items-center justify-center cursor-pointer"
-            aria-label="Logout"
-          >
-            <span className="material-symbols-outlined text-lg">logout</span>
-          </button>
+        {/* MOBILE HEADER BAR */}
+        <div className="md:hidden flex items-center justify-between p-3 text-white">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <span className="material-symbols-outlined text-xl text-white">savings</span>
+            </div>
+            <span className="font-extrabold text-base tracking-tight">Koperasi Idaman</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLogoutModalOpen(true)}
+              className="p-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20"
+              title="Logout"
+            >
+              <span className="material-symbols-outlined text-lg">logout</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-1.5 rounded-lg bg-white/20 text-white"
+            >
+              <span className="material-symbols-outlined text-2xl">
+                {mobileMenuOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+          </div>
         </div>
-      </aside>
 
-      {/* Mobile Top Navbar */}
-      <header className="md:hidden bg-[#002045] text-white border-b border-white/10 flex justify-between items-center px-4 h-16 z-50 fixed top-0 left-0 w-full shadow-md">
-        <div className="flex items-center gap-2.5">
-          <span className="material-symbols-outlined text-2xl text-[#adc7f7]">account_balance</span>
-          <span className="text-sm font-bold text-white tracking-wide">Koperasi Idaman</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setLogoutModalOpen(true)}
-            title="Keluar"
-            className="text-rose-300 hover:text-white p-1.5 rounded hover:bg-white/10"
-          >
-            <span className="material-symbols-outlined text-xl">logout</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-            aria-label="Toggle navigation menu"
-          >
-            <span className="material-symbols-outlined text-2xl">
-              {mobileMenuOpen ? 'close' : 'menu'}
-            </span>
-          </button>
-        </div>
-      </header>
-
-      {/* Mobile Navigation Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm pt-16" onClick={() => setMobileMenuOpen(false)}>
-          <div className="bg-[#002045] text-white p-4 shadow-xl border-b border-white/10 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 p-3 mb-2 bg-white/10 rounded-xl">
-              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">
+        {/* MOBILE DRAWER */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[#0e7f73] rounded-2xl p-4 text-white mb-3 shadow-xl space-y-1">
+            <div className="flex items-center gap-3 p-2 bg-white/10 rounded-xl mb-3">
+              <div className="w-8 h-8 rounded-full bg-[#ffd159] text-[#14293d] flex items-center justify-center font-bold text-xs">
                 {currentUser.avatar || 'AD'}
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-white">{currentUser.nama}</span>
-                <span className="text-[11px] text-blue-200/70">{currentUser.role}</span>
+                <span className="text-xs font-bold">{currentUser.nama}</span>
+                <span className="text-[10px] text-white/70">{currentUser.role}</span>
               </div>
             </div>
 
@@ -168,83 +184,134 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
               const active = isActive(item.href);
               return (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold ${
-                    active ? 'bg-white/15 text-white font-bold border-l-4 border-[#adc7f7]' : 'text-blue-100/70 hover:bg-white/10'
+                  className={`flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold ${
+                    active ? 'bg-white text-[#139a8c]' : 'text-white/80 hover:bg-white/10'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-xl">{item.icon}</span>
-                  {item.name}
+                  <span className="material-symbols-outlined text-lg">{item.icon}</span>
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
           </div>
-        </div>
-      )}
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col md:ml-64 mt-16 md:mt-0 max-w-[1400px] w-full min-h-screen pb-12">
-        {/* Content Header if provided */}
-        {(title || rightAction) && (
-          <div className="bg-white border-b border-[#e2e8f0] px-4 md:px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
-            <div>
-              {title && <h1 className="text-xl md:text-2xl font-bold text-[#002045] tracking-tight">{title}</h1>}
-              {subtitle && <p className="text-xs md:text-sm text-slate-500 mt-0.5">{subtitle}</p>}
-            </div>
-            {rightAction && <div className="flex items-center gap-2">{rightAction}</div>}
-          </div>
         )}
 
-        <div className="p-4 md:p-8 flex-1">{children}</div>
+        {/* MAIN CONTENT WHITE PANEL */}
+        <main className="flex-1 bg-white rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 md:p-8 flex flex-col shadow-lg overflow-y-auto relative z-10 min-h-[82vh]">
+          
+          {/* Top Bar: Search + User Profile Header */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-6 border-b border-slate-100">
+            {/* Search Pill Input */}
+            <div className="relative max-w-md w-full">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
+                search
+              </span>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-[#f4faf8] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#139a8c] focus:bg-white transition-all shadow-inner"
+              />
+            </div>
 
-        {/* Global Footer */}
-        <footer className="mt-auto border-t border-slate-200/80 bg-white px-4 md:px-8 py-4 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} <strong>Koperasi Idaman</strong>. Seluruh Hak Cipta Dilindungi.</span>
-          <div className="flex items-center gap-4 font-medium text-slate-600">
-            <span>Sistem Operasional v2.2.0</span>
-            <span>&bull;</span>
-            <span className="text-green-600 font-semibold flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              Aktif sebagai {currentUser.role}
-            </span>
+            {/* Profile & Notification Header */}
+            <div className="flex items-center justify-end gap-3 self-end sm:self-auto">
+              <Link
+                href="/pengaturan"
+                className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-50 transition-colors"
+              >
+                <span className="text-xs font-bold text-[#14293d]">{currentUser.nama || 'Johathan Stinson'}</span>
+                <div className="w-8 h-8 rounded-full bg-[#139a8c] text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-[#e0f7f4]">
+                  {currentUser.avatar || 'AD'}
+                </div>
+              </Link>
+
+              {/* Notification Bell with Badge */}
+              <div className="relative">
+                <button
+                  type="button"
+                  title="Notifikasi Sistem"
+                  className="w-8 h-8 rounded-full bg-[#f4faf8] flex items-center justify-center text-slate-600 hover:text-[#139a8c] hover:bg-[#e0f7f4] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-lg">notifications</span>
+                </button>
+                <span className="w-2 h-2 rounded-full bg-[#ff6b81] absolute top-0.5 right-0.5 ring-2 ring-white"></span>
+              </div>
+            </div>
           </div>
-        </footer>
-      </main>
+
+          {/* Dynamic Page Header Title & CTA Button (if supplied) */}
+          {(title || rightAction) && (
+            <div className="py-4 md:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                {title && (
+                  <h1 className="text-xl md:text-2xl font-extrabold text-[#14293d] tracking-tight">
+                    {title}
+                  </h1>
+                )}
+                {subtitle && (
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">{subtitle}</p>
+                )}
+              </div>
+
+              {rightAction && (
+                <div className="flex items-center gap-2 shrink-0">{rightAction}</div>
+              )}
+            </div>
+          )}
+
+          {/* Children Page Content */}
+          <div className="flex-1 py-2">{children}</div>
+
+          {/* Minimalist Sub-Footer */}
+          <footer className="mt-8 pt-4 border-t border-slate-100 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>&copy; {new Date().getFullYear()} <strong>Koperasi Idaman</strong> &bull; Sistem Terintegrasi</span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1 text-[#139a8c] font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#139a8c] animate-ping"></span>
+                Online: {currentUser.role}
+              </span>
+            </div>
+          </footer>
+        </main>
+      </div>
 
       {/* LOGOUT CONFIRMATION MODAL */}
       {logoutModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs">
-            <div className="p-5 bg-rose-700 text-white flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="material-symbols-outlined text-2xl">logout</span>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col text-xs animate-in fade-in zoom-in duration-150">
+            <div className="p-5 bg-[#139a8c] text-white flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+                <span className="material-symbols-outlined text-2xl text-[#ffd159]">logout</span>
               </div>
               <div>
-                <h3 className="text-sm font-bold">Konfirmasi Keluar</h3>
-                <p className="text-[11px] text-rose-100">Akhiri sesi pengguna aktif</p>
+                <h3 className="text-sm font-extrabold">Konfirmasi Keluar</h3>
+                <p className="text-[11px] text-white/80">Akhiri sesi pengguna aktif</p>
               </div>
             </div>
 
-            <div className="p-6 text-slate-600">
-              Apakah Anda yakin ingin keluar dari sistem <strong>Koperasi Idaman</strong>? Anda perlu memasukkan username & password kembali untuk mengakses.
+            <div className="p-6 text-slate-600 font-medium">
+              Apakah Anda yakin ingin keluar dari sistem <strong>Koperasi Idaman</strong>? Anda perlu login kembali untuk mengakses data.
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setLogoutModalOpen(false)}
-                className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition-colors"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleLogoutConfirm}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold shadow-sm"
+                className="px-5 py-2 bg-[#ff6b81] hover:bg-[#e85369] text-white rounded-full font-bold shadow-sm transition-colors cursor-pointer"
               >
-                Ya, Keluar Sekarang
+                Ya, Keluar
               </button>
             </div>
           </div>

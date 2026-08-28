@@ -352,27 +352,27 @@ export default function PengaturanPage() {
 
   return (
     <AppLayout
-      title="Pengaturan & Manajemen Sistem"
+      title="Pengaturan & Sistem"
       subtitle="Kelola konfigurasi koperasi, koneksi Supabase Cloud, manajemen pengguna admin, profil akun, dan database."
     >
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold animate-bounce">
-          <span className="material-symbols-outlined text-base">check_circle</span>
+        <div className="fixed top-20 right-6 z-50 bg-[#139a8c] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
+          <span className="material-symbols-outlined text-base text-[#ffd159]">check_circle</span>
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Tabs Navigation */}
       <div className="max-w-5xl mx-auto flex flex-col gap-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-1.5 shadow-sm flex flex-wrap gap-1">
+        <div className="bg-white border border-slate-100 rounded-2xl p-1.5 shadow-xs flex flex-wrap gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('koperasi')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === 'koperasi'
-                ? 'bg-[#002045] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-[#139a8c] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-[#f4faf8]'
             }`}
           >
             <span className="material-symbols-outlined text-lg">account_balance</span>
@@ -382,64 +382,64 @@ export default function PengaturanPage() {
           <button
             type="button"
             onClick={() => setActiveTab('supabase')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === 'supabase'
-                ? 'bg-[#002045] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-[#139a8c] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-[#f4faf8]'
             }`}
           >
             <span className="material-symbols-outlined text-lg text-emerald-400">cloud_sync</span>
-            Koneksi Supabase Cloud
-            <span className={`w-2 h-2 rounded-full ${supabaseStatus.isConnected ? 'bg-emerald-500' : 'bg-amber-400'}`}></span>
+            Koneksi Supabase
+            <span className={`w-2 h-2 rounded-full ${supabaseStatus.isConnected ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === 'users'
-                ? 'bg-[#002045] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-[#139a8c] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-[#f4faf8]'
             }`}
           >
             <span className="material-symbols-outlined text-lg">manage_accounts</span>
-            Kelola Pengguna Admin ({usersList.length})
+            Kelola Pengguna ({usersList.length})
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('profil_saya')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === 'profil_saya'
-                ? 'bg-[#002045] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-[#139a8c] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-[#f4faf8]'
             }`}
           >
             <span className="material-symbols-outlined text-lg">person</span>
-            Profil Saya & Password
+            Profil Saya
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('database')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === 'database'
-                ? 'bg-[#002045] text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-[#139a8c] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-[#f4faf8]'
             }`}
           >
             <span className="material-symbols-outlined text-lg">database</span>
-            Database & Pembersihan Data
+            Database & Reset
           </button>
         </div>
 
         {/* TAB 1: KOPERASI & PARAMETER */}
         {activeTab === 'koperasi' && (
           <form onSubmit={handleKoperasiSubmit} className="flex flex-col gap-6">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                <span className="material-symbols-outlined text-blue-700">account_balance</span>
-                <h2 className="text-sm font-bold text-[#002045]">Profil Lembaga Koperasi</h2>
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+              <div className="p-5 bg-[#fafdfc] border-b border-slate-100 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#139a8c]">account_balance</span>
+                <h2 className="text-sm font-extrabold text-[#14293d]">Profil Lembaga Koperasi</h2>
               </div>
 
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -450,7 +450,7 @@ export default function PengaturanPage() {
                     required
                     value={formData.namaKoperasi || ''}
                     onChange={(e) => setFormData({ ...formData, namaKoperasi: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -460,7 +460,7 @@ export default function PengaturanPage() {
                     type="text"
                     value={formData.badanHukum || ''}
                     onChange={(e) => setFormData({ ...formData, badanHukum: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-mono font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -470,7 +470,7 @@ export default function PengaturanPage() {
                     type="text"
                     value={formData.telepon || ''}
                     onChange={(e) => setFormData({ ...formData, telepon: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -480,7 +480,7 @@ export default function PengaturanPage() {
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -490,7 +490,7 @@ export default function PengaturanPage() {
                     type="text"
                     value={formData.ketua || ''}
                     onChange={(e) => setFormData({ ...formData, ketua: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -500,17 +500,17 @@ export default function PengaturanPage() {
                     rows={2}
                     value={formData.alamat || ''}
                     onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-medium text-slate-800 resize-none transition-all"
                   />
                 </div>
               </div>
             </div>
 
             {/* Parameter Simpan Pinjam */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                <span className="material-symbols-outlined text-blue-700">tune</span>
-                <h2 className="text-sm font-bold text-[#002045]">Parameter Simpan Pinjam & Suku Bunga</h2>
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+              <div className="p-5 bg-[#fafdfc] border-b border-slate-100 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#139a8c]">tune</span>
+                <h2 className="text-sm font-extrabold text-[#14293d]">Parameter Simpan Pinjam & Suku Bunga</h2>
               </div>
 
               <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -519,6 +519,7 @@ export default function PengaturanPage() {
                   <RupiahInput
                     value={formData.simpananPokok}
                     onChange={(val) => setFormData({ ...formData, simpananPokok: val })}
+                    className="bg-[#f4faf8] rounded-2xl"
                   />
                 </div>
 
@@ -527,6 +528,7 @@ export default function PengaturanPage() {
                   <RupiahInput
                     value={formData.simpananWajib}
                     onChange={(val) => setFormData({ ...formData, simpananWajib: val })}
+                    className="bg-[#f4faf8] rounded-2xl"
                   />
                 </div>
 
@@ -537,7 +539,7 @@ export default function PengaturanPage() {
                     step="0.1"
                     value={formData.sukuBungaPinjaman || 1.5}
                     onChange={(e) => setFormData({ ...formData, sukuBungaPinjaman: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900 text-xs"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-bold text-[#139a8c] text-xs"
                   />
                   <span className="text-[10px] text-slate-400 mt-1 block">Bunga pinjaman flat per bulan</span>
                 </div>
@@ -545,10 +547,10 @@ export default function PengaturanPage() {
             </div>
 
             {/* Alokasi SHU */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                <span className="material-symbols-outlined text-purple-700">pie_chart</span>
-                <h2 className="text-sm font-bold text-[#002045]">Alokasi Pembagian SHU (%)</h2>
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+              <div className="p-5 bg-[#fafdfc] border-b border-slate-100 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#139a8c]">pie_chart</span>
+                <h2 className="text-sm font-extrabold text-[#14293d]">Alokasi Pembagian SHU (%)</h2>
               </div>
 
               <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
@@ -558,7 +560,7 @@ export default function PengaturanPage() {
                     type="number"
                     value={formData.shuPersenAnggota || 40}
                     onChange={(e) => setFormData({ ...formData, shuPersenAnggota: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-extrabold text-[#139a8c]"
                   />
                 </div>
 
@@ -568,7 +570,7 @@ export default function PengaturanPage() {
                     type="number"
                     value={formData.shuPersenModal || 30}
                     onChange={(e) => setFormData({ ...formData, shuPersenModal: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-extrabold text-[#139a8c]"
                   />
                 </div>
 
@@ -578,7 +580,7 @@ export default function PengaturanPage() {
                     type="number"
                     value={formData.shuPersenPengurus || 20}
                     onChange={(e) => setFormData({ ...formData, shuPersenPengurus: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-extrabold text-[#139a8c]"
                   />
                 </div>
 
@@ -588,7 +590,7 @@ export default function PengaturanPage() {
                     type="number"
                     value={formData.shuPersenCadangan || 10}
                     onChange={(e) => setFormData({ ...formData, shuPersenCadangan: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-purple-900"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-extrabold text-[#139a8c]"
                   />
                 </div>
               </div>
@@ -597,7 +599,7 @@ export default function PengaturanPage() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center gap-2"
+                className="px-6 py-2.5 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full text-xs font-extrabold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">save</span>
                 Simpan Konfigurasi Koperasi
@@ -610,24 +612,24 @@ export default function PengaturanPage() {
         {activeTab === 'supabase' && (
           <div className="flex flex-col gap-6">
             {/* Status Connection Banner */}
-            <div className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+            <div className={`p-5 rounded-3xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
               supabaseStatus.isConnected
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                : 'bg-amber-50 border-amber-200 text-amber-900'
+                ? 'bg-[#e0f7f4] border-[#139a8c]/30 text-[#0f766e]'
+                : 'bg-[#fef8e7] border-[#ffd159]/50 text-[#b88000]'
             }`}>
               <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shrink-0 ${
-                  supabaseStatus.isConnected ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xl shrink-0 ${
+                  supabaseStatus.isConnected ? 'bg-[#139a8c] text-white' : 'bg-[#ffd159] text-[#14293d]'
                 }`}>
                   <span className="material-symbols-outlined">
                     {supabaseStatus.isConnected ? 'cloud_done' : 'cloud_off'}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold">
+                  <h3 className="text-sm font-extrabold">
                     Status Koneksi: {supabaseStatus.isConnected ? 'Terhubung ke Supabase Cloud' : 'Belum Terhubung / Mode Offline'}
                   </h3>
-                  <p className="text-xs mt-0.5 opacity-90">{supabaseStatus.message || 'Memeriksa status...'}</p>
+                  <p className="text-xs mt-0.5 opacity-90 font-medium">{supabaseStatus.message || 'Memeriksa status...'}</p>
                 </div>
               </div>
 
@@ -635,7 +637,7 @@ export default function PengaturanPage() {
                 type="button"
                 onClick={handleTestSupabase}
                 disabled={testingSupabase}
-                className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0"
+                className="px-5 py-2 bg-white border border-slate-200 hover:bg-[#f4faf8] text-slate-800 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs shrink-0 transition-all cursor-pointer"
               >
                 <span className={`material-symbols-outlined text-base ${testingSupabase ? 'animate-spin' : ''}`}>sync</span>
                 {testingSupabase ? 'Menguji...' : 'Uji Koneksi Ulang'}
@@ -643,10 +645,10 @@ export default function PengaturanPage() {
             </div>
 
             {/* Supabase Credentials Form */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                <span className="material-symbols-outlined text-emerald-600">key</span>
-                <h2 className="text-sm font-bold text-[#002045]">Kredensial & API Project Supabase</h2>
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+              <div className="p-5 bg-[#fafdfc] border-b border-slate-100 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#139a8c]">key</span>
+                <h2 className="text-sm font-extrabold text-[#14293d]">Kredensial & API Project Supabase</h2>
               </div>
 
               <form onSubmit={handleSaveSupabaseConfig} className="p-6 flex flex-col gap-4 text-xs">
@@ -660,7 +662,7 @@ export default function PengaturanPage() {
                     placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co"
                     value={supabaseConfig.url}
                     onChange={(e) => setSupabaseConfig({ ...supabaseConfig, url: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono text-slate-800"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-mono font-semibold text-slate-800 transition-all"
                   />
                   <span className="text-[11px] text-slate-400 mt-1 block">
                     Dapat dilihat di Supabase Dashboard &rarr; Project Settings &rarr; API &rarr; Project URL
@@ -677,18 +679,18 @@ export default function PengaturanPage() {
                     placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                     value={supabaseConfig.anonKey}
                     onChange={(e) => setSupabaseConfig({ ...supabaseConfig, anonKey: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono text-slate-800 resize-none text-[11px]"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-mono font-semibold text-slate-800 resize-none text-[11px] transition-all"
                   />
                   <span className="text-[11px] text-slate-400 mt-1 block">
                     Dapat dilihat di Supabase Dashboard &rarr; Project Settings &rarr; API &rarr; Project API Keys &rarr; `anon` `public`
                   </span>
                 </div>
 
-                <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
                   <button
                     type="submit"
                     disabled={testingSupabase}
-                    className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold shadow-sm flex items-center gap-2"
+                    className="px-6 py-2.5 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">save</span>
                     Simpan & Sambungkan Kredensial
@@ -698,20 +700,20 @@ export default function PengaturanPage() {
             </div>
 
             {/* Cloud Sync Actions */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                <span className="material-symbols-outlined text-blue-700">sync_alt</span>
-                <h2 className="text-sm font-bold text-[#002045]">Sinkronisasi Data Cloud</h2>
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+              <div className="p-5 bg-[#fafdfc] border-b border-slate-100 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#139a8c]">sync_alt</span>
+                <h2 className="text-sm font-extrabold text-[#14293d]">Sinkronisasi Data Cloud</h2>
               </div>
 
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-3">
+                <div className="p-5 rounded-2xl border border-[#d8eee8] bg-[#f4faf8] flex flex-col justify-between gap-3">
                   <div>
-                    <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-emerald-600">cloud_upload</span>
+                    <h4 className="font-extrabold text-[#14293d] flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[#139a8c]">cloud_upload</span>
                       Unggah Data Lokal ke Supabase Cloud
                     </h4>
-                    <p className="text-slate-500 mt-1 text-[11px]">
+                    <p className="text-slate-500 mt-1 text-[11px] leading-relaxed font-medium">
                       Kirim seluruh data anggota, simpanan, pinjaman, dan buku kas lokal yang ada saat ini ke database Supabase Cloud.
                     </p>
                   </div>
@@ -719,20 +721,20 @@ export default function PengaturanPage() {
                     type="button"
                     onClick={handlePushSupabase}
                     disabled={syncingCloud}
-                    className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold shadow-sm flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">upload</span>
                     {syncingCloud ? 'Sedang Sinkron...' : 'Unggah Data ke Supabase'}
                   </button>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-3">
+                <div className="p-5 rounded-2xl border border-slate-200 bg-white flex flex-col justify-between gap-3 shadow-2xs">
                   <div>
-                    <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-blue-600">cloud_download</span>
+                    <h4 className="font-extrabold text-[#14293d] flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[#139a8c]">cloud_download</span>
                       Tarik Data dari Supabase Cloud
                     </h4>
-                    <p className="text-slate-500 mt-1 text-[11px]">
+                    <p className="text-slate-500 mt-1 text-[11px] leading-relaxed font-medium">
                       Muat ulang seluruh data terbaru dari tabel Supabase ke dalam aplikasi koperasi.
                     </p>
                   </div>
@@ -740,7 +742,7 @@ export default function PengaturanPage() {
                     type="button"
                     onClick={handlePullSupabase}
                     disabled={syncingCloud}
-                    className="w-full py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold shadow-sm flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 bg-[#e0f7f4] hover:bg-[#cbf1ea] text-[#139a8c] border border-[#139a8c]/30 rounded-full font-extrabold shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">download</span>
                     {syncingCloud ? 'Sedang Memuat...' : 'Tarik Data dari Supabase'}
@@ -753,88 +755,88 @@ export default function PengaturanPage() {
 
         {/* TAB 3: KELOLA PENGGUNA ADMIN */}
         {activeTab === 'users' && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-4 md:p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-slate-100 bg-[#fafdfc] flex justify-between items-center">
               <div>
-                <h3 className="text-sm font-bold text-[#002045]">Daftar Pengguna & Hak Akses Administrator</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Kelola akun staf, bendahara, kasir, dan hak akses sistem.</p>
+                <h3 className="text-sm font-extrabold text-[#14293d]">Daftar Pengguna & Hak Akses Administrator</h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">Kelola akun staf, bendahara, kasir, dan hak akses sistem.</p>
               </div>
               <button
                 type="button"
                 onClick={handleOpenAddUser}
-                className="px-3.5 py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="px-4 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full text-xs font-extrabold flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
               >
                 <span className="material-symbols-outlined text-[18px]">person_add</span>
-                Tambah Pengguna Baru
+                + Tambah Pengguna
               </button>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
-                    <th className="px-4 py-3">Pengguna</th>
-                    <th className="px-4 py-3">Username</th>
-                    <th className="px-4 py-3">Email</th>
-                    <th className="px-4 py-3">Role / Jabatan</th>
-                    <th className="px-4 py-3">Login Terakhir</th>
-                    <th className="px-4 py-3 text-center">Status</th>
-                    <th className="px-4 py-3 text-center">Aksi</th>
+                  <tr className="bg-[#fafdfc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
+                    <th className="px-4 py-3.5">Pengguna</th>
+                    <th className="px-4 py-3.5">Username</th>
+                    <th className="px-4 py-3.5">Email</th>
+                    <th className="px-4 py-3.5">Role / Jabatan</th>
+                    <th className="px-4 py-3.5">Login Terakhir</th>
+                    <th className="px-4 py-3.5 text-center">Status</th>
+                    <th className="px-4 py-3.5 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {usersList.map((u) => {
                     const isSelf = currentUser && currentUser.id === u.id;
                     return (
-                      <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap">
+                      <tr key={u.id} className="hover:bg-[#f4faf8]/60 transition-colors">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                            <div className="w-8 h-8 rounded-full bg-[#139a8c] text-white flex items-center justify-center font-extrabold text-xs">
                               {u.avatar || 'US'}
                             </div>
-                            <div className="font-bold text-[#002045]">
-                              {u.nama} {isSelf && <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-1 font-normal">(Anda)</span>}
+                            <div className="font-extrabold text-[#14293d]">
+                              {u.nama} {isSelf && <span className="text-[10px] text-[#139a8c] bg-[#e0f7f4] px-2 py-0.5 rounded-full ml-1 font-bold">(Anda)</span>}
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 font-mono font-semibold text-slate-700 whitespace-nowrap">
+                        <td className="px-4 py-3.5 font-mono font-bold text-slate-700 whitespace-nowrap">
                           {u.username}
                         </td>
-                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-slate-600 whitespace-nowrap">
                           {u.email}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                            className={`inline-flex items-center px-3 py-1 rounded-full font-extrabold text-[10px] ${
                               u.role === 'Super Admin'
-                                ? 'bg-purple-100 text-purple-800'
+                                ? 'bg-[#fef8e7] text-[#df9800]'
                                 : u.role === 'Bendahara'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-emerald-100 text-emerald-800'
+                                ? 'bg-[#e0f2fe] text-[#0369a1]'
+                                : 'bg-[#e0f7f4] text-[#139a8c]'
                             }`}
                           >
                             {u.role}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-slate-500 whitespace-nowrap font-medium">
                           {u.lastLogin || '-'}
                         </td>
-                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-center whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              u.status === 'Aktif' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold ${
+                              u.status === 'Aktif' ? 'bg-[#e0f7f4] text-[#139a8c]' : 'bg-[#fff1f2] text-[#e11d48]'
                             }`}
                           >
                             {u.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-center whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => handleOpenEditUser(u)}
                               title="Edit Pengguna"
-                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                              className="p-1.5 text-[#139a8c] hover:bg-[#e0f7f4] rounded-xl transition-colors"
                             >
                               <span className="material-symbols-outlined text-[18px]">edit</span>
                             </button>
@@ -843,7 +845,7 @@ export default function PengaturanPage() {
                                 type="button"
                                 onClick={() => handleDeleteUser(u)}
                                 title="Hapus Pengguna"
-                                className="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
                               >
                                 <span className="material-symbols-outlined text-[18px]">delete</span>
                               </button>
@@ -861,22 +863,22 @@ export default function PengaturanPage() {
 
         {/* TAB 4: PROFIL SAYA & PASSWORD */}
         {activeTab === 'profil_saya' && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 md:p-5 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-              <span className="material-symbols-outlined text-blue-700">badge</span>
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+            <div className="p-5 border-b border-slate-100 bg-[#fafdfc] flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#139a8c]">badge</span>
               <div>
-                <h3 className="text-sm font-bold text-[#002045]">Profil Akun Saya</h3>
-                <p className="text-xs text-slate-500">Perbarui data profil pribadi dan kata sandi akun Anda.</p>
+                <h3 className="text-sm font-extrabold text-[#14293d]">Profil Akun Saya</h3>
+                <p className="text-xs text-slate-500 font-medium">Perbarui data profil pribadi dan kata sandi akun Anda.</p>
               </div>
             </div>
 
             <form onSubmit={handleSaveMyProfile} className="p-6 md:p-8 flex flex-col gap-6 text-xs">
               <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
-                <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-md border-2 border-white">
+                <div className="w-16 h-16 rounded-full bg-[#139a8c] text-white flex items-center justify-center font-black text-xl shadow-md border-2 border-white">
                   {currentUser.avatar || 'AD'}
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-[#002045]">{currentUser.nama}</h4>
+                  <h4 className="text-base font-extrabold text-[#14293d]">{currentUser.nama}</h4>
                   <p className="text-xs text-slate-500 font-semibold">{currentUser.role} &bull; @{currentUser.username}</p>
                 </div>
               </div>
@@ -889,7 +891,7 @@ export default function PengaturanPage() {
                     required
                     value={myProfileForm.nama}
                     onChange={(e) => setMyProfileForm({ ...myProfileForm, nama: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -900,7 +902,7 @@ export default function PengaturanPage() {
                     required
                     value={myProfileForm.email}
                     onChange={(e) => setMyProfileForm({ ...myProfileForm, email: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -911,7 +913,7 @@ export default function PengaturanPage() {
                     required
                     value={myProfileForm.username}
                     onChange={(e) => setMyProfileForm({ ...myProfileForm, username: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-mono font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -921,14 +923,14 @@ export default function PengaturanPage() {
                     type="text"
                     disabled
                     value={currentUser.role || 'Super Admin'}
-                    className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 font-semibold"
+                    className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-2xl text-slate-500 font-semibold"
                   />
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <span className="font-bold text-slate-700 block text-xs flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-amber-600">lock_reset</span>
+              <div className="bg-[#f4faf8] p-5 rounded-2xl border border-[#d8eee8] space-y-3">
+                <span className="font-extrabold text-[#14293d] block text-xs flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-[#df9800]">lock_reset</span>
                   Ganti Kata Sandi (Kosongkan jika tidak ingin mengubah sandi)
                 </span>
 
@@ -940,7 +942,7 @@ export default function PengaturanPage() {
                       value={myProfileForm.oldPassword}
                       onChange={(e) => setMyProfileForm({ ...myProfileForm, oldPassword: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:border-[#139a8c] outline-none"
                     />
                   </div>
 
@@ -951,7 +953,7 @@ export default function PengaturanPage() {
                       value={myProfileForm.newPassword}
                       onChange={(e) => setMyProfileForm({ ...myProfileForm, newPassword: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:border-[#139a8c] outline-none"
                     />
                   </div>
 
@@ -962,7 +964,7 @@ export default function PengaturanPage() {
                       value={myProfileForm.confirmPassword}
                       onChange={(e) => setMyProfileForm({ ...myProfileForm, confirmPassword: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:border-[#139a8c] outline-none"
                     />
                   </div>
                 </div>
@@ -971,7 +973,7 @@ export default function PengaturanPage() {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold shadow-sm"
+                  className="px-6 py-2.5 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
                 >
                   Simpan Perubahan Profil
                 </button>
@@ -982,39 +984,39 @@ export default function PengaturanPage() {
 
         {/* TAB 5: DATABASE & PEMBERSIHAN DATA */}
         {activeTab === 'database' && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-              <span className="material-symbols-outlined text-slate-700">database</span>
-              <h2 className="text-sm font-bold text-[#002045]">Manajemen Database & Pembersihan Data</h2>
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+            <div className="p-5 bg-[#fafdfc] border-b border-slate-100 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#139a8c]">database</span>
+              <h2 className="text-sm font-extrabold text-[#14293d]">Manajemen Database & Pembersihan Data</h2>
             </div>
 
             <div className="p-6 flex flex-col gap-4 text-xs">
-              <p className="text-slate-500">
+              <p className="text-slate-500 font-medium leading-relaxed">
                 Unduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk cadangan berkala, atau impor file backup untuk pemulihan, atau hapus seluruh data contoh / demo agar aplikasi siap dipakai dari nol.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-slate-50/50">
+                <div className="border border-slate-200 rounded-2xl p-4 flex flex-col justify-between gap-3 bg-[#fafdfc]">
                   <div>
-                    <h3 className="font-bold text-slate-800">Backup Data (JSON)</h3>
-                    <p className="text-slate-500 text-[11px] mt-1">Unduh seluruh rekaman database koperasi ke komputer Anda.</p>
+                    <h3 className="font-extrabold text-slate-800">Backup Data (JSON)</h3>
+                    <p className="text-slate-500 text-[11px] mt-1 font-medium">Unduh seluruh rekaman database koperasi ke komputer Anda.</p>
                   </div>
                   <button
                     type="button"
                     onClick={handleExportBackup}
-                    className="w-full py-2 bg-[#002045] hover:bg-[#1a365d] text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full py-2.5 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">cloud_download</span>
                     Unduh Backup JSON
                   </button>
                 </div>
 
-                <div className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-slate-50/50">
+                <div className="border border-slate-200 rounded-2xl p-4 flex flex-col justify-between gap-3 bg-[#fafdfc]">
                   <div>
-                    <h3 className="font-bold text-slate-800">Restore Data (JSON)</h3>
-                    <p className="text-slate-500 text-[11px] mt-1">Unggah file backup .json untuk memulihkan rekaman.</p>
+                    <h3 className="font-extrabold text-slate-800">Restore Data (JSON)</h3>
+                    <p className="text-slate-500 text-[11px] mt-1 font-medium">Unggah file backup .json untuk memulihkan rekaman.</p>
                   </div>
-                  <label className="w-full py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 rounded-lg font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+                  <label className="w-full py-2.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-full font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs transition-all">
                     <span className="material-symbols-outlined text-base">upload_file</span>
                     Pilih File Backup
                     <input
@@ -1026,15 +1028,15 @@ export default function PengaturanPage() {
                   </label>
                 </div>
 
-                <div className="border border-rose-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-rose-50/30">
+                <div className="border border-rose-200 rounded-2xl p-4 flex flex-col justify-between gap-3 bg-rose-50/40">
                   <div>
-                    <h3 className="font-bold text-rose-800">Hapus Semua Data Demo</h3>
-                    <p className="text-slate-500 text-[11px] mt-1">Kosongkan semua data anggota, simpanan, pinjaman & kas ke 0.</p>
+                    <h3 className="font-extrabold text-rose-800">Hapus Semua Data Demo</h3>
+                    <p className="text-slate-500 text-[11px] mt-1 font-medium">Kosongkan semua data anggota, simpanan, pinjaman & kas ke 0.</p>
                   </div>
                   <button
                     type="button"
                     onClick={handleClearAllData}
-                    className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">delete_sweep</span>
                     Kosongkan Semua Data
@@ -1048,17 +1050,17 @@ export default function PengaturanPage() {
 
       {/* MODAL TAMBAH / EDIT PENGGUNA ADMIN */}
       {userModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center shrink-0">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined">person</span>
-                <h3 className="text-base font-bold">{isEditingUser ? 'Edit Pengguna Admin' : 'Tambah Pengguna Admin Baru'}</h3>
+                <span className="material-symbols-outlined text-xl text-[#ffd159]">person</span>
+                <h3 className="text-base font-extrabold">{isEditingUser ? 'Edit Pengguna Admin' : 'Tambah Pengguna Admin Baru'}</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setUserModalOpen(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+                className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -1074,7 +1076,7 @@ export default function PengaturanPage() {
                     value={userFormData.nama}
                     onChange={(e) => setUserFormData({ ...userFormData, nama: e.target.value })}
                     placeholder="Contoh: Siti Rahayu"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -1086,7 +1088,7 @@ export default function PengaturanPage() {
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
                     placeholder="siti@koperasi-idaman.co.id"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -1100,7 +1102,7 @@ export default function PengaturanPage() {
                       value={userFormData.username}
                       onChange={(e) => setUserFormData({ ...userFormData, username: e.target.value })}
                       placeholder="kasir1"
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-mono disabled:bg-slate-100"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-mono font-semibold text-slate-800 disabled:bg-slate-100 transition-all"
                     />
                   </div>
 
@@ -1114,7 +1116,7 @@ export default function PengaturanPage() {
                       value={userFormData.password}
                       onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -1125,7 +1127,7 @@ export default function PengaturanPage() {
                     <select
                       value={userFormData.role}
                       onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     >
                       <option value="Super Admin">Super Admin</option>
                       <option value="Bendahara">Bendahara</option>
@@ -1139,7 +1141,7 @@ export default function PengaturanPage() {
                     <select
                       value={userFormData.status}
                       onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     >
                       <option value="Aktif">Aktif</option>
                       <option value="Nonaktif">Nonaktif</option>
@@ -1148,17 +1150,17 @@ export default function PengaturanPage() {
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+              <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setUserModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm cursor-pointer"
+                  className="px-6 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
                 >
                   {isEditingUser ? 'Simpan Perubahan' : 'Tambah Pengguna'}
                 </button>

@@ -105,26 +105,26 @@ export default function KasPage() {
           <button
             type="button"
             onClick={handleExportExcel}
-            className="px-3.5 py-2.5 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+            className="px-4 py-2 border border-[#139a8c]/30 bg-[#e0f7f4] hover:bg-[#cbf1ea] text-[#139a8c] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px] text-emerald-700">description</span>
+            <span className="material-symbols-outlined text-[18px]">description</span>
             Ekspor Excel
           </button>
           <button
             type="button"
             onClick={handleOpenModal}
-            className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+            className="bg-[#139a8c] hover:bg-[#0e8074] text-white px-5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
-            Catat Mutasi Kas
+            + Catat Mutasi Kas
           </button>
         </div>
       }
     >
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold animate-bounce">
-          <span className="material-symbols-outlined text-base">check_circle</span>
+        <div className="fixed top-20 right-6 z-50 bg-[#139a8c] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
+          <span className="material-symbols-outlined text-base text-[#ffd159]">check_circle</span>
           <span>{toastMessage}</span>
         </div>
       )}
@@ -132,67 +132,67 @@ export default function KasPage() {
       {/* Metric Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Total Kas Masuk */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div className="bg-[#f4faf8] rounded-2xl border border-[#d8eee8] p-5 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Kas Masuk (Penerimaan)</span>
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">arrow_downward</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Kas Masuk (Penerimaan)</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
+              <span className="material-symbols-outlined text-lg">arrow_downward</span>
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-emerald-700">{formatRupiah(summary.masuk)}</div>
-          <p className="text-xs text-slate-400 mt-1">Setoran simpanan, angsuran kredit & pendapatan</p>
+          <div className="text-2xl font-extrabold text-[#139a8c]">{formatRupiah(summary.masuk)}</div>
+          <p className="text-[11px] text-slate-400 mt-1">Setoran simpanan, angsuran kredit & pendapatan</p>
         </div>
 
         {/* Total Kas Keluar */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div className="bg-[#fff5f5] rounded-2xl border border-rose-100 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Kas Keluar (Pengeluaran)</span>
-            <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">arrow_upward</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Kas Keluar (Pengeluaran)</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-rose-500 flex items-center justify-center shadow-xs">
+              <span className="material-symbols-outlined text-lg">arrow_upward</span>
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-rose-600">{formatRupiah(summary.keluar)}</div>
-          <p className="text-xs text-slate-400 mt-1">Pencairan pinjaman, tarik simpanan & operasional</p>
+          <div className="text-2xl font-extrabold text-rose-500">{formatRupiah(summary.keluar)}</div>
+          <p className="text-[11px] text-slate-400 mt-1">Pencairan pinjaman, tarik simpanan & operasional</p>
         </div>
 
         {/* Saldo Kas Bersih */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div className="bg-[#f4faf8] rounded-2xl border border-[#d8eee8] p-5 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Saldo Kas Likuid</span>
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#002045] flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Saldo Kas Likuid</span>
+            <div className="w-8 h-8 rounded-xl bg-white text-[#139a8c] flex items-center justify-center shadow-xs">
+              <span className="material-symbols-outlined text-lg">account_balance_wallet</span>
             </div>
           </div>
-          <div className={`text-2xl font-extrabold ${summary.saldo >= 0 ? 'text-[#002045]' : 'text-rose-600'}`}>
+          <div className={`text-2xl font-extrabold ${summary.saldo >= 0 ? 'text-[#14293d]' : 'text-rose-600'}`}>
             {formatRupiah(summary.saldo)}
           </div>
-          <p className="text-xs text-slate-400 mt-1">Kas riil yang tersedia di brankas / bank koperasi</p>
+          <p className="text-[11px] text-slate-400 mt-1">Kas riil yang tersedia di brankas / bank koperasi</p>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col">
         {/* Filter & Search Bar */}
-        <div className="p-4 md:p-5 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+        <div className="p-4 md:p-5 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#fafdfc]">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="relative w-full sm:w-72">
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
               <input
                 type="text"
                 placeholder="Cari kategori atau keterangan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium"
+                className="w-full pl-10 pr-4 py-2 bg-[#f4faf8] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#139a8c] focus:bg-white transition-all shadow-inner"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <span className="text-xs font-bold text-slate-500">Filter:</span>
+            <span className="text-xs font-extrabold text-slate-500">Filter:</span>
             <select
               value={filterJenis}
               onChange={(e) => setFilterJenis(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium"
+              className="px-4 py-2 bg-[#f4faf8] border border-slate-200 rounded-full text-xs font-bold text-slate-700 focus:border-[#139a8c] outline-none"
             >
               <option value="all">Semua Mutasi</option>
               <option value="penerimaan">Penerimaan (Masuk)</option>
@@ -205,20 +205,20 @@ export default function KasPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
-                <th className="px-4 py-3">ID Kas</th>
-                <th className="px-4 py-3">Tanggal</th>
-                <th className="px-4 py-3">Jenis</th>
-                <th className="px-4 py-3">Kategori</th>
-                <th className="px-4 py-3">Keterangan Transaksi</th>
-                <th className="px-4 py-3 text-right">Debit (Masuk)</th>
-                <th className="px-4 py-3 text-right">Kredit (Keluar)</th>
+              <tr className="bg-[#fafdfc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
+                <th className="px-4 py-3.5">ID Kas</th>
+                <th className="px-4 py-3.5">Tanggal</th>
+                <th className="px-4 py-3.5">Jenis</th>
+                <th className="px-4 py-3.5">Kategori</th>
+                <th className="px-4 py-3.5">Keterangan Transaksi</th>
+                <th className="px-4 py-3.5 text-right">Debit (Masuk)</th>
+                <th className="px-4 py-3.5 text-right">Kredit (Keluar)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredKas.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
+                  <td colSpan={7} className="px-4 py-12 text-center text-slate-400 font-medium">
                     <span className="material-symbols-outlined text-4xl text-slate-300 block mb-1">receipt_long</span>
                     Belum ada riwayat mutasi kas ditemukan.
                   </td>
@@ -227,32 +227,32 @@ export default function KasPage() {
                 filteredKas.map((k) => {
                   const isPenerimaan = k.jenis === 'Penerimaan';
                   return (
-                    <tr key={k.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-slate-700 whitespace-nowrap">
+                    <tr key={k.id} className="hover:bg-[#f4faf8]/60 transition-colors">
+                      <td className="px-4 py-3.5 font-mono font-bold text-slate-700 whitespace-nowrap">
                         {k.id}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-slate-600 font-medium">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-medium">
                         {k.tanggal}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[10px] uppercase ${
-                            isPenerimaan ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                          className={`inline-flex items-center px-3 py-1 rounded-full font-extrabold text-[10px] uppercase ${
+                            isPenerimaan ? 'bg-[#e0f7f4] text-[#139a8c]' : 'bg-[#fff1f2] text-[#e11d48]'
                           }`}
                         >
                           {isPenerimaan ? 'Masuk' : 'Keluar'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-[#002045]">
+                      <td className="px-4 py-3.5 font-extrabold text-[#14293d]">
                         {k.kategori}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 max-w-xs truncate" title={k.keterangan}>
+                      <td className="px-4 py-3.5 text-slate-600 max-w-xs truncate" title={k.keterangan}>
                         {k.keterangan}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-emerald-700 whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-right font-extrabold text-[#139a8c] whitespace-nowrap">
                         {isPenerimaan ? formatRupiah(k.jumlah) : '-'}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-rose-600 whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-right font-extrabold text-rose-500 whitespace-nowrap">
                         {!isPenerimaan ? formatRupiah(k.jumlah) : '-'}
                       </td>
                     </tr>
@@ -266,17 +266,17 @@ export default function KasPage() {
 
       {/* MODAL CATAT MUTASI KAS MANUAL */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-5 bg-[#002045] text-white flex justify-between items-center shrink-0">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+            <div className="p-6 bg-[#139a8c] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined">receipt_long</span>
-                <h3 className="text-base font-bold">Catat Mutasi Kas Manual</h3>
+                <span className="material-symbols-outlined text-xl text-[#ffd159]">receipt_long</span>
+                <h3 className="text-base font-extrabold">Catat Mutasi Kas Manual</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+                className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -290,7 +290,7 @@ export default function KasPage() {
                     <select
                       value={formData.jenis}
                       onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     >
                       <option value="Pengeluaran">Pengeluaran (Kas Keluar)</option>
                       <option value="Penerimaan">Penerimaan (Kas Masuk)</option>
@@ -304,7 +304,7 @@ export default function KasPage() {
                       required
                       value={formData.tanggal}
                       onChange={(e) => setFormData({ ...formData, tanggal: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                      className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                     />
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export default function KasPage() {
                     placeholder="Contoh: Operasional, ATK, Listrik, Konsumsi, dll"
                     value={formData.kategori}
                     onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
@@ -327,7 +327,7 @@ export default function KasPage() {
                     required
                     value={formData.jumlah}
                     onChange={(val) => setFormData({ ...formData, jumlah: val })}
-                    className="font-bold text-[#002045]"
+                    className="font-extrabold text-[#139a8c] bg-[#f4faf8] rounded-2xl"
                   />
                 </div>
 
@@ -338,22 +338,22 @@ export default function KasPage() {
                     placeholder="Tuliskan keterangan detail transaksi..."
                     value={formData.keterangan}
                     onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
+                    className="w-full px-3.5 py-2.5 bg-[#f4faf8] border border-slate-200 rounded-2xl focus:border-[#139a8c] focus:bg-white outline-none font-medium text-slate-800 resize-none transition-all"
                   />
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+              <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm cursor-pointer"
+                  className="px-6 py-2 bg-[#139a8c] hover:bg-[#0e8074] text-white rounded-full font-extrabold shadow-sm transition-all cursor-pointer"
                 >
                   Simpan Transaksi Kas
                 </button>
