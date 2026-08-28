@@ -399,6 +399,35 @@ export default function LaporanPage() {
             </div>
           </div>
         </div>
+
+        {/* Section 4: Tanda Tangan Pengurus (Kiri: Ketua, Kanan: Bendahara) */}
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-xs">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-center">
+            {/* Kiri: Ketua Pengurus */}
+            <div className="w-full sm:w-64 flex flex-col items-center">
+              <span className="text-slate-500 font-semibold mb-1">Mengetahui,</span>
+              <span className="font-extrabold text-[#0f172a] text-sm">Ketua Pengurus</span>
+              <div className="h-16"></div>
+              <span className="font-extrabold text-[#0f172a] text-sm border-b border-slate-800 pb-0.5 min-w-36">
+                {settings.ketua || '-'}
+              </span>
+              <span className="text-[10px] text-slate-400 mt-1">Ketua Koperasi</span>
+            </div>
+
+            {/* Kanan: Bendahara */}
+            <div className="w-full sm:w-64 flex flex-col items-center">
+              <span className="text-slate-500 font-semibold mb-1">
+                {settings.alamat ? `${settings.alamat.split(',').pop().trim()}, ` : ''}{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </span>
+              <span className="font-extrabold text-[#0f172a] text-sm">Bendahara</span>
+              <div className="h-16"></div>
+              <span className="font-extrabold text-[#0f172a] text-sm border-b border-slate-800 pb-0.5 min-w-36">
+                {settings.bendahara || '-'}
+              </span>
+              <span className="text-[10px] text-slate-400 mt-1">Penanggung Jawab Keuangan</span>
+            </div>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
