@@ -5,12 +5,15 @@ import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 
 export default function LaporanPage() {
-  const today = new Date().toISOString().split('T')[0];
-  const currentYear = new Date().getFullYear();
-  const firstDayOfYear = `${currentYear}-01-01`;
+  const d = new Date();
+  const currentYear = d.getFullYear();
+  const currentMonthNum = String(d.getMonth() + 1).padStart(2, '0');
+  const currentMonthStr = `${currentYear}-${currentMonthNum}`; // '2026-08'
+  const firstMonthOfYear = `${currentYear}-01`;
 
-  const [tanggalMulai, setTanggalMulai] = useState(firstDayOfYear);
-  const [tanggalSelesai, setTanggalSelesai] = useState(today);
+  // State in YYYY-MM format
+  const [bulanMulai, setBulanMulai] = useState(firstMonthOfYear);
+  const [bulanSelesai, setBulanSelesai] = useState(currentMonthStr);
 
   const [laporan, setLaporan] = useState({
     arusKas: {
@@ -50,10 +53,31 @@ export default function LaporanPage() {
 
   const [settings, setSettings] = useState({});
 
+  // Helper to format YYYY-MM into Indonesian Month-Year string
+  const formatBulanTahun = (ym) => {
+    if (!ym) return '';
+    const [year, month] = ym.split('-');
+    const monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const monthIndex = parseInt(month, 10) - 1;
+    return `${monthNames[monthIndex] || month} ${year}`;
+  };
+
   const loadLaporan = () => {
+    // Convert YYYY-MM to full start and end dates
+    const startDate = bulanMulai ? `${bulanMulai}-01` : '';
+    let endDate = '';
+    if (bulanSelesai) {
+      const [y, m] = bulanSelesai.split('-');
+      const lastDay = new Date(Number(y), Number(m), 0).getDate();
+      endDate = `${bulanSelesai}-${String(lastDay).padStart(2, '0')}`;
+    }
+
     const data = dataService.getLaporanData({
-      startDate: tanggalMulai,
-      endDate: tanggalSelesai
+      startDate,
+      endDate
     });
     const s = dataService.getSettings();
     setLaporan(data);
@@ -69,7 +93,7 @@ export default function LaporanPage() {
 
     window.addEventListener('koperasi_db_updated', handleUpdate);
     return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
-  }, [tanggalMulai, tanggalSelesai]);
+  }, [bulanMulai, bulanSelesai]);
 
   const formatRupiah = (num) => {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
@@ -80,38 +104,35 @@ export default function LaporanPage() {
   };
 
   // Quick Preset Helper Functions
-  const setPresetHariIni = () => {
-    setTanggalMulai(today);
-    setTanggalSelesai(today);
-  };
-
   const setPresetBulanIni = () => {
-    const d = new Date();
-    const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
-    const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
-    setTanggalMulai(startOfMonth);
-    setTanggalSelesai(endOfMonth);
+    setBulanMulai(currentMonthStr);
+    setBulanSelesai(currentMonthStr);
   };
 
   const setPresetTahunIni = () => {
-    setTanggalMulai(firstDayOfYear);
-    setTanggalSelesai(today);
+    setBulanMulai(firstMonthOfYear);
+    setBulanSelesai(currentMonthStr);
   };
 
   const setPresetSemuaWaktu = () => {
-    setTanggalMulai('');
-    setTanggalSelesai('');
+    setBulanMulai('');
+    setBulanSelesai('');
+  };
+
+  // Periode Label Text
+  const getPeriodeLabel = () => {
+    if (!bulanMulai && !bulanSelesai) return 'Semua Periode (Semua Waktu)';
+    if (bulanMulai === bulanSelesai) return `Bulan ${formatBulanTahun(bulanMulai)}`;
+    return `${formatBulanTahun(bulanMulai) || 'Awal'} s/d ${formatBulanTahun(bulanSelesai) || 'Sekarang'}`;
   };
 
   // Export CSV of Financial Summary
   const handleExportCSV = () => {
-    const labelPeriode = tanggalMulai || tanggalSelesai
-      ? `${tanggalMulai || 'Awal'} s/d ${tanggalSelesai || 'Sekarang'}`
-      : 'Semua Waktu';
+    const labelPeriode = getPeriodeLabel();
 
     const rows = [
       ['LAPORAN KEUANGAN KOPERASI IDAMAN'],
-      ['Rentang Tanggal Kalender', labelPeriode],
+      ['Periode Bulan & Tahun', labelPeriode],
       [''],
       ['1. LAPORAN ARUS KAS'],
       ['Pemasukan Simpanan', laporan.arusKas.totalSimpananMasuk],
@@ -148,7 +169,7 @@ export default function LaporanPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${tanggalMulai || 'Awal'}_sd_${tanggalSelesai || 'Sekarang'}.csv`);
+    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${bulanMulai || 'Awal'}_sd_${bulanSelesai || 'Sekarang'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -157,7 +178,7 @@ export default function LaporanPage() {
   return (
     <AppLayout
       title="Laporan Keuangan & Rekapitulasi"
-      subtitle="Pilih rentang tanggal kalender untuk merekapitulasi arus kas, neraca saldo, dan alokasi SHU."
+      subtitle="Pilih kalender bulan dan tahun untuk merekapitulasi arus kas, neraca saldo, dan alokasi SHU."
       rightAction={
         <div className="flex items-center gap-2">
           <button
@@ -179,35 +200,35 @@ export default function LaporanPage() {
         </div>
       }
     >
-      {/* Date Range Calendar Filter Bar */}
+      {/* Month & Year Calendar Filter Bar */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm mb-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        {/* Date Inputs */}
+        {/* Month Picker Inputs */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-700 text-xl">calendar_month</span>
-            <span className="text-xs font-bold text-slate-700">Rentang Kalender:</span>
+            <span className="material-symbols-outlined text-blue-700 text-2xl">calendar_month</span>
+            <span className="text-xs font-bold text-slate-700">Pilih Bulan & Tahun:</span>
           </div>
 
           <div className="flex items-center gap-2">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Dari Tanggal</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Dari Bulan</label>
               <input
-                type="date"
-                value={tanggalMulai}
-                onChange={(e) => setTanggalMulai(e.target.value)}
-                className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium font-mono text-slate-800"
+                type="month"
+                value={bulanMulai}
+                onChange={(e) => setBulanMulai(e.target.value)}
+                className="px-3.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-bold text-[#002045] cursor-pointer shadow-sm"
               />
             </div>
 
             <span className="text-slate-400 font-bold self-end mb-2">s/d</span>
 
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Sampai Tanggal</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Sampai Bulan</label>
               <input
-                type="date"
-                value={tanggalSelesai}
-                onChange={(e) => setTanggalSelesai(e.target.value)}
-                className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium font-mono text-slate-800"
+                type="month"
+                value={bulanSelesai}
+                onChange={(e) => setBulanSelesai(e.target.value)}
+                className="px-3.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-bold text-[#002045] cursor-pointer shadow-sm"
               />
             </div>
           </div>
@@ -218,29 +239,22 @@ export default function LaporanPage() {
           <span className="text-[11px] font-semibold text-slate-400 mr-1">Preset:</span>
           <button
             type="button"
-            onClick={setPresetHariIni}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors"
-          >
-            Hari Ini
-          </button>
-          <button
-            type="button"
             onClick={setPresetBulanIni}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-bold text-slate-700 transition-colors cursor-pointer"
           >
-            Bulan Ini
+            Bulan Ini ({formatBulanTahun(currentMonthStr)})
           </button>
           <button
             type="button"
             onClick={setPresetTahunIni}
-            className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 text-[11px] font-bold text-blue-800 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 text-[11px] font-bold text-blue-800 transition-colors cursor-pointer"
           >
-            Tahun Ini ({currentYear})
+            Tahun {currentYear} (Jan - Des)
           </button>
           <button
             type="button"
             onClick={setPresetSemuaWaktu}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors cursor-pointer"
           >
             Semua Waktu
           </button>
@@ -253,10 +267,10 @@ export default function LaporanPage() {
         <div className="text-center pb-4 border-b border-slate-200">
           <h2 className="text-lg font-black text-[#002045] tracking-wide">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
           <p className="text-xs text-slate-500">{settings.alamat || 'Jakarta, Indonesia'}</p>
-          <div className="inline-flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full text-xs font-bold text-blue-950 mt-2">
+          <div className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-100 px-3.5 py-1 rounded-full text-xs font-bold text-blue-950 mt-2">
             <span className="material-symbols-outlined text-sm text-blue-700">date_range</span>
             <span>
-              Periode Laporan: {tanggalMulai || tanggalSelesai ? `${tanggalMulai || 'Awal'} s/d ${tanggalSelesai || 'Sekarang'}` : 'Semua Waktu'}
+              Periode Laporan: {getPeriodeLabel()}
             </span>
           </div>
         </div>
