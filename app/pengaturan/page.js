@@ -7,7 +7,7 @@ import { authService } from '../../lib/authService';
 import { getSupabaseConfig, saveSupabaseConfig, testSupabaseConnection } from '../../lib/supabase';
 
 export default function PengaturanPage() {
-  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'users' | 'profil_saya' | 'supabase' | 'database'
+  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'supabase' | 'users' | 'profil_saya' | 'database'
 
   // Tab 1: Koperasi Settings
   const [formData, setFormData] = useState({
@@ -329,11 +329,20 @@ export default function PengaturanPage() {
     reader.readAsText(file);
   };
 
-  const handleResetDatabase = () => {
-    if (confirm('PERINGATAN: Apakah Anda yakin ingin mereset seluruh database ke data contoh default?')) {
-      dataService.resetDatabase();
-      setFormData(dataService.getSettings());
-      showToast('Database berhasil direset ke data contoh default.');
+  // Clear all demo data
+  const handleClearAllData = async () => {
+    if (confirm('KONFIRMASI: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA (Anggota, Simpanan, Pinjaman, Buku Kas)?\n\nDatabase akan dikosongkan bersih sehingga siap diisi data operasional riil.')) {
+      dataService.clearAllData();
+
+      if (supabaseStatus.isConnected) {
+        const wipeCloud = confirm('Apakah Anda juga ingin mengosongkan data di database Supabase Cloud?');
+        if (wipeCloud) {
+          await dataService.clearSupabaseData();
+        }
+      }
+
+      showToast('Seluruh data demo berhasil dihapus bersih!');
+      loadData();
     }
   };
 
@@ -416,7 +425,7 @@ export default function PengaturanPage() {
             }`}
           >
             <span className="material-symbols-outlined text-lg">database</span>
-            Backup & Pemulihan
+            Database & Pembersihan Data
           </button>
         </div>
 
@@ -973,17 +982,17 @@ export default function PengaturanPage() {
           </div>
         )}
 
-        {/* TAB 5: DATABASE & BACKUP */}
+        {/* TAB 5: DATABASE & PEMBERSIHAN DATA */}
         {activeTab === 'database' && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
               <span className="material-symbols-outlined text-slate-700">database</span>
-              <h2 className="text-sm font-bold text-[#002045]">Manajemen Database & Pemulihan</h2>
+              <h2 className="text-sm font-bold text-[#002045]">Manajemen Database & Pembersihan Data</h2>
             </div>
 
             <div className="p-6 flex flex-col gap-4 text-xs">
               <p className="text-slate-500">
-                Unduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk cadangan berkala, atau impor file backup untuk pemulihan.
+                Unduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk cadangan berkala, atau impor file backup untuk pemulihan, atau hapus seluruh data contoh / demo agar aplikasi siap dipakai dari nol.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -1021,16 +1030,16 @@ export default function PengaturanPage() {
 
                 <div className="border border-rose-200 rounded-xl p-4 flex flex-col justify-between gap-3 bg-rose-50/30">
                   <div>
-                    <h3 className="font-bold text-rose-800">Reset Data Default</h3>
-                    <p className="text-slate-500 text-[11px] mt-1">Kembalikan seluruh data ke contoh awal sistem.</p>
+                    <h3 className="font-bold text-rose-800">Hapus Semua Data Demo</h3>
+                    <p className="text-slate-500 text-[11px] mt-1">Kosongkan semua data anggota, simpanan, pinjaman & kas ke 0.</p>
                   </div>
                   <button
                     type="button"
-                    onClick={handleResetDatabase}
+                    onClick={handleClearAllData}
                     className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold flex items-center justify-center gap-1.5 shadow-sm"
                   >
-                    <span className="material-symbols-outlined text-base">restart_alt</span>
-                    Reset ke Awal
+                    <span className="material-symbols-outlined text-base">delete_sweep</span>
+                    Kosongkan Semua Data
                   </button>
                 </div>
               </div>
