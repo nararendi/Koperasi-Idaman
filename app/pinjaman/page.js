@@ -2,357 +2,739 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import AppLayout from '../../components/AppLayout';
+import { dataService } from '../../lib/dataService';
 
 export default function PinjamanPage() {
-  const [summary] = useState({
-    berjalan: 'Rp 1.250.000.000',
-    lunas: 'Rp 3.400.000.000',
-    tunggakan: 'Rp 45.500.000'
+  const [summary, setSummary] = useState({
+    berjalan: 0,
+    lunas: 0,
+    diajukan: 0,
+    sisaHutang: 0
   });
 
-  const [pinjamanList, setPinjamanList] = useState([
-    {
-      id: 1,
-      tanggal: '12 Okt 2024',
-      nama: 'Budi Santoso',
-      jumlah: 'Rp 15.000.000',
-      bunga: '2.5%',
-      tenor: '12 Bln',
-      status: 'Berjalan',
-      sisa: 'Rp 10.000.000'
-    },
-    {
-      id: 2,
-      tanggal: '15 Okt 2024',
-      nama: 'Siti Aminah',
-      jumlah: 'Rp 5.000.000',
-      bunga: '2.5%',
-      tenor: '6 Bln',
-      status: 'Diajukan',
-      sisa: '-'
-    },
-    {
-      id: 3,
-      tanggal: '01 Sep 2024',
-      nama: 'Agus Setiawan',
-      jumlah: 'Rp 50.000.000',
-      bunga: '2.5%',
-      tenor: '24 Bln',
-      status: 'Disetujui',
-      sisa: 'Rp 50.000.000'
-    },
-    {
-      id: 4,
-      tanggal: '20 Jun 2023',
-      nama: 'Rina Melati',
-      jumlah: 'Rp 20.000.000',
-      bunga: '2.5%',
-      tenor: '12 Bln',
-      status: 'Lunas',
-      sisa: 'Rp 0'
-    },
-    {
-      id: 5,
-      tanggal: '18 Okt 2024',
-      nama: 'Hendra Gunawan',
-      jumlah: 'Rp 100.000.000',
-      bunga: '2.5%',
-      tenor: '36 Bln',
-      status: 'Ditolak',
-      sisa: '-'
-    }
-  ]);
-
+  const [pinjamanList, setPinjamanList] = useState([]);
+  const [anggotaList, setAnggotaList] = useState([]);
+  const [settings, setSettings] = useState({});
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Modal: Ajukan Pinjaman Baru
+  const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [applyForm, setApplyForm] = useState({
+    nomor_anggota: '',
+    jumlah: '5000000',
+    bunga: 1.5,
+    tenor: 12,
+    keperluan: ''
+  });
+
+  // Modal: Bayar Angsuran
+  const [bayarModalOpen, setBayarModalOpen] = useState(false);
+  const [selectedPinjamanBayar, setSelectedPinjamanBayar] = useState(null);
+  const [bayarForm, setBayarForm] = useState({
+    jumlahBayar: '',
+    metode: 'Tunai',
+    penerima: 'Admin Kasir'
+  });
+
+  // Modal: Detail Pinjaman & Riwayat Angsuran
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedPinjamanDetail, setSelectedPinjamanDetail] = useState(null);
+
+  const loadData = () => {
+    const s = dataService.getPinjamanSummary();
+    const list = dataService.getPinjamanList();
+    const anggota = dataService.getAnggotaList();
+    const currentSettings = dataService.getSettings();
+
+    setSummary(s);
+    setPinjamanList(list);
+    setAnggotaList(anggota);
+    setSettings(currentSettings);
+
+    if (anggota.length > 0 && !applyForm.nomor_anggota) {
+      setApplyForm((prev) => ({
+        ...prev,
+        nomor_anggota: anggota[0].nomor_anggota || anggota[0].id,
+        bunga: currentSettings.sukuBungaPinjaman || 1.5
+      }));
+    }
+  };
 
   useEffect(() => {
-    async function loadPinjaman() {
-      try {
-        if (supabase) {
-          const { data, error } = await supabase
-            .from('pinjaman')
-            .select('*')
-            .order('created_at', { ascending: false });
+    loadData();
 
-          if (!error && data && data.length > 0) {
-            setPinjamanList(
-              data.map((item) => ({
-                id: item.id,
-                tanggal: item.tanggal_pengajuan || item.created_at,
-                nama: item.nama_anggota || item.nama,
-                jumlah: `Rp ${Number(item.jumlah || 0).toLocaleString('id-ID')}`,
-                bunga: `${item.bunga || 2.5}%`,
-                tenor: `${item.tenor || 12} Bln`,
-                status: item.status || 'Diajukan',
-                sisa: item.sisa_hutang ? `Rp ${Number(item.sisa_hutang).toLocaleString('id-ID')}` : '-'
-              }))
-            );
-          }
-        }
-      } catch (err) {
-        console.info('Supabase pinjaman check:', err);
-      }
+    const handleUpdate = () => {
+      loadData();
+    };
+
+    window.addEventListener('koperasi_db_updated', handleUpdate);
+    return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
+  }, []);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  // Open Apply Modal
+  const handleOpenApplyModal = () => {
+    setApplyForm({
+      nomor_anggota: anggotaList.length > 0 ? (anggotaList[0].nomor_anggota || anggotaList[0].id) : '',
+      jumlah: '5000000',
+      bunga: settings.sukuBungaPinjaman || 1.5,
+      tenor: 12,
+      keperluan: ''
+    });
+    setApplyModalOpen(true);
+  };
+
+  // Submit Loan Application
+  const handleSubmitApply = (e) => {
+    e.preventDefault();
+    if (!applyForm.nomor_anggota) {
+      alert('Pilih anggota pemohon pinjaman.');
+      return;
+    }
+    if (!applyForm.jumlah || Number(applyForm.jumlah) <= 0) {
+      alert('Masukkan nominal pinjaman yang valid.');
+      return;
     }
 
-    loadPinjaman();
-  }, []);
+    const newLoan = dataService.applyPinjaman(applyForm);
+    setApplyModalOpen(false);
+    showToast(`Pengajuan pinjaman baru (${newLoan.nomor_pinjaman}) senilai Rp ${Number(newLoan.jumlah).toLocaleString('id-ID')} berhasil diajukan!`);
+  };
+
+  // Change Loan Status (Approve / Reject / Disburse)
+  const handleUpdateStatus = (id, newStatus) => {
+    if (newStatus === 'Berjalan') {
+      if (!confirm('Apakah Anda yakin ingin mencairkan dana pinjaman ini? Saldo Kas Koperasi akan otomatis dipotong untuk pencairan dana pinjaman.')) {
+        return;
+      }
+    }
+    const updated = dataService.updatePinjamanStatus(id, newStatus);
+    if (updated) {
+      showToast(`Status pinjaman ${updated.nomor_pinjaman} diubah menjadi "${newStatus}"`);
+    }
+  };
+
+  // Open Pay Installment Modal
+  const handleOpenBayarModal = (pinjaman) => {
+    setSelectedPinjamanBayar(pinjaman);
+    setBayarForm({
+      jumlahBayar: pinjaman.total_angsuran_bulanan || Math.round(Number(pinjaman.total_pinjaman) / Number(pinjaman.tenor)),
+      metode: 'Tunai',
+      penerima: 'Admin Kasir'
+    });
+    setBayarModalOpen(true);
+  };
+
+  // Submit Installment Payment
+  const handleSubmitBayar = (e) => {
+    e.preventDefault();
+    if (!selectedPinjamanBayar) return;
+
+    const res = dataService.payPinjamanInstallment({
+      pinjamanId: selectedPinjamanBayar.id,
+      jumlahBayar: bayarForm.jumlahBayar,
+      metode: bayarForm.metode,
+      penerima: bayarForm.penerima
+    });
+
+    setBayarModalOpen(false);
+    showToast(`Pembayaran angsuran Rp ${Number(bayarForm.jumlahBayar).toLocaleString('id-ID')} berhasil dibukukan ke Kas Koperasi!`);
+  };
+
+  // Open Detail Modal
+  const handleOpenDetailModal = (pinjaman) => {
+    setSelectedPinjamanDetail(pinjaman);
+    setDetailModalOpen(true);
+  };
 
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Berjalan':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800">Berjalan</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">Berjalan</span>;
       case 'Diajukan':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">Diajukan</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800">Diajukan</span>;
       case 'Disetujui':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800">Disetujui</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800">Disetujui</span>;
       case 'Lunas':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-800">Lunas</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700">Lunas</span>;
       case 'Ditolak':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800">Ditolak</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-100 text-rose-800">Ditolak</span>;
       default:
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-800">{status}</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-800">{status}</span>;
     }
   };
 
   const filteredList = pinjamanList.filter((item) => {
-    const matchSearch = item.nama.toLowerCase().includes(searchQuery.toLowerCase());
+    const nama = (item.nama || '').toLowerCase();
+    const noPj = (item.nomor_pinjaman || item.id || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    const matchSearch = nama.includes(query) || noPj.includes(query);
     const matchStatus = statusFilter === 'Semua' || item.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
+  const formatRupiah = (num) => {
+    return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
+  };
+
+  // Calculator preview for application form
+  const calcPokokBulan = Math.round(Number(applyForm.jumlah || 0) / Number(applyForm.tenor || 1));
+  const calcBungaBulan = Math.round(Number(applyForm.jumlah || 0) * (Number(applyForm.bunga || 0) / 100));
+  const calcTotalBulan = calcPokokBulan + calcBungaBulan;
+  const calcTotalSemua = calcTotalBulan * Number(applyForm.tenor || 1);
+
   return (
-    <div className="bg-[#f9f9ff] text-[#111c2c] min-h-screen flex flex-col md:flex-row font-sans">
-      {/* SideNavBar */}
-      <nav className="hidden md:flex h-full w-64 fixed left-0 top-0 bg-[#002045] text-white flex-col py-6 shadow-sm z-50">
-        <div className="px-4 mb-8 flex items-center gap-2">
-          <span className="material-symbols-outlined text-2xl">account_balance</span>
-          <div>
-            <h1 className="text-base font-bold text-white leading-tight">
-              Koperasi Idaman
-            </h1>
-            <p className="text-xs text-white/70">Management System</p>
+    <AppLayout
+      title="Manajemen Pinjaman Koperasi"
+      subtitle="Kelola pengajuan kredit, persetujuan, pencairan dana, dan penerimaan angsuran."
+      rightAction={
+        <button
+          type="button"
+          onClick={handleOpenApplyModal}
+          className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-[18px]">add_task</span>
+          Ajukan Pinjaman Baru
+        </button>
+      }
+    >
+      {/* Toast */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold animate-bounce">
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Pinjaman Berjalan</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">trending_up</span>
+            </div>
           </div>
+          <p className="text-xl font-extrabold text-emerald-700">{formatRupiah(summary.berjalan)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Total plafon kredit aktif</p>
         </div>
 
-        <div className="flex-1 flex flex-col gap-1 px-2">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">dashboard</span>
-            Beranda
-          </Link>
-          <Link
-            href="/anggota"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">group</span>
-            Anggota
-          </Link>
-          <Link
-            href="/simpanan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">
-              account_balance_wallet
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Sisa Piutang / Tagihan</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">receipt_long</span>
+            </div>
+          </div>
+          <p className="text-xl font-extrabold text-amber-700">{formatRupiah(summary.sisaHutang)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Belum terbayar dari pinjaman aktif</p>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Pinjaman Selesai (Lunas)</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+            </div>
+          </div>
+          <p className="text-xl font-extrabold text-[#002045]">{formatRupiah(summary.lunas)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Riwayat kredit lunas tuntas</p>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Menunggu Persetujuan</span>
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">pending_actions</span>
+            </div>
+          </div>
+          <p className="text-xl font-extrabold text-purple-700">{formatRupiah(summary.diajukan)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Pengajuan baru yang perlu ditinjau</p>
+        </div>
+      </div>
+
+      {/* Main Table */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        {/* Filters */}
+        <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-bold text-slate-500 mr-1">Status:</span>
+            {['Semua', 'Diajukan', 'Disetujui', 'Berjalan', 'Lunas', 'Ditolak'].map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  statusFilter === st
+                    ? 'bg-[#002045] text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+              search
             </span>
-            Simpanan
-          </Link>
-          <Link
-            href="/pinjaman"
-            className="flex items-center gap-3 px-4 py-2 rounded bg-white/10 text-white border-l-4 border-[#adc7f7] transition-all text-xs font-bold"
-          >
-            <span className="material-symbols-outlined text-lg">payments</span>
-            Pinjaman
-          </Link>
-          <Link
-            href="/kas"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">receipt_long</span>
-            Transaksi Kas
-          </Link>
-          <Link
-            href="/laporan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">assessment</span>
-            Laporan
-          </Link>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari peminjam, nomor kredit..."
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white"
+            />
+          </div>
         </div>
 
-        <div className="mt-auto flex flex-col gap-1 px-2">
-          <Link
-            href="/pengaturan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">settings</span>
-            Pengaturan
-          </Link>
-          <button
-            type="button"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold text-left"
-          >
-            <span className="material-symbols-outlined text-lg">logout</span>
-            Keluar
-          </button>
+        {/* Table List */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                <th className="px-4 py-3">No. Pinjaman</th>
+                <th className="px-4 py-3">Peminjam</th>
+                <th className="px-4 py-3 text-right">Plafon Pinjaman</th>
+                <th className="px-4 py-3">Bunga & Tenor</th>
+                <th className="px-4 py-3 text-right">Angsuran / Bln</th>
+                <th className="px-4 py-3 text-right">Sisa Hutang</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-center">Aksi / Operasional</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredList.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-10 text-center text-slate-400">
+                    Tidak ditemukan data pinjaman dengan filter saat ini.
+                  </td>
+                </tr>
+              ) : (
+                filteredList.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="px-4 py-3 font-mono font-bold text-blue-900 whitespace-nowrap">
+                      {item.nomor_pinjaman || item.id}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="font-bold text-[#002045]">{item.nama}</div>
+                      <div className="text-[11px] text-slate-400 font-mono">{item.nomor_anggota}</div>
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-[#002045] whitespace-nowrap">
+                      {formatRupiah(item.jumlah)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-600">
+                      <div>{item.bunga}% / bln</div>
+                      <div className="text-[11px] font-semibold text-blue-800">{item.tenor} Bulan</div>
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-slate-700 whitespace-nowrap">
+                      {formatRupiah(item.total_angsuran_bulanan || item.angsuran_pokok)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold whitespace-nowrap">
+                      {item.status === 'Lunas' ? (
+                        <span className="text-emerald-700">Rp 0 (Lunas)</span>
+                      ) : (
+                        <span className="text-rose-600">{formatRupiah(item.sisa_hutang || item.total_pinjaman)}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                      {getStatusBadge(item.status)}
+                    </td>
+                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {/* Action buttons depending on status */}
+                        {item.status === 'Diajukan' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateStatus(item.id, 'Disetujui')}
+                              title="Setujui Pengajuan Pinjaman"
+                              className="px-2.5 py-1 bg-blue-700 hover:bg-blue-800 text-white rounded text-[11px] font-bold"
+                            >
+                              Setujui
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateStatus(item.id, 'Ditolak')}
+                              title="Tolak Pinjaman"
+                              className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[11px] font-bold"
+                            >
+                              Tolak
+                            </button>
+                          </>
+                        )}
+
+                        {item.status === 'Disetujui' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(item.id, 'Berjalan')}
+                            title="Cairkan Dana & Potong Kas"
+                            className="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[11px] font-bold flex items-center gap-1 shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-sm">payments</span>
+                            Cairkan Dana
+                          </button>
+                        )}
+
+                        {item.status === 'Berjalan' && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenBayarModal(item)}
+                            title="Bayar Angsuran Pinjaman"
+                            className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-[11px] font-bold flex items-center gap-1 shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-sm">add_card</span>
+                            Bayar Angsuran
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDetailModal(item)}
+                          title="Lihat Detail & Jadwal Angsuran"
+                          className="p-1 text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded"
+                        >
+                          <span className="material-symbols-outlined text-lg">info</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </nav>
+      </div>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col md:ml-64 mt-16 md:mt-0 max-w-[1280px] w-full mx-auto relative min-h-screen">
-        <div className="flex-1 p-4 md:p-10 flex flex-col gap-6">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#111c2c]">
-                Manajemen Pinjaman
-              </h2>
-              <p className="text-sm text-[#595f66] mt-1">
-                Kelola data pengajuan, status persetujuan, dan angsuran pinjaman anggota.
-              </p>
+      {/* MODAL AJUKAN PINJAMAN BARU */}
+      {applyModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined">request_quote</span>
+                <h3 className="text-base font-bold">Formulir Pengajuan Pinjaman</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setApplyModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
             </div>
-            <button
-              type="button"
-              className="bg-[#2f855a] hover:bg-[#276749] text-white px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0px_4px_12px_rgba(0,0,0,0.05)] cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Ajukan Pinjaman Baru
-            </button>
-          </div>
 
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl border border-[#c4c6cf] p-5 flex items-center justify-between shadow-[0px_4px_12px_rgba(0,0,0,0.05)]">
+            <form onSubmit={handleSubmitApply} className="p-6 flex flex-col gap-4 text-xs">
               <div>
-                <div className="text-xs font-semibold text-[#595f66] uppercase tracking-wider mb-1">
-                  Total Pinjaman Berjalan
-                </div>
-                <div className="text-2xl font-bold text-[#002045]">
-                  {summary.berjalan}
-                </div>
+                <label className="font-bold text-slate-700 block mb-1">Pilih Anggota Pemohon *</label>
+                <select
+                  required
+                  value={applyForm.nomor_anggota}
+                  onChange={(e) => setApplyForm({ ...applyForm, nomor_anggota: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-medium"
+                >
+                  <option value="">-- Pilih Anggota --</option>
+                  {anggotaList.map((a) => (
+                    <option key={a.id || a.nomor_anggota} value={a.nomor_anggota || a.id}>
+                      {a.nomor_anggota || a.id} - {a.nama || a.nama_lengkap}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="w-12 h-12 rounded-full bg-[#d6e3ff]/50 flex items-center justify-center text-[#002045]">
-                <span className="material-symbols-outlined text-2xl">trending_up</span>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl border border-[#c4c6cf] p-5 flex items-center justify-between shadow-[0px_4px_12px_rgba(0,0,0,0.05)]">
-              <div>
-                <div className="text-xs font-semibold text-[#595f66] uppercase tracking-wider mb-1">
-                  Total Sudah Lunas
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-1">
+                  <label className="font-bold text-slate-700 block mb-1">Plafon Pinjaman (Rp) *</label>
+                  <input
+                    type="number"
+                    required
+                    min="500000"
+                    step="500000"
+                    value={applyForm.jumlah}
+                    onChange={(e) => setApplyForm({ ...applyForm, jumlah: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-bold text-blue-900"
+                  />
                 </div>
-                <div className="text-2xl font-bold text-[#002045]">
-                  {summary.lunas}
-                </div>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700">
-                <span className="material-symbols-outlined text-2xl">check_circle</span>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl border border-[#c4c6cf] p-5 flex items-center justify-between shadow-[0px_4px_12px_rgba(0,0,0,0.05)]">
-              <div>
-                <div className="text-xs font-semibold text-[#595f66] uppercase tracking-wider mb-1">
-                  Total Tunggakan
-                </div>
-                <div className="text-2xl font-bold text-[#ba1a1a]">
-                  {summary.tunggakan}
-                </div>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-[#ffdad6] flex items-center justify-center text-[#ba1a1a]">
-                <span className="material-symbols-outlined text-2xl">warning</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Table Container */}
-          <div className="bg-white rounded-xl border border-[#c4c6cf] overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex flex-col">
-            {/* Filter Buttons */}
-            <div className="p-4 border-b border-[#c4c6cf] bg-[#f9f9ff] flex flex-wrap gap-4 justify-between items-center">
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-xs font-semibold text-[#595f66] mr-1">Status:</span>
-                {['Semua', 'Diajukan', 'Disetujui', 'Berjalan', 'Lunas', 'Ditolak'].map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    onClick={() => setStatusFilter(st)}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                      statusFilter === st
-                        ? 'bg-[#002045] text-white'
-                        : 'bg-white text-[#595f66] border border-[#c4c6cf] hover:bg-[#f0f3ff]'
-                    }`}
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Tenor (Bulan) *</label>
+                  <select
+                    value={applyForm.tenor}
+                    onChange={(e) => setApplyForm({ ...applyForm, tenor: Number(e.target.value) })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-semibold"
                   >
-                    {st}
-                  </button>
-                ))}
+                    <option value={3}>3 Bulan</option>
+                    <option value={6}>6 Bulan</option>
+                    <option value={10}>10 Bulan</option>
+                    <option value={12}>12 Bulan (1 Tahun)</option>
+                    <option value={18}>18 Bulan</option>
+                    <option value={24}>24 Bulan (2 Tahun)</option>
+                    <option value={36}>36 Bulan (3 Tahun)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Bunga (% / Bln)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={applyForm.bunga}
+                    onChange={(e) => setApplyForm({ ...applyForm, bunga: Number(e.target.value) })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none font-semibold text-slate-700"
+                  />
+                </div>
               </div>
 
-              <div className="relative w-full sm:w-64">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#74777f] text-[18px]">
-                  search
-                </span>
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Tujuan / Keperluan Pinjaman</label>
                 <input
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari nama anggota..."
-                  className="w-full pl-9 pr-3 py-1.5 border border-[#c4c6cf] rounded text-sm focus:border-[#2B6CB0] focus:ring-1 focus:ring-[#2B6CB0] outline-none"
+                  value={applyForm.keperluan}
+                  onChange={(e) => setApplyForm({ ...applyForm, keperluan: e.target.value })}
+                  placeholder="Contoh: Tambahan modal usaha warung sembako"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
                 />
+              </div>
+
+              {/* Real-time Loan Calculator Preview */}
+              <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col gap-2">
+                <span className="font-bold text-[#002045] flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-blue-600">calculate</span>
+                  Simulasi Angsuran Bulanan:
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
+                  <div>
+                    <span className="text-slate-500 block">Pokok / Bln:</span>
+                    <span className="font-bold text-slate-800">{formatRupiah(calcPokokBulan)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Bunga / Bln:</span>
+                    <span className="font-bold text-slate-800">{formatRupiah(calcBungaBulan)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Total Angsuran/Bln:</span>
+                    <span className="font-extrabold text-blue-900">{formatRupiah(calcTotalBulan)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Total Pengembalian:</span>
+                    <span className="font-extrabold text-indigo-900">{formatRupiah(calcTotalSemua)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setApplyModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] shadow-sm"
+                >
+                  Ajukan Pinjaman
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL BAYAR ANGSURAN */}
+      {bayarModalOpen && selectedPinjamanBayar && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-5 bg-amber-600 text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined">payments</span>
+                <h3 className="text-base font-bold">Bayar Angsuran Pinjaman</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBayarModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitBayar} className="p-6 flex flex-col gap-4 text-xs">
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Peminjam:</span>
+                  <span className="font-bold text-[#002045]">{selectedPinjamanBayar.nama}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">No. Pinjaman:</span>
+                  <span className="font-mono text-slate-700">{selectedPinjamanBayar.nomor_pinjaman || selectedPinjamanBayar.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Sisa Hutang:</span>
+                  <span className="font-bold text-rose-600">{formatRupiah(selectedPinjamanBayar.sisa_hutang)}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Nominal Pembayaran Angsuran (Rp) *</label>
+                <input
+                  type="number"
+                  required
+                  min="1000"
+                  value={bayarForm.jumlahBayar}
+                  onChange={(e) => setBayarForm({ ...bayarForm, jumlahBayar: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-amber-600 outline-none text-base font-bold text-amber-800"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Metode Pembayaran</label>
+                <select
+                  value={bayarForm.metode}
+                  onChange={(e) => setBayarForm({ ...bayarForm, metode: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-amber-600 outline-none bg-white font-medium"
+                >
+                  <option value="Tunai">Tunai / Kasir</option>
+                  <option value="Transfer Bank">Transfer Bank</option>
+                  <option value="Potong Gaji">Potong Gaji</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Nama Petugas Penerima</label>
+                <input
+                  type="text"
+                  value={bayarForm.penerima}
+                  onChange={(e) => setBayarForm({ ...bayarForm, penerima: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-amber-600 outline-none"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBayarModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-amber-600 text-white rounded-lg font-bold hover:bg-amber-700 shadow-sm"
+                >
+                  Simpan Angsuran
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETAIL PINJAMAN */}
+      {detailModalOpen && selectedPinjamanDetail && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center rounded-t-2xl">
+              <div>
+                <h3 className="text-base font-bold">Rincian & Jadwal Pinjaman</h3>
+                <p className="text-xs text-blue-200 font-mono">{selectedPinjamanDetail.nomor_pinjaman || selectedPinjamanDetail.id}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4 text-xs">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>
+                  <span className="text-slate-400 font-semibold block">Nama Peminjam:</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedPinjamanDetail.nama}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Status Pinjaman:</span>
+                  <span>{getStatusBadge(selectedPinjamanDetail.status)}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Plafon Pinjaman:</span>
+                  <span className="font-bold text-slate-800">{formatRupiah(selectedPinjamanDetail.jumlah)}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Tenor & Bunga:</span>
+                  <span className="font-bold text-slate-800">{selectedPinjamanDetail.tenor} Bulan ({selectedPinjamanDetail.bunga}% / bln)</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Total Kewajiban:</span>
+                  <span className="font-bold text-slate-800">{formatRupiah(selectedPinjamanDetail.total_pinjaman)}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Sisa Hutang:</span>
+                  <span className="font-bold text-rose-600">{formatRupiah(selectedPinjamanDetail.sisa_hutang)}</span>
+                </div>
+              </div>
+
+              {/* Installment History Table */}
+              <div>
+                <h4 className="text-sm font-bold text-[#002045] mb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-blue-700">history</span>
+                  Riwayat Pembayaran Angsuran ({selectedPinjamanDetail.riwayat_angsuran?.length || 0})
+                </h4>
+
+                {(!selectedPinjamanDetail.riwayat_angsuran || selectedPinjamanDetail.riwayat_angsuran.length === 0) ? (
+                  <p className="text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    Belum ada riwayat pembayaran angsuran.
+                  </p>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                        <tr>
+                          <th className="px-3 py-2">Angsuran Ke</th>
+                          <th className="px-3 py-2">Tanggal</th>
+                          <th className="px-3 py-2">Metode</th>
+                          <th className="px-3 py-2 text-right">Nominal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {selectedPinjamanDetail.riwayat_angsuran.map((ang) => (
+                          <tr key={ang.id}>
+                            <td className="px-3 py-2 font-bold text-blue-900">Ke-{ang.angsuran_ke}</td>
+                            <td className="px-3 py-2 text-slate-600">{ang.tanggal}</td>
+                            <td className="px-3 py-2 text-slate-600">{ang.metode}</td>
+                            <td className="px-3 py-2 text-right font-bold text-emerald-700">{formatRupiah(ang.jumlah)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#f0f3ff] border-b border-[#c4c6cf]">
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase">Tanggal</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase">Nama Anggota</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase text-right">Jumlah Pinjaman</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase">Bunga</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase">Tenor</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase">Status</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-[#595f66] uppercase text-right">Sisa Hutang</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm divide-y divide-[#c4c6cf]">
-                  {filteredList.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#f0f3ff] transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap text-[#111c2c]">{item.tanggal}</td>
-                      <td className="px-4 py-3 font-bold text-[#002045]">{item.nama}</td>
-                      <td className="px-4 py-3 text-right font-medium">{item.jumlah}</td>
-                      <td className="px-4 py-3">{item.bunga}</td>
-                      <td className="px-4 py-3">{item.tenor}</td>
-                      <td className="px-4 py-3">{getStatusBadge(item.status)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-[#595f66]">{item.sisa}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDetailModalOpen(false)}
+                className="px-4 py-2 bg-[#002045] text-white rounded-lg text-xs font-bold hover:bg-[#1a365d]"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="bg-[#f0f3ff] border-t border-[#c4c6cf] py-4">
-          <div className="w-full max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center px-4 md:px-10 gap-2">
-            <span className="text-xs font-bold text-[#002045]">
-              © 2024 Koperasi Idaman. v2.1.0-stable
-            </span>
-            <div className="flex gap-4 text-xs text-[#595f66]">
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Panduan Pengguna
-              </a>
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Bantuan
-              </a>
-            </div>
-          </div>
-        </footer>
-      </main>
-    </div>
+      )}
+    </AppLayout>
   );
 }

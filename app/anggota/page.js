@@ -2,110 +2,104 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import AppLayout from '../../components/AppLayout';
+import { dataService } from '../../lib/dataService';
 
 export default function DaftarAnggotaPage() {
-  const [anggotaList, setAnggotaList] = useState([
-    {
-      id: 'ANG-2023-001',
-      nama: 'Budi Santoso',
-      alamat: 'Jl. Merdeka No. 10, Jakarta',
-      nomor_hp: '0812-3456-7890',
-      tanggal_daftar: '15 Jan 2023',
-      status: 'Aktif'
-    },
-    {
-      id: 'ANG-2023-002',
-      nama: 'Siti Aminah',
-      alamat: 'Jl. Sudirman Blok B4, Bandung',
-      nomor_hp: '0856-7890-1234',
-      tanggal_daftar: '02 Feb 2023',
-      status: 'Aktif'
-    },
-    {
-      id: 'ANG-2022-145',
-      nama: 'Ahmad Dahlan',
-      alamat: 'Jl. Diponegoro No. 88, Surabaya',
-      nomor_hp: '0811-2233-4455',
-      tanggal_daftar: '10 Nov 2022',
-      status: 'Keluar'
-    },
-    {
-      id: 'ANG-2023-018',
-      nama: 'Dewi Lestari',
-      alamat: 'Komp. Mawar Hijau, Semarang',
-      nomor_hp: '0899-8877-6655',
-      tanggal_daftar: '05 Mar 2023',
-      status: 'Berhenti'
-    },
-    {
-      id: 'ANG-2024-001',
-      nama: 'Eko Prasetyo',
-      alamat: 'Jl. Pahlawan Gg. 3, Malang',
-      nomor_hp: '0813-5555-4444',
-      tanggal_daftar: '01 Jan 2024',
-      status: 'Aktif'
-    }
-  ]);
-
+  const [anggotaList, setAnggotaList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
+
+  // Modal States
+  const [selectedAnggota, setSelectedAnggota] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({});
+  const [toastMessage, setToastMessage] = useState('');
+
+  const loadAnggota = () => {
+    const list = dataService.getAnggotaList();
+    setAnggotaList(list);
+  };
 
   useEffect(() => {
-    async function fetchAnggota() {
-      try {
-        if (supabase) {
-          const { data, error } = await supabase
-            .from('anggota')
-            .select('*')
-            .order('created_at', { ascending: false });
+    loadAnggota();
 
-          if (!error && data && data.length > 0) {
-            setAnggotaList(
-              data.map((item) => ({
-                id: item.nomor_anggota || item.id || `ANG-${item.id}`,
-                nama: item.nama_lengkap || item.nama,
-                alamat: item.alamat_lengkap || item.alamat,
-                nomor_hp: item.nomor_hp,
-                tanggal_daftar: item.tanggal_daftar || item.created_at,
-                status: item.status_keanggotaan || item.status || 'Aktif'
-              }))
-            );
-          }
-        }
-      } catch (err) {
-        console.info('Supabase fetch initialized:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
+    const handleUpdate = () => {
+      loadAnggota();
+    };
 
-    fetchAnggota();
+    window.addEventListener('koperasi_db_updated', handleUpdate);
+    return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
   }, []);
 
-  const handleDelete = async (id) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus data anggota ${id}?`)) {
-      try {
-        if (supabase) {
-          await supabase.from('anggota').delete().eq('nomor_anggota', id);
-        }
-      } catch (err) {
-        console.error('Gagal menghapus dari Supabase:', err);
-      }
-      setAnggotaList((prev) => prev.filter((item) => item.id !== id));
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  // Open Detail Modal with personal savings & loan history
+  const handleOpenDetail = (item) => {
+    const simpanan = dataService.getSimpananByAnggota(item.nomor_anggota || item.id);
+    const pinjaman = dataService.getPinjamanByAnggota(item.nomor_anggota || item.id);
+    
+    let totalSimpanan = 0;
+    simpanan.forEach((s) => {
+      const isWithdrawal = s.tipe === 'Penarikan' || (s.keterangan || '').toLowerCase().includes('tarik');
+      totalSimpanan += isWithdrawal ? -Number(s.jumlah || 0) : Number(s.jumlah || 0);
+    });
+
+    setSelectedAnggota({
+      ...item,
+      simpananList: simpanan,
+      pinjamanList: pinjaman,
+      totalSimpanan
+    });
+    setDetailModalOpen(true);
+  };
+
+  // Open Edit Modal
+  const handleOpenEdit = (item) => {
+    setEditFormData({
+      id: item.id || item.nomor_anggota,
+      nomor_anggota: item.nomor_anggota || item.id,
+      nama: item.nama || item.nama_lengkap || '',
+      alamat: item.alamat || item.alamat_lengkap || '',
+      nomor_hp: item.nomor_hp || '',
+      pekerjaan: item.pekerjaan || '',
+      tempat_lahir: item.tempat_lahir || '',
+      tanggal_lahir: item.tanggal_lahir || '',
+      status: item.status || item.status_keanggotaan || 'Aktif'
+    });
+    setEditModalOpen(true);
+  };
+
+  // Save Edit
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    dataService.updateAnggota(editFormData.id, editFormData);
+    setEditModalOpen(false);
+    showToast(`Data anggota ${editFormData.nama} berhasil diperbarui!`);
+  };
+
+  // Delete Anggota
+  const handleDelete = (item) => {
+    const id = item.nomor_anggota || item.id;
+    if (confirm(`Apakah Anda yakin ingin menghapus data anggota "${item.nama || item.nama_lengkap}" (${id})?`)) {
+      dataService.deleteAnggota(id);
+      showToast(`Data anggota ${id} berhasil dihapus.`);
     }
   };
 
   const filteredAnggota = anggotaList.filter((item) => {
-    const matchesSearch =
-      item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.alamat.toLowerCase().includes(searchQuery.toLowerCase());
+    const nama = (item.nama || item.nama_lengkap || '').toLowerCase();
+    const id = (item.nomor_anggota || item.id || '').toLowerCase();
+    const alamat = (item.alamat || item.alamat_lengkap || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
 
-    const matchesStatus =
-      statusFilter === 'all' ||
-      item.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesSearch = nama.includes(query) || id.includes(query) || alamat.includes(query);
+    const itemStatus = (item.status || item.status_keanggotaan || 'aktif').toLowerCase();
+    const matchesStatus = statusFilter === 'all' || itemStatus === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -114,338 +108,455 @@ export default function DaftarAnggotaPage() {
     const s = (status || '').toLowerCase();
     if (s === 'aktif') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#E6FFFA] text-[#234E52] text-xs font-semibold uppercase tracking-wide">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase">
           Aktif
         </span>
       );
     }
     if (s === 'keluar') {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#EDF2F7] text-[#4A5568] text-xs font-semibold uppercase tracking-wide">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase">
           Keluar
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FED7D7] text-[#9B2C2C] text-xs font-semibold uppercase tracking-wide">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[11px] font-bold uppercase">
         Berhenti
       </span>
     );
   };
 
   return (
-    <div className="bg-[#f0f3ff] text-[#111c2c] min-h-screen flex flex-col md:flex-row font-sans">
-      {/* SideNavBar (Desktop) */}
-      <nav className="hidden md:flex h-full w-64 fixed left-0 top-0 bg-[#002045] text-white flex-col py-6 shadow-sm z-50">
-        <div className="px-4 mb-8 flex items-center gap-2">
-          <span className="material-symbols-outlined text-2xl">account_balance</span>
-          <div>
-            <h1 className="text-base font-bold text-white leading-tight">
-              Koperasi Idaman
-            </h1>
-            <p className="text-xs text-white/70">Management System</p>
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col gap-1 px-2">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">dashboard</span>
-            Beranda
-          </Link>
-          <Link
-            href="/anggota"
-            className="flex items-center gap-3 px-4 py-2 rounded bg-white/10 text-white border-l-4 border-[#adc7f7] transition-all duration-150 text-xs font-bold"
-          >
-            <span className="material-symbols-outlined text-lg">group</span>
-            Anggota
-          </Link>
-          <Link
-            href="/simpanan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">
-              account_balance_wallet
-            </span>
-            Simpanan
-          </Link>
-          <Link
-            href="/pinjaman"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">payments</span>
-            Pinjaman
-          </Link>
-          <Link
-            href="/kas"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">receipt_long</span>
-            Transaksi Kas
-          </Link>
-          <Link
-            href="/laporan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">assessment</span>
-            Laporan
-          </Link>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-1 px-2">
-          <Link
-            href="/pengaturan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">settings</span>
-            Pengaturan
-          </Link>
-          <button
-            type="button"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 text-xs font-semibold text-left"
-          >
-            <span className="material-symbols-outlined text-lg">logout</span>
-            Keluar
-          </button>
-        </div>
-      </nav>
-
-      {/* TopNavBar (Mobile) */}
-      <header className="md:hidden bg-white text-[#002045] border-b border-[#c4c6cf] flex justify-between items-center px-4 w-full h-16 z-50 fixed top-0 left-0">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-2xl">account_balance</span>
-          <h1 className="text-base font-bold text-[#002045]">
-            Sistem Informasi Koperasi
-          </h1>
-        </div>
+    <AppLayout
+      title="Manajemen Anggota Koperasi"
+      subtitle="Kelola data pendaftaran, keanggotaan aktif, dan profil anggota koperasi."
+      rightAction={
         <Link
-          href="/"
-          className="text-[#595f66] hover:bg-[#f0f3ff] transition-colors p-2 rounded-full cursor-pointer"
+          href="/anggota/tambah"
+          className="bg-[#002045] hover:bg-[#1a365d] text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
         >
-          <span className="material-symbols-outlined">menu</span>
+          <span className="material-symbols-outlined text-[18px]">person_add</span>
+          Tambah Anggota Baru
         </Link>
-      </header>
+      }
+    >
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold animate-bounce">
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col md:ml-64 mt-16 md:mt-0 max-w-[1280px] w-full mx-auto relative min-h-screen">
-        <div className="flex-1 p-4 md:p-10 flex flex-col gap-6">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#111c2c]">
-                Daftar Anggota
-              </h2>
-              <p className="text-sm text-[#595f66] mt-1">
-                Kelola data seluruh anggota Koperasi Idaman.
-              </p>
-            </div>
-            <Link
-              href="/anggota/tambah"
-              className="bg-[#2f855a] text-white px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 hover:bg-[#276749] transition-colors shadow-[0px_4px_12px_rgba(0,0,0,0.05)] cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Tambah Anggota Baru
-            </Link>
+      {/* Top Stats Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <div className="text-xs font-semibold text-slate-500 uppercase">Total Anggota Terdaftar</div>
+            <div className="text-2xl font-extrabold text-[#002045] mt-1">{anggotaList.length} Orang</div>
           </div>
-
-          {/* Card Container */}
-          <div className="bg-white border border-[#c4c6cf] rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex-1 flex flex-col overflow-hidden">
-            {/* Toolbar */}
-            <div className="p-4 border-b border-[#c4c6cf] flex flex-col sm:flex-row gap-4 justify-between items-center bg-[#f9f9ff]">
-              <div className="relative w-full sm:w-96">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#74777f]">
-                  search
-                </span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-[#c4c6cf] rounded text-sm text-[#111c2c] focus:outline-none focus:border-[#2B6CB0] focus:ring-1 focus:ring-[#2B6CB0] placeholder:text-[#A0AEC0] bg-white transition-all"
-                  placeholder="Cari nama / nomor anggota..."
-                />
-              </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <label className="text-xs font-semibold text-[#595f66] shrink-0">
-                  Status:
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full sm:w-auto border border-[#c4c6cf] rounded px-3 py-2 text-sm text-[#111c2c] focus:outline-none focus:border-[#2B6CB0] focus:ring-1 focus:ring-[#2B6CB0] bg-white cursor-pointer"
-                >
-                  <option value="all">Semua Status</option>
-                  <option value="aktif">Aktif</option>
-                  <option value="keluar">Keluar</option>
-                  <option value="berhenti">Berhenti</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Table Wrapper */}
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-[#F7FAFC] border-b border-[#c4c6cf]">
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      No. Anggota
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Nama Lengkap
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Alamat
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Nomor HP
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Tanggal Daftar
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Status
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap text-right">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm text-[#111c2c] divide-y divide-[#c4c6cf]">
-                  {filteredAnggota.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={7}
-                        className="py-8 text-center text-sm text-[#595f66]"
-                      >
-                        Tidak ada data anggota yang sesuai.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredAnggota.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="hover:bg-[#F0F4F8] transition-colors group"
-                      >
-                        <td
-                          className={`py-3 px-4 font-semibold ${
-                            item.status.toLowerCase() !== 'aktif'
-                              ? 'text-[#74777f]'
-                              : ''
-                          }`}
-                        >
-                          {item.id}
-                        </td>
-                        <td
-                          className={`py-3 px-4 font-medium ${
-                            item.status.toLowerCase() !== 'aktif'
-                              ? 'text-[#74777f]'
-                              : ''
-                          }`}
-                        >
-                          {item.nama}
-                        </td>
-                        <td className="py-3 px-4 text-[#595f66] truncate max-w-[200px]">
-                          {item.alamat}
-                        </td>
-                        <td className="py-3 px-4 text-[#595f66]">{item.nomor_hp}</td>
-                        <td className="py-3 px-4 text-[#595f66]">
-                          {item.tanggal_daftar}
-                        </td>
-                        <td className="py-3 px-4">{getStatusBadge(item.status)}</td>
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              className="text-[#002045] hover:text-[#2d476f] p-1 rounded hover:bg-[#e7eeff] transition-colors"
-                              title="Lihat Detail"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                visibility
-                              </span>
-                            </button>
-                            <Link
-                              href={`/anggota/edit?id=${encodeURIComponent(item.id)}`}
-                              className="text-[#002045] hover:text-[#2d476f] p-1 rounded hover:bg-[#e7eeff] transition-colors"
-                              title="Edit"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                edit
-                              </span>
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(item.id)}
-                              className="text-[#ba1a1a] hover:text-[#93000a] p-1 rounded hover:bg-[#ffdad6] transition-colors"
-                              title="Hapus"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                delete
-                              </span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="p-4 border-t border-[#c4c6cf] flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#f9f9ff]">
-              <span className="text-sm text-[#595f66]">
-                Menampilkan 1-{filteredAnggota.length} dari {anggotaList.length} anggota
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  className="px-2 py-1 border border-[#c4c6cf] rounded bg-white text-[#595f66] hover:bg-[#f0f3ff] disabled:opacity-50"
-                  disabled
-                >
-                  <span className="material-symbols-outlined text-[18px] leading-none">
-                    chevron_left
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="w-8 h-8 flex items-center justify-center border border-[#002045] bg-[#002045] text-white text-xs font-semibold rounded"
-                >
-                  1
-                </button>
-                <button
-                  type="button"
-                  className="px-2 py-1 border border-[#c4c6cf] rounded bg-white text-[#595f66] hover:bg-[#f0f3ff]"
-                >
-                  <span className="material-symbols-outlined text-[18px] leading-none">
-                    chevron_right
-                  </span>
-                </button>
-              </div>
-            </div>
+          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+            <span className="material-symbols-outlined text-xl">group</span>
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="bg-[#f0f3ff] border-t border-[#c4c6cf] py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center px-4 md:px-10 w-full max-w-[1280px] mx-auto gap-2">
-            <span className="text-xs font-bold text-[#002045]">
-              © 2024 Koperasi Idaman. v2.1.0-stable
-            </span>
-            <div className="flex gap-4 text-xs text-[#595f66]">
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Panduan Pengguna
-              </a>
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Bantuan
-              </a>
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Kebijakan Privasi
-              </a>
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <div className="text-xs font-semibold text-slate-500 uppercase">Anggota Status Aktif</div>
+            <div className="text-2xl font-extrabold text-emerald-700 mt-1">
+              {anggotaList.filter((a) => (a.status || a.status_keanggotaan || '').toLowerCase() === 'aktif').length} Orang
             </div>
           </div>
-        </footer>
-      </main>
-    </div>
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <span className="material-symbols-outlined text-xl">verified_user</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <div className="text-xs font-semibold text-slate-500 uppercase">Tidak Aktif / Keluar</div>
+            <div className="text-2xl font-extrabold text-slate-600 mt-1">
+              {anggotaList.filter((a) => (a.status || a.status_keanggotaan || '').toLowerCase() !== 'aktif').length} Orang
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+            <span className="material-symbols-outlined text-xl">person_off</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Table Container */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        {/* Search & Filter Bar */}
+        <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-bold text-slate-500 mr-1">Status:</span>
+            {['all', 'aktif', 'keluar', 'berhenti'].map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  statusFilter === st
+                    ? 'bg-[#002045] text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {st === 'all' ? 'Semua Status' : st.charAt(0).toUpperCase() + st.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+              search
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama, no. anggota, alamat..."
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-xs focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none bg-white"
+            />
+          </div>
+        </div>
+
+        {/* Anggota List Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                <th className="px-4 py-3">No. Anggota</th>
+                <th className="px-4 py-3">Nama Anggota</th>
+                <th className="px-4 py-3">No. Telepon / WA</th>
+                <th className="px-4 py-3">Alamat</th>
+                <th className="px-4 py-3">Tgl Daftar</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredAnggota.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-slate-400">
+                    Tidak ditemukan data anggota yang sesuai dengan kriteria pencarian.
+                  </td>
+                </tr>
+              ) : (
+                filteredAnggota.map((item) => (
+                  <tr key={item.id || item.nomor_anggota} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="px-4 py-3 font-mono font-bold text-blue-900 whitespace-nowrap">
+                      {item.nomor_anggota || item.id}
+                    </td>
+                    <td className="px-4 py-3 font-bold text-[#002045] whitespace-nowrap">
+                      {item.nama || item.nama_lengkap}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                      {item.nomor_hp || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate" title={item.alamat || item.alamat_lengkap}>
+                      {item.alamat || item.alamat_lengkap || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                      {item.tanggal_daftar || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                      {getStatusBadge(item.status || item.status_keanggotaan)}
+                    </td>
+                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDetail(item)}
+                          title="Lihat Detail & Tabungan"
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(item)}
+                          title="Edit Data Anggota"
+                          className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item)}
+                          title="Hapus Anggota"
+                          className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* DETAIL MODAL */}
+      {detailModalOpen && selectedAnggota && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-base">
+                  {(selectedAnggota.nama || selectedAnggota.nama_lengkap || 'A').charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold">{selectedAnggota.nama || selectedAnggota.nama_lengkap}</h3>
+                  <p className="text-xs text-blue-200/80 font-mono">No. {selectedAnggota.nomor_anggota || selectedAnggota.id}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-6 text-xs">
+              {/* Profile Details Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>
+                  <span className="text-slate-400 font-semibold block">Nomor HP / WA:</span>
+                  <span className="font-bold text-slate-800">{selectedAnggota.nomor_hp || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Pekerjaan:</span>
+                  <span className="font-bold text-slate-800">{selectedAnggota.pekerjaan || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Tempat, Tgl Lahir:</span>
+                  <span className="font-bold text-slate-800">
+                    {selectedAnggota.tempat_lahir || '-'}, {selectedAnggota.tanggal_lahir || '-'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Tanggal Bergabung:</span>
+                  <span className="font-bold text-slate-800">{selectedAnggota.tanggal_daftar || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Status Keanggotaan:</span>
+                  <span className="font-bold">{getStatusBadge(selectedAnggota.status || selectedAnggota.status_keanggotaan)}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold block">Total Saldo Simpanan:</span>
+                  <span className="font-bold text-emerald-700 text-sm">
+                    Rp {Number(selectedAnggota.totalSimpanan || 0).toLocaleString('id-ID')}
+                  </span>
+                </div>
+                <div className="col-span-2 sm:col-span-3">
+                  <span className="text-slate-400 font-semibold block">Alamat Lengkap:</span>
+                  <span className="font-medium text-slate-800">{selectedAnggota.alamat || selectedAnggota.alamat_lengkap || '-'}</span>
+                </div>
+              </div>
+
+              {/* Savings History for this member */}
+              <div>
+                <h4 className="text-sm font-bold text-[#002045] mb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-emerald-600">savings</span>
+                  Riwayat Simpanan Anggota ({selectedAnggota.simpananList?.length || 0})
+                </h4>
+                {selectedAnggota.simpananList?.length === 0 ? (
+                  <p className="text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">Belum ada transaksi simpanan tercatat.</p>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                        <tr>
+                          <th className="px-3 py-2">Tgl</th>
+                          <th className="px-3 py-2">Jenis</th>
+                          <th className="px-3 py-2 text-right">Nominal</th>
+                          <th className="px-3 py-2">Keterangan</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {selectedAnggota.simpananList.map((s) => (
+                          <tr key={s.id}>
+                            <td className="px-3 py-2 text-slate-600">{s.tanggal}</td>
+                            <td className="px-3 py-2 font-semibold text-emerald-700">{s.jenis}</td>
+                            <td className="px-3 py-2 text-right font-bold">Rp {Number(s.jumlah || 0).toLocaleString('id-ID')}</td>
+                            <td className="px-3 py-2 text-slate-500">{s.keterangan}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Loan History for this member */}
+              <div>
+                <h4 className="text-sm font-bold text-[#002045] mb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-amber-600">payments</span>
+                  Riwayat Pinjaman Anggota ({selectedAnggota.pinjamanList?.length || 0})
+                </h4>
+                {selectedAnggota.pinjamanList?.length === 0 ? (
+                  <p className="text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">Tidak ada pengajuan pinjaman aktif/lunas.</p>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                        <tr>
+                          <th className="px-3 py-2">No. Pinjaman</th>
+                          <th className="px-3 py-2">Plafon</th>
+                          <th className="px-3 py-2">Status</th>
+                          <th className="px-3 py-2 text-right">Sisa Hutang</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {selectedAnggota.pinjamanList.map((p) => (
+                          <tr key={p.id}>
+                            <td className="px-3 py-2 font-mono font-semibold">{p.nomor_pinjaman || p.id}</td>
+                            <td className="px-3 py-2 font-bold">Rp {Number(p.jumlah || 0).toLocaleString('id-ID')}</td>
+                            <td className="px-3 py-2 font-semibold text-amber-700">{p.status}</td>
+                            <td className="px-3 py-2 text-right font-bold text-rose-600">Rp {Number(p.sisa_hutang || 0).toLocaleString('id-ID')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDetailModalOpen(false)}
+                className="px-4 py-2 bg-[#002045] text-white rounded-lg text-xs font-bold hover:bg-[#1a365d]"
+              >
+                Tutup Detail
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 flex flex-col">
+            <div className="p-5 bg-[#002045] text-white flex justify-between items-center rounded-t-2xl">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined">edit_square</span>
+                <h3 className="text-base font-bold">Edit Data Anggota</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="p-6 flex flex-col gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor Anggota (ID)</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={editFormData.nomor_anggota || ''}
+                    className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg font-mono text-slate-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.nama || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, nama: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor HP / WhatsApp *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.nomor_hp || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, nomor_hp: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Pekerjaan</label>
+                  <input
+                    type="text"
+                    value={editFormData.pekerjaan || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, pekerjaan: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Tempat Lahir</label>
+                  <input
+                    type="text"
+                    value={editFormData.tempat_lahir || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, tempat_lahir: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Status Keanggotaan</label>
+                  <select
+                    value={editFormData.status || 'Aktif'}
+                    onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none bg-white font-semibold"
+                  >
+                    <option value="Aktif">Aktif</option>
+                    <option value="Keluar">Keluar</option>
+                    <option value="Berhenti">Berhenti</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-700 block mb-1">Alamat Lengkap</label>
+                  <textarea
+                    rows={3}
+                    value={editFormData.alamat || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, alamat: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-blue-600 outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d]"
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </AppLayout>
   );
 }

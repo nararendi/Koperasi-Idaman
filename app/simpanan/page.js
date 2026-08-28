@@ -2,431 +2,546 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import AppLayout from '../../components/AppLayout';
+import { dataService } from '../../lib/dataService';
 
 export default function SimpananPage() {
   const [summary, setSummary] = useState({
-    pokok: 'Rp 500.000.000',
-    wajib: 'Rp 750.000.000',
-    sukarela: 'Rp 1.250.000.000'
+    pokok: 0,
+    wajib: 0,
+    sukarela: 0,
+    total: 0
   });
 
-  const [riwayatSimpanan, setRiwayatSimpanan] = useState([
-    {
-      id: 1,
-      tanggal: '24 Okt 2024',
-      nama: 'Budi Santoso',
-      nomor_anggota: 'ANG-2023-001',
-      jenis: 'Sukarela',
-      jumlah: 'Rp 500.000',
-      pencatat: 'Admin Pusat',
-      keterangan: 'Setoran tunai via teller'
-    },
-    {
-      id: 2,
-      tanggal: '24 Okt 2024',
-      nama: 'Siti Aminah',
-      nomor_anggota: 'ANG-2023-002',
-      jenis: 'Wajib',
-      jumlah: 'Rp 100.000',
-      pencatat: 'Admin Pusat',
-      keterangan: 'Potong gaji bulanan'
-    },
-    {
-      id: 3,
-      tanggal: '23 Okt 2024',
-      nama: 'Ahmad Fauzi',
-      nomor_anggota: 'ANG-2022-145',
-      jenis: 'Pokok',
-      jumlah: 'Rp 1.000.000',
-      pencatat: 'Teller 1',
-      keterangan: 'Pendaftaran anggota baru'
-    },
-    {
-      id: 4,
-      tanggal: '23 Okt 2024',
-      nama: 'Rina Wijaya',
-      nomor_anggota: 'ANG-2024-001',
-      jenis: 'Sukarela',
-      jumlah: 'Rp 2.500.000',
-      pencatat: 'Admin Pusat',
-      keterangan: 'Transfer Bank'
-    }
-  ]);
-
+  const [simpananList, setSimpananList] = useState([]);
+  const [anggotaList, setAnggotaList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [jenisFilter, setJenisFilter] = useState('all');
 
-  useEffect(() => {
-    async function loadSimpanan() {
-      try {
-        if (supabase) {
-          const { data, error } = await supabase
-            .from('simpanan')
-            .select('*')
-            .order('created_at', { ascending: false });
+  // Modal: Catat Transaksi Baru
+  const [modalOpen, setModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    nomor_anggota: '',
+    jenis: 'Sukarela',
+    tipe: 'Setoran',
+    jumlah: '',
+    metode: 'Tunai',
+    keterangan: ''
+  });
 
-          if (!error && data && data.length > 0) {
-            setRiwayatSimpanan(
-              data.map((item) => ({
-                id: item.id,
-                tanggal: item.tanggal || item.created_at,
-                nama: item.nama_anggota || item.nama,
-                nomor_anggota: item.nomor_anggota,
-                jenis: item.jenis_simpanan || item.jenis,
-                jumlah: `Rp ${Number(item.jumlah || 0).toLocaleString('id-ID')}`,
-                pencatat: item.pencatat || 'Admin',
-                keterangan: item.keterangan || '-'
-              }))
-            );
-          }
-        }
-      } catch (err) {
-        console.info('Supabase simpanan check:', err);
-      }
+  // Modal: Bukti Kuitansi
+  const [kuitansiModalOpen, setKuitansiModalOpen] = useState(false);
+  const [selectedKuitansi, setSelectedKuitansi] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const loadData = () => {
+    const s = dataService.getSimpananSummary();
+    const list = dataService.getSimpananList();
+    const anggota = dataService.getAnggotaList();
+
+    setSummary(s);
+    setSimpananList(list);
+    setAnggotaList(anggota);
+
+    if (anggota.length > 0 && !formData.nomor_anggota) {
+      setFormData((prev) => ({
+        ...prev,
+        nomor_anggota: anggota[0].nomor_anggota || anggota[0].id
+      }));
     }
+  };
 
-    loadSimpanan();
+  useEffect(() => {
+    loadData();
+
+    const handleUpdate = () => {
+      loadData();
+    };
+
+    window.addEventListener('koperasi_db_updated', handleUpdate);
+    return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
   }, []);
 
-  const filteredData = riwayatSimpanan.filter((item) => {
-    const matchSearch =
-      item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.nomor_anggota.toLowerCase().includes(searchQuery.toLowerCase());
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  const handleOpenModal = () => {
+    const settings = dataService.getSettings();
+    setFormData({
+      nomor_anggota: anggotaList.length > 0 ? (anggotaList[0].nomor_anggota || anggotaList[0].id) : '',
+      jenis: 'Sukarela',
+      tipe: 'Setoran',
+      jumlah: '',
+      metode: 'Tunai',
+      keterangan: ''
+    });
+    setModalOpen(true);
+  };
+
+  const handleSubmitTransaction = (e) => {
+    e.preventDefault();
+    if (!formData.nomor_anggota) {
+      alert('Pilih anggota terlebih dahulu.');
+      return;
+    }
+    if (!formData.jumlah || Number(formData.jumlah) <= 0) {
+      alert('Nominal harus lebih dari 0.');
+      return;
+    }
+
+    const newTx = dataService.addSimpananTransaction({
+      nomor_anggota: formData.nomor_anggota,
+      jenis: formData.jenis,
+      tipe: formData.tipe,
+      jumlah: formData.jumlah,
+      metode: formData.metode,
+      keterangan: formData.keterangan || `${formData.tipe} Simpanan ${formData.jenis}`
+    });
+
+    setModalOpen(false);
+    showToast(`Transaksi Simpanan ${formData.jenis} sebesar Rp ${Number(formData.jumlah).toLocaleString('id-ID')} berhasil dicatat!`);
+  };
+
+  const handlePrintKuitansi = (item) => {
+    setSelectedKuitansi(item);
+    setKuitansiModalOpen(true);
+  };
+
+  const filteredList = simpananList.filter((item) => {
+    const nama = (item.nama_anggota || item.nama || '').toLowerCase();
+    const noAnggota = (item.nomor_anggota || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    const matchSearch = nama.includes(query) || noAnggota.includes(query);
+
     const matchJenis =
       jenisFilter === 'all' ||
-      item.jenis.toLowerCase() === jenisFilter.toLowerCase();
+      (item.jenis || '').toLowerCase() === jenisFilter.toLowerCase();
+
     return matchSearch && matchJenis;
   });
 
+  const formatRupiah = (num) => {
+    return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
+  };
+
   return (
-    <div className="bg-[#f9f9ff] text-[#111c2c] min-h-screen flex flex-col md:flex-row font-sans">
-      {/* SideNavBar */}
-      <nav className="hidden md:flex h-full w-64 fixed left-0 top-0 bg-[#002045] text-white flex-col py-6 shadow-sm z-50">
-        <div className="px-4 mb-8 flex items-center gap-2">
-          <span className="material-symbols-outlined text-2xl">account_balance</span>
-          <div>
-            <h1 className="text-base font-bold text-white leading-tight">
-              Koperasi Idaman
-            </h1>
-            <p className="text-xs text-white/70">Management System</p>
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col gap-1 px-2">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">dashboard</span>
-            Beranda
-          </Link>
-          <Link
-            href="/anggota"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">group</span>
-            Anggota
-          </Link>
-          <Link
-            href="/simpanan"
-            className="flex items-center gap-3 px-4 py-2 rounded bg-white/10 text-white border-l-4 border-[#adc7f7] transition-all text-xs font-bold"
-          >
-            <span className="material-symbols-outlined text-lg">
-              account_balance_wallet
-            </span>
-            Simpanan
-          </Link>
-          <Link
-            href="/pinjaman"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">payments</span>
-            Pinjaman
-          </Link>
-          <Link
-            href="/kas"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">receipt_long</span>
-            Transaksi Kas
-          </Link>
-          <Link
-            href="/laporan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">assessment</span>
-            Laporan
-          </Link>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-1 px-2">
-          <Link
-            href="/pengaturan"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold"
-          >
-            <span className="material-symbols-outlined text-lg">settings</span>
-            Pengaturan
-          </Link>
-          <button
-            type="button"
-            className="flex items-center gap-3 px-4 py-2 rounded text-white/70 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold text-left"
-          >
-            <span className="material-symbols-outlined text-lg">logout</span>
-            Keluar
-          </button>
-        </div>
-      </nav>
-
-      {/* TopNavBar (Mobile) */}
-      <header className="md:hidden bg-white text-[#002045] border-b border-[#c4c6cf] flex justify-between items-center px-4 w-full h-16 z-50 fixed top-0 left-0">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-2xl">account_balance</span>
-          <h1 className="text-base font-bold text-[#002045]">
-            Sistem Informasi Koperasi
-          </h1>
-        </div>
-        <Link
-          href="/"
-          className="text-[#595f66] hover:bg-[#f0f3ff] transition-colors p-2 rounded-full cursor-pointer"
+    <AppLayout
+      title="Manajemen Simpanan Anggota"
+      subtitle="Pencatatan saldo simpanan pokok, wajib, dan sukarela beserta mutasi rekening anggota."
+      rightAction={
+        <button
+          type="button"
+          onClick={handleOpenModal}
+          className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
         >
-          <span className="material-symbols-outlined">menu</span>
-        </Link>
-      </header>
+          <span className="material-symbols-outlined text-[18px]">add_circle</span>
+          Catat Setoran / Penarikan
+        </button>
+      }
+    >
+      {/* Toast */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-emerald-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold animate-bounce">
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col md:ml-64 mt-16 md:mt-0 max-w-[1280px] w-full mx-auto relative min-h-screen">
-        <div className="flex-1 p-4 md:p-10 flex flex-col gap-6">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#111c2c]">
-                Manajemen Simpanan
-              </h2>
-              <p className="text-sm text-[#595f66] mt-1">
-                Ringkasan total simpanan anggota dan riwayat transaksi setoran.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0px_4px_12px_rgba(0,0,0,0.05)] cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Catat Setoran Baru
-            </button>
-          </div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white border border-[#c4c6cf] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xs font-semibold text-[#595f66] uppercase tracking-wider">
-                  Total Simpanan Pokok
-                </h3>
-                <div className="w-8 h-8 rounded bg-[#e7eeff] flex items-center justify-center text-[#1a365d]">
-                  <span className="material-symbols-outlined text-[20px]">lock</span>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-[#1a365d]">{summary.pokok}</p>
-              <div className="mt-3 pt-2 border-t border-[#c4c6cf] flex items-center text-xs text-[#595f66]">
-                <span className="material-symbols-outlined text-[16px] text-[#2e7d32] mr-1">
-                  trending_up
-                </span>
-                Wajib saat pendaftaran awal
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#c4c6cf] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xs font-semibold text-[#595f66] uppercase tracking-wider">
-                  Total Simpanan Wajib
-                </h3>
-                <div className="w-8 h-8 rounded bg-[#e7eeff] flex items-center justify-center text-[#1a365d]">
-                  <span className="material-symbols-outlined text-[20px]">autorenew</span>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-[#1a365d]">{summary.wajib}</p>
-              <div className="mt-3 pt-2 border-t border-[#c4c6cf] flex items-center text-xs text-[#595f66]">
-                <span className="material-symbols-outlined text-[16px] text-[#2e7d32] mr-1">
-                  trending_up
-                </span>
-                Iuran bulanan anggota
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#c4c6cf] rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xs font-semibold text-[#595f66] uppercase tracking-wider">
-                  Total Simpanan Sukarela
-                </h3>
-                <div className="w-8 h-8 rounded bg-[#e7eeff] flex items-center justify-center text-[#1a365d]">
-                  <span className="material-symbols-outlined text-[20px]">savings</span>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-[#1a365d]">{summary.sukarela}</p>
-              <div className="mt-3 pt-2 border-t border-[#c4c6cf] flex items-center text-xs text-[#595f66]">
-                <span className="material-symbols-outlined text-[16px] text-[#595f66] mr-1">
-                  drag_handle
-                </span>
-                Simpanan bebas dapat ditarik
-              </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Simpanan Pokok</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">lock</span>
             </div>
           </div>
+          <p className="text-xl font-extrabold text-[#002045]">{formatRupiah(summary.pokok)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Setoran wajib pendaftaran</p>
+        </div>
 
-          {/* Table Container */}
-          <div className="bg-white border border-[#c4c6cf] rounded-xl shadow-sm overflow-hidden flex flex-col">
-            {/* Filters */}
-            <div className="p-4 border-b border-[#c4c6cf] bg-[#f9f9ff] flex flex-wrap gap-4 items-end">
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-semibold text-[#595f66] mb-1">
-                  Pilih Anggota
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#74777f] text-[20px]">
-                    search
-                  </span>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 rounded border border-[#c4c6cf] text-sm focus:border-[#2B6CB0] focus:ring-1 focus:ring-[#2B6CB0] placeholder:text-[#A0AEC0] bg-white"
-                    placeholder="Cari nama atau No. Anggota..."
-                  />
-                </div>
-              </div>
-
-              <div className="w-48 shrink-0">
-                <label className="block text-xs font-semibold text-[#595f66] mb-1">
-                  Jenis Simpanan
-                </label>
-                <select
-                  value={jenisFilter}
-                  onChange={(e) => setJenisFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[#c4c6cf] text-sm focus:border-[#2B6CB0] focus:ring-1 focus:ring-[#2B6CB0] bg-white cursor-pointer"
-                >
-                  <option value="all">Semua Jenis</option>
-                  <option value="pokok">Simpanan Pokok</option>
-                  <option value="wajib">Simpanan Wajib</option>
-                  <option value="sukarela">Simpanan Sukarela</option>
-                </select>
-              </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Simpanan Wajib</span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">calendar_month</span>
             </div>
+          </div>
+          <p className="text-xl font-extrabold text-indigo-700">{formatRupiah(summary.wajib)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Iuran rutin bulanan anggota</p>
+        </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#F7FAFC] border-b border-[#c4c6cf]">
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Tanggal Setor
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Nama Anggota
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      No. Anggota
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Jenis Simpanan
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap text-right">
-                      Jumlah Setoran
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Pencatat
-                    </th>
-                    <th className="py-2.5 px-4 text-xs font-semibold text-[#595f66] uppercase whitespace-nowrap">
-                      Keterangan
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#c4c6cf] text-sm">
-                  {filteredData.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-[#F0F4F8] transition-colors"
-                    >
-                      <td className="py-3 px-4 whitespace-nowrap text-[#111c2c]">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-500 uppercase">Simpanan Sukarela</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-base">savings</span>
+            </div>
+          </div>
+          <p className="text-xl font-extrabold text-emerald-700">{formatRupiah(summary.sukarela)}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Dapat disetor & ditarik sewaktu-waktu</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-[#002045] to-[#1a365d] text-white rounded-xl p-5 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-blue-200 uppercase">Total Seluruh Simpanan</span>
+            <span className="material-symbols-outlined text-blue-300">account_balance</span>
+          </div>
+          <div>
+            <p className="text-xl font-extrabold text-white mt-2">{formatRupiah(summary.total)}</p>
+            <p className="text-[11px] text-blue-200/80 mt-0.5">Kekayaan dana anggota</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Table Container */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        {/* Filters */}
+        <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-bold text-slate-500 mr-1">Jenis:</span>
+            {['all', 'pokok', 'wajib', 'sukarela'].map((j) => (
+              <button
+                key={j}
+                type="button"
+                onClick={() => setJenisFilter(j)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  jenisFilter === j
+                    ? 'bg-[#002045] text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {j === 'all' ? 'Semua Jenis' : j.charAt(0).toUpperCase() + j.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+              search
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama atau No. Anggota..."
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white"
+            />
+          </div>
+        </div>
+
+        {/* Table Data */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                <th className="px-4 py-3">Tanggal</th>
+                <th className="px-4 py-3">No. Anggota</th>
+                <th className="px-4 py-3">Nama Anggota</th>
+                <th className="px-4 py-3">Jenis Simpanan</th>
+                <th className="px-4 py-3">Metode</th>
+                <th className="px-4 py-3">Keterangan</th>
+                <th className="px-4 py-3 text-right">Jumlah</th>
+                <th className="px-4 py-3 text-center">Bukti</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredList.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-10 text-center text-slate-400">
+                    Belum ada data transaksi simpanan yang cocok.
+                  </td>
+                </tr>
+              ) : (
+                filteredList.map((item) => {
+                  const isWithdrawal = item.tipe === 'Penarikan' || (item.keterangan || '').toLowerCase().includes('tarik');
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-600 font-medium">
                         {item.tanggal}
                       </td>
-                      <td className="py-3 px-4 font-bold text-[#1a365d]">
-                        {item.nama}
-                      </td>
-                      <td className="py-3 px-4 text-[#595f66]">
+                      <td className="px-4 py-3 font-mono font-bold text-blue-900 whitespace-nowrap">
                         {item.nomor_anggota}
                       </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#e7eeff] text-[#003765] border border-[#c4c6cf]">
+                      <td className="px-4 py-3 font-bold text-[#002045] whitespace-nowrap">
+                        {item.nama_anggota || item.nama}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full font-bold text-[10px] uppercase ${
+                            (item.jenis || '').toLowerCase().includes('pokok')
+                              ? 'bg-blue-100 text-blue-800'
+                              : (item.jenis || '').toLowerCase().includes('wajib')
+                              ? 'bg-indigo-100 text-indigo-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
                           {item.jenis}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right text-[#2e7d32] font-semibold tabular-nums">
-                        {item.jumlah}
+                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                        {item.metode || 'Tunai'}
                       </td>
-                      <td className="py-3 px-4 text-[#595f66]">{item.pencatat}</td>
-                      <td className="py-3 px-4 text-[#595f66] truncate max-w-[180px]">
-                        {item.keterangan}
+                      <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate" title={item.keterangan}>
+                        {item.keterangan || '-'}
+                      </td>
+                      <td
+                        className={`px-4 py-3 text-right font-bold whitespace-nowrap ${
+                          isWithdrawal ? 'text-rose-600' : 'text-emerald-700'
+                        }`}
+                      >
+                        {isWithdrawal ? `-${formatRupiah(item.jumlah)}` : `+${formatRupiah(item.jumlah)}`}
+                      </td>
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handlePrintKuitansi(item)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                          title="Cetak Bukti Kuitansi"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">receipt</span>
+                        </button>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* MODAL CATAT TRANSAKSI SIMPANAN */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 flex flex-col">
+            <div className="p-5 bg-emerald-800 text-white flex justify-between items-center rounded-t-2xl">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined">payments</span>
+                <h3 className="text-base font-bold">Catat Transaksi Simpanan</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
             </div>
 
-            {/* Pagination */}
-            <div className="p-4 border-t border-[#c4c6cf] flex items-center justify-between bg-[#f9f9ff]">
-              <span className="text-xs text-[#595f66]">
-                Menampilkan 1-{filteredData.length} data
-              </span>
-              <div className="flex gap-1">
+            <form onSubmit={handleSubmitTransaction} className="p-6 flex flex-col gap-4 text-xs">
+              {/* Tipe Transaksi */}
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Tipe Transaksi</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, tipe: 'Setoran' })}
+                    className={`py-2 rounded-lg font-bold border transition-all ${
+                      formData.tipe === 'Setoran'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    + Setoran Masuk
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, tipe: 'Penarikan', jenis: 'Sukarela' })}
+                    className={`py-2 rounded-lg font-bold border transition-all ${
+                      formData.tipe === 'Penarikan'
+                        ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    - Penarikan Saldo
+                  </button>
+                </div>
+              </div>
+
+              {/* Pilih Anggota */}
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Pilih Anggota Koperasi *</label>
+                <select
+                  required
+                  value={formData.nomor_anggota}
+                  onChange={(e) => setFormData({ ...formData, nomor_anggota: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium"
+                >
+                  <option value="">-- Pilih Anggota --</option>
+                  {anggotaList.map((a) => (
+                    <option key={a.id || a.nomor_anggota} value={a.nomor_anggota || a.id}>
+                      {a.nomor_anggota || a.id} - {a.nama || a.nama_lengkap}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Jenis Simpanan */}
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Jenis Simpanan</label>
+                <select
+                  value={formData.jenis}
+                  disabled={formData.tipe === 'Penarikan'}
+                  onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium disabled:bg-slate-100"
+                >
+                  <option value="Sukarela">Simpanan Sukarela (Bebas Setor/Tarik)</option>
+                  <option value="Wajib">Simpanan Wajib (Bulanan)</option>
+                  <option value="Pokok">Simpanan Pokok</option>
+                </select>
+              </div>
+
+              {/* Nominal */}
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Nominal Jumlah (Rp) *</label>
+                <input
+                  type="number"
+                  required
+                  min="1000"
+                  step="1000"
+                  value={formData.jumlah}
+                  onChange={(e) => setFormData({ ...formData, jumlah: e.target.value })}
+                  placeholder="Contoh: 100000"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none text-sm font-bold text-emerald-800"
+                />
+              </div>
+
+              {/* Metode Pembayaran */}
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Metode Penerimaan / Pembayaran</label>
+                <select
+                  value={formData.metode}
+                  onChange={(e) => setFormData({ ...formData, metode: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none bg-white font-medium"
+                >
+                  <option value="Tunai">Tunai / Kasir</option>
+                  <option value="Transfer Bank">Transfer Bank / QRIS</option>
+                  <option value="Potong Gaji">Potong Gaji Otomatis</option>
+                </select>
+              </div>
+
+              {/* Keterangan */}
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Keterangan / Catatan</label>
+                <input
+                  type="text"
+                  value={formData.keterangan}
+                  onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
+                  placeholder="Contoh: Setoran sukarela tabungan qurban"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:border-emerald-600 outline-none"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-slate-200 flex justify-end gap-2">
                 <button
                   type="button"
-                  className="w-8 h-8 rounded border border-[#c4c6cf] flex items-center justify-center text-[#595f66] hover:bg-[#e7eeff] disabled:opacity-50"
-                  disabled
+                  onClick={() => setModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
                 >
-                  <span className="material-symbols-outlined text-[16px]">
-                    chevron_left
-                  </span>
+                  Batal
                 </button>
                 <button
-                  type="button"
-                  className="w-8 h-8 rounded border border-[#002045] bg-[#002045] flex items-center justify-center text-white text-xs font-semibold"
+                  type="submit"
+                  className="px-5 py-2 bg-emerald-700 text-white rounded-lg font-bold hover:bg-emerald-800 shadow-sm"
                 >
-                  1
-                </button>
-                <button
-                  type="button"
-                  className="w-8 h-8 rounded border border-[#c4c6cf] flex items-center justify-center text-[#595f66] hover:bg-[#e7eeff]"
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    chevron_right
-                  </span>
+                  Simpan Transaksi
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL KUITANSI PRINT PREVIEW */}
+      {kuitansiModalOpen && selectedKuitansi && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-4 bg-[#002045] text-white flex justify-between items-center">
+              <span className="text-xs font-bold uppercase tracking-wider">Kuitansi Resmi Transaksi</span>
+              <button
+                type="button"
+                onClick={() => setKuitansiModalOpen(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            <div id="printArea" className="p-6 flex flex-col gap-4 text-xs">
+              <div className="text-center border-b border-slate-200 pb-3">
+                <h3 className="font-extrabold text-sm text-[#002045]">KOPERASI SIMPAN PINJAM IDAMAN</h3>
+                <p className="text-[11px] text-slate-500">Bukti Penerimaan / Penarikan Simpanan</p>
+                <p className="font-mono text-[10px] text-slate-400 mt-1">No. Bukti: {selectedKuitansi.id}</p>
+              </div>
+
+              <div className="space-y-2 py-2">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Tanggal:</span>
+                  <span className="font-semibold text-slate-800">{selectedKuitansi.tanggal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">No. Anggota:</span>
+                  <span className="font-mono font-bold text-blue-900">{selectedKuitansi.nomor_anggota}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Nama Anggota:</span>
+                  <span className="font-bold text-slate-800">{selectedKuitansi.nama_anggota || selectedKuitansi.nama}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Jenis Transaksi:</span>
+                  <span className="font-semibold text-emerald-700">Simpanan {selectedKuitansi.jenis}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Metode:</span>
+                  <span className="text-slate-800">{selectedKuitansi.metode || 'Tunai'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Keterangan:</span>
+                  <span className="text-slate-800">{selectedKuitansi.keterangan}</span>
+                </div>
+                <div className="flex justify-between pt-3 border-t border-dashed border-slate-300 text-sm font-bold">
+                  <span>Nominal Transaksi:</span>
+                  <span className="text-emerald-800 font-extrabold">{formatRupiah(selectedKuitansi.jumlah)}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-200 grid grid-cols-2 text-center text-[10px] text-slate-500">
+                <div>
+                  <p>Penyetor / Anggota,</p>
+                  <div className="h-10"></div>
+                  <p className="font-bold text-slate-700">({selectedKuitansi.nama_anggota || selectedKuitansi.nama})</p>
+                </div>
+                <div>
+                  <p>Petugas Kasir,</p>
+                  <div className="h-10"></div>
+                  <p className="font-bold text-slate-700">({selectedKuitansi.pencatat || 'Kasir Koperasi'})</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setKuitansiModalOpen(false)}
+                className="px-4 py-2 border border-slate-200 rounded-lg font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-[#002045] text-white rounded-lg font-bold hover:bg-[#1a365d] flex items-center gap-1.5 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-base">print</span>
+                Cetak Kuitansi
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="bg-[#f0f3ff] border-t border-[#c4c6cf] py-4">
-          <div className="w-full max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center px-4 md:px-10 gap-2">
-            <span className="text-xs font-bold text-[#002045]">
-              © 2024 Koperasi Idaman. v2.1.0-stable
-            </span>
-            <div className="flex gap-4 text-xs text-[#595f66]">
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Panduan Pengguna
-              </a>
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Bantuan
-              </a>
-              <a href="#" className="hover:text-[#002045] transition-colors">
-                Kebijakan Privasi
-              </a>
-            </div>
-          </div>
-        </footer>
-      </main>
-    </div>
+      )}
+    </AppLayout>
   );
 }
