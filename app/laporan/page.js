@@ -5,7 +5,12 @@ import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 
 export default function LaporanPage() {
+  const today = new Date().toISOString().split('T')[0];
   const currentYear = new Date().getFullYear();
+  const firstDayOfYear = `${currentYear}-01-01`;
+
+  const [tanggalMulai, setTanggalMulai] = useState(firstDayOfYear);
+  const [tanggalSelesai, setTanggalSelesai] = useState(today);
 
   const [laporan, setLaporan] = useState({
     arusKas: {
@@ -44,21 +49,12 @@ export default function LaporanPage() {
   });
 
   const [settings, setSettings] = useState({});
-  const [periodeBulan, setPeriodeBulan] = useState('');
-  const [periodeTahun, setPeriodeTahun] = useState(String(currentYear));
-
-  // Generate dynamic list of years around current year
-  const availableYears = [
-    currentYear + 1,
-    currentYear,
-    currentYear - 1,
-    currentYear - 2,
-    currentYear - 3,
-    currentYear - 4
-  ];
 
   const loadLaporan = () => {
-    const data = dataService.getLaporanData(periodeBulan, periodeTahun);
+    const data = dataService.getLaporanData({
+      startDate: tanggalMulai,
+      endDate: tanggalSelesai
+    });
     const s = dataService.getSettings();
     setLaporan(data);
     setSettings(s);
@@ -73,7 +69,7 @@ export default function LaporanPage() {
 
     window.addEventListener('koperasi_db_updated', handleUpdate);
     return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
-  }, [periodeBulan, periodeTahun]);
+  }, [tanggalMulai, tanggalSelesai]);
 
   const formatRupiah = (num) => {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
@@ -83,12 +79,39 @@ export default function LaporanPage() {
     window.print();
   };
 
+  // Quick Preset Helper Functions
+  const setPresetHariIni = () => {
+    setTanggalMulai(today);
+    setTanggalSelesai(today);
+  };
+
+  const setPresetBulanIni = () => {
+    const d = new Date();
+    const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+    const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+    setTanggalMulai(startOfMonth);
+    setTanggalSelesai(endOfMonth);
+  };
+
+  const setPresetTahunIni = () => {
+    setTanggalMulai(firstDayOfYear);
+    setTanggalSelesai(today);
+  };
+
+  const setPresetSemuaWaktu = () => {
+    setTanggalMulai('');
+    setTanggalSelesai('');
+  };
+
   // Export CSV of Financial Summary
   const handleExportCSV = () => {
-    const labelPeriode = `${periodeBulan ? `Bulan ${periodeBulan} ` : 'Semua Bulan '}${periodeTahun || 'Semua Tahun'}`;
+    const labelPeriode = tanggalMulai || tanggalSelesai
+      ? `${tanggalMulai || 'Awal'} s/d ${tanggalSelesai || 'Sekarang'}`
+      : 'Semua Waktu';
+
     const rows = [
       ['LAPORAN KEUANGAN KOPERASI IDAMAN'],
-      ['Periode', labelPeriode],
+      ['Rentang Tanggal Kalender', labelPeriode],
       [''],
       ['1. LAPORAN ARUS KAS'],
       ['Pemasukan Simpanan', laporan.arusKas.totalSimpananMasuk],
@@ -99,7 +122,7 @@ export default function LaporanPage() {
       ['Penarikan Simpanan', laporan.arusKas.totalPenarikanSimpanan],
       ['Biaya Operasional', laporan.arusKas.totalBiayaOperasional],
       ['Total Pengeluaran Kas', laporan.arusKas.totalPengeluaran],
-      ['Saldo Kas Bersih', laporan.arusKas.saldoKasBersih],
+      ['Saldo Kas Bersih Periode Ini', laporan.arusKas.saldoKasBersih],
       [''],
       ['2. NERACA KEUANGAN'],
       ['Aset Kas', laporan.neraca.kas],
@@ -125,7 +148,7 @@ export default function LaporanPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${periodeTahun || 'Semua_Tahun'}.csv`);
+    link.setAttribute('download', `Laporan_Keuangan_Koperasi_${tanggalMulai || 'Awal'}_sd_${tanggalSelesai || 'Sekarang'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -134,7 +157,7 @@ export default function LaporanPage() {
   return (
     <AppLayout
       title="Laporan Keuangan & Rekapitulasi"
-      subtitle="Arus kas komprehensif, neraca saldo, dan kalkulasi Sisa Hasil Usaha (SHU)."
+      subtitle="Pilih rentang tanggal kalender untuk merekapitulasi arus kas, neraca saldo, dan alokasi SHU."
       rightAction={
         <div className="flex items-center gap-2">
           <button
@@ -156,61 +179,86 @@ export default function LaporanPage() {
         </div>
       }
     >
-      {/* Filter Periode */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-blue-700">filter_alt</span>
-          <span className="text-xs font-bold text-slate-700">Periode Pelaporan:</span>
+      {/* Date Range Calendar Filter Bar */}
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm mb-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        {/* Date Inputs */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-blue-700 text-xl">calendar_month</span>
+            <span className="text-xs font-bold text-slate-700">Rentang Kalender:</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Dari Tanggal</label>
+              <input
+                type="date"
+                value={tanggalMulai}
+                onChange={(e) => setTanggalMulai(e.target.value)}
+                className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium font-mono text-slate-800"
+              />
+            </div>
+
+            <span className="text-slate-400 font-bold self-end mb-2">s/d</span>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Sampai Tanggal</label>
+              <input
+                type="date"
+                value={tanggalSelesai}
+                onChange={(e) => setTanggalSelesai(e.target.value)}
+                className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium font-mono text-slate-800"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div>
-            <select
-              value={periodeBulan}
-              onChange={(e) => setPeriodeBulan(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium"
-            >
-              <option value="">Semua Bulan (Tahunan)</option>
-              <option value="01">Januari</option>
-              <option value="02">Februari</option>
-              <option value="03">Maret</option>
-              <option value="04">April</option>
-              <option value="05">Mei</option>
-              <option value="06">Juni</option>
-              <option value="07">Juli</option>
-              <option value="08">Agustus</option>
-              <option value="09">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-          </div>
-
-          <div>
-            <select
-              value={periodeTahun}
-              onChange={(e) => setPeriodeTahun(e.target.value)}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:border-blue-600 outline-none bg-white font-medium font-bold text-[#002045]"
-            >
-              <option value="">Semua Tahun</option>
-              {availableYears.map((yr) => (
-                <option key={yr} value={String(yr)}>
-                  Tahun {yr} {yr === currentYear ? '(Tahun Sekarang)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Quick Presets */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+          <span className="text-[11px] font-semibold text-slate-400 mr-1">Preset:</span>
+          <button
+            type="button"
+            onClick={setPresetHariIni}
+            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors"
+          >
+            Hari Ini
+          </button>
+          <button
+            type="button"
+            onClick={setPresetBulanIni}
+            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors"
+          >
+            Bulan Ini
+          </button>
+          <button
+            type="button"
+            onClick={setPresetTahunIni}
+            className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 text-[11px] font-bold text-blue-800 transition-colors"
+          >
+            Tahun Ini ({currentYear})
+          </button>
+          <button
+            type="button"
+            onClick={setPresetSemuaWaktu}
+            className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition-colors"
+          >
+            Semua Waktu
+          </button>
         </div>
       </div>
 
+      {/* Printable Report Container */}
       <div id="laporanContainer" className="flex flex-col gap-6">
         {/* Report Header for Print */}
         <div className="text-center pb-4 border-b border-slate-200">
-          <h2 className="text-lg font-black text-[#002045]">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
+          <h2 className="text-lg font-black text-[#002045] tracking-wide">{settings.namaKoperasi || 'KOPERASI SIMPAN PINJAM IDAMAN'}</h2>
           <p className="text-xs text-slate-500">{settings.alamat || 'Jakarta, Indonesia'}</p>
-          <p className="text-xs font-bold text-blue-900 mt-1">
-            Laporan Keuangan & Perkembangan Usaha Periode {periodeBulan ? `Bulan ${periodeBulan} ` : ''}{periodeTahun ? `Tahun ${periodeTahun}` : 'Semua Periode'}
-          </p>
+          <div className="inline-flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full text-xs font-bold text-blue-950 mt-2">
+            <span className="material-symbols-outlined text-sm text-blue-700">date_range</span>
+            <span>
+              Periode Laporan: {tanggalMulai || tanggalSelesai ? `${tanggalMulai || 'Awal'} s/d ${tanggalSelesai || 'Sekarang'}` : 'Semua Waktu'}
+            </span>
+          </div>
         </div>
 
         {/* Section 1 & Section 2 Grid */}
@@ -224,7 +272,7 @@ export default function LaporanPage() {
                   <h3 className="text-sm font-bold text-[#002045]">Laporan Arus Kas (Cashflow)</h3>
                 </div>
                 <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                  Realisasi
+                  Realisasi Periode
                 </span>
               </div>
 
@@ -268,8 +316,10 @@ export default function LaporanPage() {
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-sm font-extrabold">
-              <span className="text-[#002045]">Saldo Kas Riil Koperasi:</span>
-              <span className="text-emerald-700 text-base">{formatRupiah(laporan.arusKas.saldoKasBersih)}</span>
+              <span className="text-[#002045]">Saldo Bersih Kas Periode Ini:</span>
+              <span className={`text-base ${laporan.arusKas.saldoKasBersih >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+                {formatRupiah(laporan.arusKas.saldoKasBersih)}
+              </span>
             </div>
           </div>
 
