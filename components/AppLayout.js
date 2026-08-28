@@ -12,7 +12,11 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState({
+    nama: 'Administrator',
+    role: 'Super Admin',
+    avatar: 'AD'
+  });
 
   useEffect(() => {
     const user = authService.getCurrentUser();
@@ -20,7 +24,9 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
       router.push('/login');
       return;
     }
-    setCurrentUser(user);
+    if (user) {
+      setCurrentUser(user);
+    }
 
     const handleAuthUpdate = () => {
       const u = authService.getCurrentUser();
@@ -28,7 +34,9 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
         router.push('/login');
         return;
       }
-      setCurrentUser(u);
+      if (u) {
+        setCurrentUser(u);
+      }
     };
 
     window.addEventListener('koperasi_auth_updated', handleAuthUpdate);
@@ -171,11 +179,11 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           <div className="md:hidden bg-[#1e40af] rounded-2xl p-4 text-white mb-3 shadow-xl space-y-1">
             <div className="flex items-center gap-3 p-2 bg-white/10 rounded-xl mb-3">
               <div className="w-8 h-8 rounded-full bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-bold text-xs">
-                {currentUser.avatar || 'AD'}
+                {currentUser?.avatar || 'AD'}
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-bold">{currentUser.nama}</span>
-                <span className="text-[10px] text-blue-100">{currentUser.role}</span>
+                <span className="text-xs font-bold">{currentUser?.nama || 'Administrator'}</span>
+                <span className="text-[10px] text-blue-100">{currentUser?.role || 'Super Admin'}</span>
               </div>
             </div>
 
@@ -223,9 +231,9 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
                 href="/pengaturan"
                 className="flex items-center gap-2.5 p-1 rounded-full hover:bg-[#f8fafc] transition-colors"
               >
-                <span className="text-xs font-extrabold text-[#0f172a]">{currentUser.nama || 'Administrator'}</span>
+                <span className="text-xs font-extrabold text-[#0f172a]">{currentUser?.nama || 'Administrator'}</span>
                 <div className="w-8 h-8 rounded-full bg-[#2563eb] text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-[#eff6ff]">
-                  {currentUser.avatar || 'AD'}
+                  {currentUser?.avatar || 'AD'}
                 </div>
               </Link>
 
@@ -272,7 +280,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center gap-1 text-[#2563eb] font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] animate-ping"></span>
-                Online: {currentUser.role}
+                Online: {currentUser?.role || 'Super Admin'}
               </span>
             </div>
           </footer>
