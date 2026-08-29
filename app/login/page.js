@@ -119,6 +119,34 @@ export default function LoginPage() {
               <span>{loading ? 'Memverifikasi...' : 'Masuk ke Sistem'}</span>
             </button>
           </form>
+
+          {/* Quick Demo Fill Buttons */}
+          <div className="pt-2 border-t border-slate-100 flex flex-col gap-1.5 text-center">
+            <span className="text-[11px] font-semibold text-slate-400">Pilih Akun Demo Cepat:</span>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setUsername('admin'); setPassword('password123'); }}
+                className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+              >
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('bendahara'); setPassword('password123'); }}
+                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+              >
+                Bendahara
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('kasir'); setPassword('password123'); }}
+                className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+              >
+                Kasir
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
