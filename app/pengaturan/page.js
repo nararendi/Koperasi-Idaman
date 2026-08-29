@@ -5,10 +5,9 @@ import AppLayout from '../../components/AppLayout';
 import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { authService } from '../../lib/authService';
-import { getSupabaseConfig, saveSupabaseConfig, testSupabaseConnection } from '../../lib/supabase';
 
 export default function PengaturanPage() {
-  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'supabase' | 'users' | 'profil_saya' | 'database'
+  const [activeTab, setActiveTab] = useState('koperasi'); // 'koperasi' | 'users' | 'profil_saya' | 'database'
 
   // Tab 1: Koperasi Settings
   const [formData, setFormData] = useState({
@@ -55,24 +54,16 @@ export default function PengaturanPage() {
     confirmPassword: ''
   });
 
-  // Tab 4: Supabase Connection
-  const [supabaseConfig, setSupabaseConfig] = useState({ url: '', anonKey: '' });
-  const [supabaseStatus, setSupabaseStatus] = useState({ checked: false, isConnected: false, message: '' });
-  const [testingSupabase, setTestingSupabase] = useState(false);
-  const [syncingCloud, setSyncingCloud] = useState(false);
-
   const [toastMessage, setToastMessage] = useState('');
 
   const loadData = () => {
     const s = dataService.getSettings();
     const uList = authService.getAllUsers();
     const current = authService.getCurrentUser();
-    const sbConfig = getSupabaseConfig();
 
     setFormData(s);
     setUsersList(uList);
     setCurrentUser(current);
-    setSupabaseConfig(sbConfig);
 
     if (current) {
       setMyProfileForm({
@@ -89,16 +80,9 @@ export default function PengaturanPage() {
   useEffect(() => {
     loadData();
 
-    // Initial check of Supabase connection
-    const checkConn = async () => {
-      const res = await testSupabaseConnection();
-      setSupabaseStatus({
-        checked: true,
-        isConnected: res.success,
-        message: res.message
-      });
-    };
-    checkConn();
+    // Auto pull data dari Supabase saat buka halaman
+    dataService.fetchFromSupabase().catch(() => {});
+    authService.fetchUsersFromSupabase().catch(() => {});
 
     const handleUsersUpdate = () => loadData();
     const handleAuthUpdate = () => loadData();
@@ -133,70 +117,6 @@ export default function PengaturanPage() {
       shuPersenCadangan: Number(formData.shuPersenCadangan)
     });
     showToast('Konfigurasi dan profil koperasi berhasil disimpan!');
-  };
-
-  // Save Supabase Config
-  const handleSaveSupabaseConfig = async (e) => {
-    e.preventDefault();
-    setTestingSupabase(true);
-    saveSupabaseConfig(supabaseConfig.url, supabaseConfig.anonKey);
-    const res = await testSupabaseConnection(supabaseConfig.url, supabaseConfig.anonKey);
-    setSupabaseStatus({
-      checked: true,
-      isConnected: res.success,
-      message: res.message
-    });
-    setTestingSupabase(false);
-    if (res.success) {
-      showToast('Koneksi Supabase berhasil disimpan dan terhubung!');
-    } else {
-      alert(res.message);
-    }
-  };
-
-  // Test Supabase Connection Button
-  const handleTestSupabase = async () => {
-    setTestingSupabase(true);
-    const res = await testSupabaseConnection(supabaseConfig.url, supabaseConfig.anonKey);
-    setSupabaseStatus({
-      checked: true,
-      isConnected: res.success,
-      message: res.message
-    });
-    setTestingSupabase(false);
-    if (res.success) {
-      showToast('Koneksi ke Supabase berhasil terhubung!');
-    } else {
-      alert(res.message);
-    }
-  };
-
-  // Pull from Supabase
-  const handlePullSupabase = async () => {
-    setSyncingCloud(true);
-    const [resData, resUsers] = await Promise.all([
-      dataService.fetchFromSupabase(),
-      authService.fetchUsersFromSupabase()
-    ]);
-    setSyncingCloud(false);
-    if (resData.success || resUsers.success) {
-      loadData();
-      showToast('Data berhasil disinkronkan dari Cloud Supabase!');
-    } else {
-      alert(resData.message || resUsers.message || 'Gagal sinkronisasi data.');
-    }
-  };
-
-  // Push to Supabase
-  const handlePushSupabase = async () => {
-    setSyncingCloud(true);
-    const res = await dataService.pushAllToSupabase();
-    setSyncingCloud(false);
-    if (res.success) {
-      showToast(res.message);
-    } else {
-      alert(res.message);
-    }
   };
 
   // User Management Handlers
@@ -342,17 +262,10 @@ export default function PengaturanPage() {
 
   // Clear all demo data
   const handleClearAllData = async () => {
-    if (confirm('KONFIRMASI: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA (Anggota, Simpanan, Pinjaman, Buku Kas)?\n\nDatabase akan dikosongkan bersih sehingga siap diisi data operasional riil.')) {
+    if (confirm('KONFIRMASI: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA transaksi (Anggota, Simpanan, Pinjaman, Buku Kas)?\n\nDatabase akan dikosongkan bersih sehingga siap diisi data operasional riil.')) {
       dataService.clearAllData();
-
-      if (supabaseStatus.isConnected) {
-        const wipeCloud = confirm('Apakah Anda juga ingin mengosongkan data di database Supabase Cloud?');
-        if (wipeCloud) {
-          await dataService.clearSupabaseData();
-        }
-      }
-
-      showToast('Seluruh data demo berhasil dihapus bersih!');
+      await dataService.clearSupabaseData();
+      showToast('Seluruh data transaksi berhasil dibersihkan!');
       loadData();
     }
   };
@@ -386,7 +299,7 @@ export default function PengaturanPage() {
   return (
     <AppLayout
       title="Pengaturan & Sistem"
-      subtitle="Kelola konfigurasi koperasi, koneksi Supabase Cloud, manajemen pengguna admin, profil akun, dan database."
+      subtitle="Kelola konfigurasi koperasi, manajemen pengguna admin, profil akun, dan database."
     >
       {/* Toast */}
       {toastMessage && (
@@ -410,20 +323,6 @@ export default function PengaturanPage() {
           >
             <span className="material-symbols-outlined text-lg">account_balance</span>
             Profil Koperasi
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('supabase')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-              activeTab === 'supabase'
-                ? 'bg-[#2563eb] text-white shadow-xs'
-                : 'text-slate-600 hover:bg-[#f8fafc]'
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg text-emerald-400">cloud_sync</span>
-            Koneksi Supabase
-            <span className={`w-2 h-2 rounded-full ${supabaseStatus.isConnected ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
           </button>
 
           <button
@@ -462,7 +361,7 @@ export default function PengaturanPage() {
             }`}
           >
             <span className="material-symbols-outlined text-lg">database</span>
-            Database & Reset
+            Database & Backup
           </button>
         </div>
 
@@ -498,72 +397,70 @@ export default function PengaturanPage() {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="font-bold text-slate-700 block mb-1">Nomor Telepon Kantor / WA</label>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor Badan Hukum / Akta</label>
                   <input
                     type="text"
-                    value={formData.telepon || ''}
-                    onChange={(e) => setFormData({ ...formData, telepon: e.target.value })}
-                    placeholder="Contoh: 085323066335"
+                    value={formData.badanHukum || ''}
+                    onChange={(e) => setFormData({ ...formData, badanHukum: e.target.value })}
+                    placeholder="AHU-0012948.AH.01.26.TAHUN 2020"
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   />
                 </div>
 
-                {/* Susunan Pengurus & Pengawas */}
-                <div className="sm:col-span-2 pt-2 border-t border-slate-100">
-                  <h3 className="text-xs font-black text-[#0f172a] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[#2563eb] text-base">badge</span>
-                    Susunan Pengurus & Pengawas Koperasi
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Nama Ketua Pengurus</label>
-                      <input
-                        type="text"
-                        value={formData.ketua || ''}
-                        onChange={(e) => setFormData({ ...formData, ketua: e.target.value })}
-                        placeholder="Contoh: Asep Solehudin, S.Pd."
-                        className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
-                      />
-                      <span className="text-[10px] text-slate-400 mt-1 block">Tampil pada tanda tangan laporan (sebelah kiri)</span>
-                    </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor Telepon / WhatsApp</label>
+                  <input
+                    type="text"
+                    value={formData.telepon || ''}
+                    onChange={(e) => setFormData({ ...formData, telepon: e.target.value })}
+                    placeholder="085323066335"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  />
+                </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Nama Sekretaris</label>
-                      <input
-                        type="text"
-                        value={formData.sekretaris || ''}
-                        onChange={(e) => setFormData({ ...formData, sekretaris: e.target.value })}
-                        placeholder="Contoh: Rendi Gunawan, S.Kom."
-                        className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
-                      />
-                      <span className="text-[10px] text-slate-400 mt-1 block">Sekretaris pengurus koperasi</span>
-                    </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Email Koperasi</label>
+                  <input
+                    type="email"
+                    value={formData.email || ''}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="info@koperasi-idaman.co.id"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  />
+                </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Nama Bendahara</label>
-                      <input
-                        type="text"
-                        value={formData.bendahara || ''}
-                        onChange={(e) => setFormData({ ...formData, bendahara: e.target.value })}
-                        placeholder="Contoh: Siti Rahayu, S.E."
-                        className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
-                      />
-                      <span className="text-[10px] text-slate-400 mt-1 block">Tampil pada tanda tangan laporan (sebelah kanan)</span>
-                    </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Ketua Koperasi</label>
+                  <input
+                    type="text"
+                    value={formData.ketua || ''}
+                    onChange={(e) => setFormData({ ...formData, ketua: e.target.value })}
+                    placeholder="Asep Solehudin, S.Pd."
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  />
+                </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Nama Pengawas Keuangan</label>
-                      <input
-                        type="text"
-                        value={formData.pengawas || ''}
-                        onChange={(e) => setFormData({ ...formData, pengawas: e.target.value })}
-                        placeholder="Contoh: Drs. Bambang Irawan, M.Ak."
-                        className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
-                      />
-                      <span className="text-[10px] text-slate-400 mt-1 block">Badan pengawas keuangan koperasi</span>
-                    </div>
-                  </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Sekretaris</label>
+                  <input
+                    type="text"
+                    value={formData.sekretaris || ''}
+                    onChange={(e) => setFormData({ ...formData, sekretaris: e.target.value })}
+                    placeholder="Nama Sekretaris"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nama Bendahara</label>
+                  <input
+                    type="text"
+                    value={formData.bendahara || ''}
+                    onChange={(e) => setFormData({ ...formData, bendahara: e.target.value })}
+                    placeholder="Ica Cahyani"
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
+                  />
                 </div>
               </div>
             </div>
@@ -572,7 +469,7 @@ export default function PengaturanPage() {
             <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
               <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#2563eb]">tune</span>
-                <h2 className="text-sm font-extrabold text-[#0f172a]">Parameter Simpan Pinjam & Suku Bunga</h2>
+                <h2 className="text-sm font-extrabold text-[#0f172a]">Parameter Simpan Pinjam</h2>
               </div>
 
               <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -670,158 +567,13 @@ export default function PengaturanPage() {
           </form>
         )}
 
-        {/* TAB 2: KONEKSI SUPABASE CLOUD */}
-        {activeTab === 'supabase' && (
-          <div className="flex flex-col gap-6">
-            {/* Status Connection Banner */}
-            <div className={`p-5 rounded-3xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
-              supabaseStatus.isConnected
-                ? 'bg-[#eff6ff] border-[#bfdbfe] text-[#1d4ed8]'
-                : 'bg-[#fef8e7] border-[#ffd159]/50 text-[#b88000]'
-            }`}>
-              <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xl shrink-0 ${
-                  supabaseStatus.isConnected ? 'bg-[#2563eb] text-white' : 'bg-[#ffd159] text-[#0f172a]'
-                }`}>
-                  <span className="material-symbols-outlined">
-                    {supabaseStatus.isConnected ? 'cloud_done' : 'cloud_off'}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-extrabold">
-                    Status Koneksi: {supabaseStatus.isConnected ? 'Terhubung ke Supabase Cloud' : 'Belum Terhubung / Mode Offline'}
-                  </h3>
-                  <p className="text-xs mt-0.5 opacity-90 font-medium">{supabaseStatus.message || 'Memeriksa status...'}</p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleTestSupabase}
-                disabled={testingSupabase}
-                className="px-5 py-2 bg-white border border-slate-200 hover:bg-[#f8fafc] text-slate-800 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs shrink-0 transition-all cursor-pointer"
-              >
-                <span className={`material-symbols-outlined text-base ${testingSupabase ? 'animate-spin' : ''}`}>sync</span>
-                {testingSupabase ? 'Menguji...' : 'Uji Koneksi Ulang'}
-              </button>
-            </div>
-
-            {/* Supabase Credentials Form */}
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
-              <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#2563eb]">key</span>
-                <h2 className="text-sm font-extrabold text-[#0f172a]">Kredensial & API Project Supabase</h2>
-              </div>
-
-              <form onSubmit={handleSaveSupabaseConfig} className="p-6 flex flex-col gap-4 text-xs">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Supabase Project URL (NEXT_PUBLIC_SUPABASE_URL) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co"
-                    value={supabaseConfig.url}
-                    onChange={(e) => setSupabaseConfig({ ...supabaseConfig, url: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-mono font-semibold text-slate-800 transition-all"
-                  />
-                  <span className="text-[11px] text-slate-400 mt-1 block">
-                    Dapat dilihat di Supabase Dashboard &rarr; Project Settings &rarr; API &rarr; Project URL
-                  </span>
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Supabase Anon Key (NEXT_PUBLIC_SUPABASE_ANON_KEY) *
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    value={supabaseConfig.anonKey}
-                    onChange={(e) => setSupabaseConfig({ ...supabaseConfig, anonKey: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-mono font-semibold text-slate-800 resize-none text-[11px] transition-all"
-                  />
-                  <span className="text-[11px] text-slate-400 mt-1 block">
-                    Dapat dilihat di Supabase Dashboard &rarr; Project Settings &rarr; API &rarr; Project API Keys &rarr; `anon` `public`
-                  </span>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                  <button
-                    type="submit"
-                    disabled={testingSupabase}
-                    className="px-6 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full font-extrabold shadow-sm flex items-center gap-2 transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base">save</span>
-                    Simpan & Sambungkan Kredensial
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Cloud Sync Actions */}
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
-              <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#2563eb]">sync_alt</span>
-                <h2 className="text-sm font-extrabold text-[#0f172a]">Sinkronisasi Data Cloud</h2>
-              </div>
-
-              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-5 rounded-2xl border border-[#bfdbfe] bg-[#eff6ff] flex flex-col justify-between gap-3">
-                  <div>
-                    <h4 className="font-extrabold text-[#0f172a] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[#2563eb]">cloud_upload</span>
-                      Unggah Data Lokal ke Supabase Cloud
-                    </h4>
-                    <p className="text-slate-500 mt-1 text-[11px] leading-relaxed font-medium">
-                      Kirim seluruh data anggota, simpanan, pinjaman, dan buku kas lokal yang ada saat ini ke database Supabase Cloud.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handlePushSupabase}
-                    disabled={syncingCloud}
-                    className="w-full py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full font-extrabold shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base">upload</span>
-                    {syncingCloud ? 'Sedang Sinkron...' : 'Unggah Data ke Supabase'}
-                  </button>
-                </div>
-
-                <div className="p-5 rounded-2xl border border-slate-200 bg-white flex flex-col justify-between gap-3 shadow-2xs">
-                  <div>
-                    <h4 className="font-extrabold text-[#0f172a] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[#2563eb]">cloud_download</span>
-                      Tarik Data dari Supabase Cloud
-                    </h4>
-                    <p className="text-slate-500 mt-1 text-[11px] leading-relaxed font-medium">
-                      Muat ulang seluruh data terbaru dari tabel Supabase ke dalam aplikasi koperasi.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handlePullSupabase}
-                    disabled={syncingCloud}
-                    className="w-full py-2.5 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] border border-[#2563eb]/30 rounded-full font-extrabold shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base">download</span>
-                    {syncingCloud ? 'Sedang Memuat...' : 'Tarik Data dari Supabase'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: KELOLA PENGGUNA ADMIN */}
+        {/* TAB 2: KELOLA PENGGUNA ADMIN */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-100 bg-[#f8fafc] flex justify-between items-center">
               <div>
                 <h3 className="text-sm font-extrabold text-[#0f172a]">Daftar Pengguna & Hak Akses Administrator</h3>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">Kelola akun staf, bendahara, kasir, dan hak akses sistem.</p>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">Kelola akun staf, bendahara, kasir, dan hak akses sistem terintegrasi cloud.</p>
               </div>
               <button
                 type="button"
@@ -923,7 +675,7 @@ export default function PengaturanPage() {
           </div>
         )}
 
-        {/* TAB 4: PROFIL SAYA & PASSWORD */}
+        {/* TAB 3: PROFIL SAYA & PASSWORD */}
         {activeTab === 'profil_saya' && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
             <div className="p-5 border-b border-slate-100 bg-[#f8fafc] flex items-center gap-2">
@@ -1044,17 +796,17 @@ export default function PengaturanPage() {
           </div>
         )}
 
-        {/* TAB 5: DATABASE & PEMBERSIHAN DATA */}
+        {/* TAB 4: DATABASE & PEMBERSIHAN DATA */}
         {activeTab === 'database' && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center gap-2">
               <span className="material-symbols-outlined text-[#2563eb]">database</span>
-              <h2 className="text-sm font-extrabold text-[#0f172a]">Manajemen Database & Pembersihan Data</h2>
+              <h2 className="text-sm font-extrabold text-[#0f172a]">Manajemen Database & Backup</h2>
             </div>
 
             <div className="p-6 flex flex-col gap-4 text-xs">
               <p className="text-slate-500 font-medium leading-relaxed">
-                Unduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk cadangan berkala, atau impor file backup untuk pemulihan, atau hapus seluruh data contoh / demo agar aplikasi siap dipakai dari nol.
+                Unduh seluruh salinan data (Anggota, Simpanan, Pinjaman, Buku Kas) dalam format JSON untuk cadangan berkala, atau impor file backup untuk pemulihan data.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -1092,8 +844,8 @@ export default function PengaturanPage() {
 
                 <div className="border border-rose-200 rounded-2xl p-4 flex flex-col justify-between gap-3 bg-rose-50/40">
                   <div>
-                    <h3 className="font-extrabold text-rose-800">Hapus Semua Data Demo</h3>
-                    <p className="text-slate-500 text-[11px] mt-1 font-medium">Kosongkan semua data anggota, simpanan, pinjaman & kas ke 0.</p>
+                    <h3 className="font-extrabold text-rose-800">Reset Semua Transaksi</h3>
+                    <p className="text-slate-500 text-[11px] mt-1 font-medium">Kosongkan riwayat data transaksi anggota, simpanan, & pinjaman.</p>
                   </div>
                   <button
                     type="button"
@@ -1101,7 +853,7 @@ export default function PengaturanPage() {
                     className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">delete_sweep</span>
-                    Kosongkan Semua Data
+                    Kosongkan Data Transaksi
                   </button>
                 </div>
               </div>
