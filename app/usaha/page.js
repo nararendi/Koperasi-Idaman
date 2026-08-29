@@ -1113,7 +1113,8 @@ export default function UsahaPage() {
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-600">Total Tagihan:</span>
                       <span className="text-base font-black text-[#2563eb]">{formatRupiah(cartTotal)}</span>
-                    </d                    <div className="flex justify-between items-center gap-2 text-xs">
+                    </div>
+                    <div className="flex justify-between items-center gap-2 text-xs">
                       <label className="font-bold text-slate-700 whitespace-nowrap">Uang Bayar:</label>
                       <div className="w-36">
                         <RupiahInput
