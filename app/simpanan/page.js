@@ -59,6 +59,7 @@ export default function SimpananPage() {
 
   useEffect(() => {
     loadData();
+    dataService.fetchFromSupabase().catch(() => {});
 
     const handleUpdate = () => {
       loadData();
