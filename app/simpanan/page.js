@@ -110,27 +110,98 @@ export default function SimpananPage() {
     showToast(`Transaksi Simpanan ${formData.jenis} sebesar Rp ${Number(formData.jumlah).toLocaleString('id-ID')} berhasil dicatat!`);
   };
 
-  const handlePrintKuitansi = (item) => {
-    setSelectedKuitansi(item);
-    setKuitansiModalOpen(true);
+  // State Accordion Collapse/Expand per Anggota (Set berisi nomor_anggota yang dibuka)
+  const [expandedMembers, setExpandedMembers] = useState(new Set());
+
+  const toggleMemberExpand = (noAnggota) => {
+    setExpandedMembers((prev) => {
+      const next = new Set(prev);
+      if (next.has(noAnggota)) {
+        next.delete(noAnggota);
+      } else {
+        next.add(noAnggota);
+      }
+      return next;
+    });
   };
 
-  const filteredList = (simpananList || []).filter((item) => {
-    if (!item) return false;
-    const nama = (item?.nama_anggota || item?.nama || '').toLowerCase();
-    const noAnggota = (item?.nomor_anggota || '').toLowerCase();
-    const query = searchQuery.toLowerCase();
-    const matchSearch = nama.includes(query) || noAnggota.includes(query);
+  const expandAll = () => {
+    const allNos = new Set(groupedMembers.map((g) => g.nomor_anggota));
+    setExpandedMembers(allNos);
+  };
 
-    const matchJenis =
-      jenisFilter === 'all' ||
-      (item?.jenis || '').toLowerCase() === jenisFilter.toLowerCase();
+  const collapseAll = () => {
+    setExpandedMembers(new Set());
+  };
 
-    return matchSearch && matchJenis;
-  });
+  // Grouping list per Anggota
+  const groupedMembers = (() => {
+    const map = new Map();
+
+    (simpananList || []).forEach((item) => {
+      if (!item) return;
+      const no = item.nomor_anggota || 'UNKNOWN';
+      const nama = item.nama_anggota || item.nama || '-';
+
+      if (!map.has(no)) {
+        map.set(no, {
+          nomor_anggota: no,
+          nama_anggota: nama,
+          pokok: 0,
+          wajib: 0,
+          sukarela: 0,
+          total: 0,
+          transactions: []
+        });
+      }
+
+      const entry = map.get(no);
+      entry.transactions.push(item);
+
+      const amount = Number(item.jumlah || 0);
+      const isWithdrawal = item.tipe === 'Penarikan' || (item.keterangan || '').toLowerCase().includes('tarik');
+      const val = isWithdrawal ? -amount : amount;
+      const j = (item.jenis || '').toLowerCase();
+
+      if (j.includes('pokok')) entry.pokok += val;
+      else if (j.includes('wajib')) entry.wajib += val;
+      else if (j.includes('sukarela')) entry.sukarela += val;
+
+      entry.total += val;
+    });
+
+    // Filter berdasarkan search query dan jenisFilter
+    const groups = Array.from(map.values()).map((g) => {
+      const filteredTrx = g.transactions.filter((t) => {
+        if (jenisFilter === 'all') return true;
+        return (t.jenis || '').toLowerCase().includes(jenisFilter.toLowerCase());
+      });
+
+      return {
+        ...g,
+        filteredTransactions: filteredTrx
+      };
+    });
+
+    return groups.filter((g) => {
+      const query = searchQuery.toLowerCase();
+      const matchSearch =
+        g.nama_anggota.toLowerCase().includes(query) ||
+        g.nomor_anggota.toLowerCase().includes(query);
+
+      const hasTransactions = g.filteredTransactions.length > 0;
+
+      return matchSearch && (jenisFilter === 'all' || hasTransactions);
+    });
+  })();
 
   const formatRupiah = (num) => {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
+  };
+
+  const handlePrintKuitansi = (item) => {
+    setSelectedKuitansi(item);
+    setKuitansiModalOpen(true);
   };
 
   return (
@@ -141,7 +212,7 @@ export default function SimpananPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => excelExport.exportSimpanan(filteredList, summary, settings)}
+            onClick={() => excelExport.exportSimpanan(simpananList, summary, settings)}
             className="px-4 py-2 border border-[#2563eb]/30 bg-[#eff6ff] hover:bg-[#dbeafe] text-[#2563eb] rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">description</span>
@@ -160,9 +231,9 @@ export default function SimpananPage() {
     >
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-[#2563eb] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold animate-in fade-in">
-          <span className="material-symbols-outlined text-base text-[#ffd159]">check_circle</span>
-          <span>{toastMessage}</span>
+        <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-sm animate-in fade-in">
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          {toastMessage}
         </div>
       )}
 
@@ -215,10 +286,10 @@ export default function SimpananPage() {
 
       {/* Table Container */}
       <div className="bg-white border border-slate-100 rounded-3xl shadow-xs overflow-hidden flex flex-col">
-        {/* Filters */}
+        {/* Filters & Collapse Actions */}
         <div className="p-4 border-b border-slate-100 bg-[#f8fafc] flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-extrabold text-slate-500 mr-1">Jenis:</span>
+            <span className="text-xs font-extrabold text-slate-500 mr-1">Filter Jenis:</span>
             {['all', 'pokok', 'wajib', 'sukarela'].map((j) => (
               <button
                 key={j}
@@ -233,6 +304,25 @@ export default function SimpananPage() {
                 {j === 'all' ? 'Semua' : j.charAt(0).toUpperCase() + j.slice(1)}
               </button>
             ))}
+
+            <div className="hidden sm:flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200">
+              <button
+                type="button"
+                onClick={expandAll}
+                className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-[#2563eb] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                title="Buka semua rincian riwayat transaksi"
+              >
+                Buka Semua
+              </button>
+              <button
+                type="button"
+                onClick={collapseAll}
+                className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-[#2563eb] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                title="Tutup semua rincian"
+              >
+                Tutup Semua
+              </button>
+            </div>
           </div>
 
           <div className="relative w-full sm:w-72">
@@ -249,78 +339,194 @@ export default function SimpananPage() {
           </div>
         </div>
 
-        {/* Table Data */}
+        {/* Grouped Accordion Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-400 uppercase font-bold tracking-wider">
-                <th className="px-4 py-3.5">Tanggal</th>
+                <th className="px-4 py-3.5 w-12 text-center">#</th>
                 <th className="px-4 py-3.5">No. Anggota</th>
                 <th className="px-4 py-3.5">Nama Anggota</th>
-                <th className="px-4 py-3.5">Jenis Simpanan</th>
-                <th className="px-4 py-3.5">Metode</th>
-                <th className="px-4 py-3.5">Keterangan</th>
-                <th className="px-4 py-3.5 text-right">Jumlah</th>
-                <th className="px-4 py-3.5 text-center">Bukti</th>
+                <th className="px-4 py-3.5 text-right">Simp. Pokok</th>
+                <th className="px-4 py-3.5 text-right">Simp. Wajib</th>
+                <th className="px-4 py-3.5 text-right">Simp. Sukarela</th>
+                <th className="px-4 py-3.5 text-right">Total Simpanan</th>
+                <th className="px-4 py-3.5 text-center w-24">Riwayat</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredList.length === 0 ? (
+              {groupedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-slate-400 font-medium">
+                  <td colSpan={8} className="px-4 py-12 text-center text-slate-400 font-medium">
                     Belum ada data transaksi simpanan yang cocok.
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item) => {
-                  const isWithdrawal = item.tipe === 'Penarikan' || (item.keterangan || '').toLowerCase().includes('tarik');
+                groupedMembers.map((group) => {
+                  const isExpanded = expandedMembers.has(group.nomor_anggota);
+                  const displayTrx = group.filteredTransactions || group.transactions;
+
                   return (
-                    <tr key={item.id} className="hover:bg-[#f8fafc]/60 transition-colors">
-                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-medium">
-                        {item.tanggal}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
-                        {item.nomor_anggota}
-                      </td>
-                      <td className="px-4 py-3.5 font-extrabold text-[#0f172a] whitespace-nowrap">
-                        {item.nama_anggota || item.nama}
-                      </td>
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full font-extrabold text-[10px] uppercase ${
-                            (item.jenis || '').toLowerCase().includes('pokok')
-                              ? 'bg-[#eff6ff] text-[#2563eb]'
-                              : (item.jenis || '').toLowerCase().includes('wajib')
-                              ? 'bg-[#e0e7ff] text-[#4338ca]'
-                              : 'bg-[#fef8e7] text-[#b88000]'
-                          }`}
-                        >
-                          {item.jenis}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-600 whitespace-nowrap">
-                        {item.metode || 'Tunai'}
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-600 max-w-[200px] truncate" title={item.keterangan}>
-                        {item.keterangan || '-'}
-                      </td>
-                      <td
-                        className={`px-4 py-3.5 text-right font-extrabold whitespace-nowrap ${
-                          isWithdrawal ? 'text-rose-500' : 'text-[#2563eb]'
+                    <tr key={group.nomor_anggota} className="contents">
+                      {/* Baris Utama Akumulasi per Anggota (Click to Expand/Collapse) */}
+                      <tr
+                        onClick={() => toggleMemberExpand(group.nomor_anggota)}
+                        className={`group cursor-pointer transition-colors ${
+                          isExpanded ? 'bg-blue-50/50 hover:bg-blue-50/80' : 'hover:bg-[#f8fafc]/80'
                         }`}
                       >
-                        {isWithdrawal ? `-${formatRupiah(item.jumlah)}` : `+${formatRupiah(item.jumlah)}`}
-                      </td>
-                      <td className="px-4 py-3.5 text-center whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handlePrintKuitansi(item)}
-                          className="p-1.5 text-[#2563eb] hover:bg-[#eff6ff] rounded-xl transition-colors"
-                          title="Cetak Bukti Kuitansi"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">receipt</span>
-                        </button>
-                      </td>
+                        <td className="px-4 py-3.5 text-center">
+                          <span
+                            className={`material-symbols-outlined text-base transition-transform duration-200 ${
+                              isExpanded ? 'rotate-90 text-[#2563eb]' : 'text-slate-400 group-hover:text-slate-600'
+                            }`}
+                          >
+                            chevron_right
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
+                          {group.nomor_anggota}
+                        </td>
+                        <td className="px-4 py-3.5 font-extrabold text-[#0f172a] whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span>{group.nama_anggota}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 font-semibold text-slate-500">
+                              {group.transactions.length} trx
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5 text-right font-bold text-slate-700 whitespace-nowrap">
+                          {formatRupiah(group.pokok)}
+                        </td>
+                        <td className="px-4 py-3.5 text-right font-bold text-[#2563eb] whitespace-nowrap">
+                          {formatRupiah(group.wajib)}
+                        </td>
+                        <td className="px-4 py-3.5 text-right font-bold text-[#df9800] whitespace-nowrap">
+                          {formatRupiah(group.sukarela)}
+                        </td>
+                        <td className="px-4 py-3.5 text-right font-black text-[#0f172a] whitespace-nowrap bg-slate-50/40">
+                          {formatRupiah(group.total)}
+                        </td>
+                        <td className="px-4 py-3.5 text-center whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                              isExpanded
+                                ? 'bg-blue-100 text-[#1d4ed8]'
+                                : 'bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-[#2563eb]'
+                            }`}
+                          >
+                            {isExpanded ? 'Tutup' : 'Lihat'}
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Baris Collapse: Rincian Riwayat Transaksi Anggota */}
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={8} className="p-0 bg-slate-50/80 border-y border-blue-100">
+                            <div className="p-4 pl-12 pr-6">
+                              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
+                                <div className="px-4 py-2.5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
+                                  <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-[16px] text-[#2563eb]">history</span>
+                                    Riwayat Transaksi: {group.nama_anggota} ({group.nomor_anggota})
+                                  </span>
+                                  <span className="text-[10px] font-bold text-slate-400">
+                                    Menampilkan {displayTrx.length} transaksi
+                                  </span>
+                                </div>
+                                <table className="w-full text-left text-xs border-collapse">
+                                  <thead>
+                                    <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100">
+                                      <th className="px-4 py-2.5">Tanggal</th>
+                                      <th className="px-4 py-2.5">Kode</th>
+                                      <th className="px-4 py-2.5">Jenis</th>
+                                      <th className="px-4 py-2.5">Tipe</th>
+                                      <th className="px-4 py-2.5">Metode</th>
+                                      <th className="px-4 py-2.5">Keterangan</th>
+                                      <th className="px-4 py-2.5 text-right">Nominal</th>
+                                      <th className="px-4 py-2.5 text-center">Kuitansi</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100">
+                                    {displayTrx.length === 0 ? (
+                                      <tr>
+                                        <td colSpan={8} className="px-4 py-4 text-center text-slate-400 text-xs">
+                                          Tidak ada transaksi pada filter ini.
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      displayTrx.map((trx) => {
+                                        const isWithdrawal =
+                                          trx.tipe === 'Penarikan' || (trx.keterangan || '').toLowerCase().includes('tarik');
+
+                                        return (
+                                          <tr key={trx.id} className="hover:bg-blue-50/30 transition-colors">
+                                            <td className="px-4 py-2.5 font-medium text-slate-600 whitespace-nowrap">
+                                              {trx.tanggal}
+                                            </td>
+                                            <td className="px-4 py-2.5 font-mono text-slate-500 whitespace-nowrap">
+                                              {trx.id}
+                                            </td>
+                                            <td className="px-4 py-2.5 whitespace-nowrap">
+                                              <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase ${
+                                                  (trx.jenis || '').toLowerCase().includes('pokok')
+                                                    ? 'bg-[#eff6ff] text-[#2563eb]'
+                                                    : (trx.jenis || '').toLowerCase().includes('wajib')
+                                                    ? 'bg-[#e0e7ff] text-[#4338ca]'
+                                                    : 'bg-[#fef8e7] text-[#b88000]'
+                                                }`}
+                                              >
+                                                {trx.jenis}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-2.5 font-semibold whitespace-nowrap">
+                                              <span
+                                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                                  isWithdrawal ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                                                }`}
+                                              >
+                                                {trx.tipe || (isWithdrawal ? 'Penarikan' : 'Setoran')}
+                                              </span>
+                                            </td>
+                                            <td className="px-4 py-2.5 text-slate-600 whitespace-nowrap">
+                                              {trx.metode || 'Tunai'}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-slate-600 max-w-[200px] truncate" title={trx.keterangan}>
+                                              {trx.keterangan || '-'}
+                                            </td>
+                                            <td
+                                              className={`px-4 py-2.5 text-right font-extrabold whitespace-nowrap ${
+                                                isWithdrawal ? 'text-rose-500' : 'text-emerald-600'
+                                              }`}
+                                            >
+                                              {isWithdrawal ? `-${formatRupiah(trx.jumlah)}` : `+${formatRupiah(trx.jumlah)}`}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-center whitespace-nowrap">
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handlePrintKuitansi(trx);
+                                                }}
+                                                className="p-1 text-[#2563eb] hover:bg-[#eff6ff] rounded-lg transition-colors cursor-pointer"
+                                                title="Cetak Kuitansi"
+                                              >
+                                                <span className="material-symbols-outlined text-[16px]">receipt</span>
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        );
+                                      })
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                     </tr>
                   );
                 })
