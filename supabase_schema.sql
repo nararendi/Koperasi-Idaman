@@ -1,9 +1,10 @@
 -- ==============================================================================
--- SKRIP DATABASE SUPABASE LENGKAP - KOPERASI IDAMAN (EDISI LENGKAP & TERBARU)
--- Mencakup: Pengaturan, Pengguna Admin, Anggota, Simpanan, Pinjaman, Kas, Sembako, Tabungan Qurban, & Rekap Tagihan
+-- SKRIP DATABASE SUPABASE LENGKAP - KOPERASI IDAMAN (FULL 2-WAY SYNC & CRUD)
+-- Mencakup: Pengaturan, Pengguna Admin, Anggota, Simpanan, Pinjaman, Riwayat Angsuran,
+-- Kas, Produk Toko Sembako, Transaksi Kasir POS, Tabungan Qurban, & Rekap Tagihan Bulanan
 -- ==============================================================================
 
--- 1. BERSIHKAN STRUKTUR TABEL LAMA JIKA INGIN RESET ULANG (CASCADE)
+-- 1. BERSIHKAN STRUKTUR TABEL LAMA JIKA RESET / RE-RUN
 DROP TABLE IF EXISTS public.tagihan_override CASCADE;
 DROP TABLE IF EXISTS public.qurban_mutasi CASCADE;
 DROP TABLE IF EXISTS public.qurban_peserta CASCADE;
@@ -43,7 +44,7 @@ CREATE TABLE public.settings (
 );
 
 -- ------------------------------------------------------------------------------
--- 3. TABEL PENGGUNA ADMIN (LOGIN & AKSES)
+-- 3. TABEL PENGGUNA ADMIN (LOGIN & HAK AKSES)
 -- ------------------------------------------------------------------------------
 CREATE TABLE public.users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -67,10 +68,10 @@ CREATE TABLE public.anggota (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nomor_anggota VARCHAR(50) UNIQUE NOT NULL,
     nama_lengkap VARCHAR(255) NOT NULL,
-    alamat_lengkap TEXT,
-    nomor_hp VARCHAR(30),
-    pekerjaan VARCHAR(100),
-    tempat_lahir VARCHAR(100),
+    alamat_lengkap TEXT DEFAULT '',
+    nomor_hp VARCHAR(30) DEFAULT '',
+    pekerjaan VARCHAR(100) DEFAULT '-',
+    tempat_lahir VARCHAR(100) DEFAULT '-',
     tanggal_lahir DATE,
     tanggal_daftar DATE DEFAULT CURRENT_DATE,
     status_keanggotaan VARCHAR(20) DEFAULT 'Aktif' CHECK (status_keanggotaan IN ('Aktif', 'Keluar', 'Berhenti')),
@@ -92,7 +93,7 @@ CREATE TABLE public.simpanan (
     jumlah NUMERIC(15, 2) NOT NULL CHECK (jumlah > 0),
     metode VARCHAR(30) DEFAULT 'Tunai',
     pencatat VARCHAR(100) DEFAULT 'Admin Kasir',
-    keterangan TEXT,
+    keterangan TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -108,14 +109,14 @@ CREATE TABLE public.pinjaman (
     jumlah NUMERIC(15, 2) NOT NULL CHECK (jumlah > 0),
     bunga NUMERIC(5, 2) NOT NULL DEFAULT 1.50,
     tenor INT NOT NULL CHECK (tenor > 0),
-    angsuran_pokok NUMERIC(15, 2) NOT NULL,
-    angsuran_bunga NUMERIC(15, 2) NOT NULL,
-    total_angsuran_bulanan NUMERIC(15, 2) NOT NULL,
-    total_pinjaman NUMERIC(15, 2) NOT NULL,
+    angsuran_pokok NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+    angsuran_bunga NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+    total_angsuran_bulanan NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+    total_pinjaman NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
     total_terbayar NUMERIC(15, 2) DEFAULT 0.00,
-    sisa_hutang NUMERIC(15, 2) NOT NULL,
+    sisa_hutang NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
     status VARCHAR(20) DEFAULT 'Diajukan' CHECK (status IN ('Diajukan', 'Disetujui', 'Berjalan', 'Lunas', 'Ditolak')),
-    keperluan TEXT,
+    keperluan TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -126,7 +127,7 @@ CREATE TABLE public.pinjaman (
 CREATE TABLE public.riwayat_angsuran (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nomor_pinjaman VARCHAR(50) NOT NULL REFERENCES public.pinjaman(nomor_pinjaman) ON DELETE CASCADE,
-    angsuran_ke INT NOT NULL,
+    angsuran_ke INT NOT NULL DEFAULT 1,
     tanggal DATE NOT NULL DEFAULT CURRENT_DATE,
     jumlah NUMERIC(15, 2) NOT NULL CHECK (jumlah > 0),
     metode VARCHAR(30) DEFAULT 'Tunai',
@@ -135,7 +136,7 @@ CREATE TABLE public.riwayat_angsuran (
 );
 
 -- ------------------------------------------------------------------------------
--- 8. TABEL BUKU KAS HARIAN (ARUS KAS)
+-- 8. TABEL BUKU KAS HARIAN (ARUS KAS MASUK & KELUAR)
 -- ------------------------------------------------------------------------------
 CREATE TABLE public.kas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -144,7 +145,7 @@ CREATE TABLE public.kas (
     jenis VARCHAR(20) NOT NULL CHECK (jenis IN ('Penerimaan', 'Pengeluaran')),
     kategori VARCHAR(100) NOT NULL,
     jumlah NUMERIC(15, 2) NOT NULL CHECK (jumlah > 0),
-    keterangan TEXT,
+    keterangan TEXT DEFAULT '',
     ref_id VARCHAR(100),
     created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -156,7 +157,7 @@ CREATE TABLE public.sembako_produk (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     kode_produk VARCHAR(50) UNIQUE NOT NULL,
     nama VARCHAR(255) NOT NULL,
-    kategori VARCHAR(100) NOT NULL,
+    kategori VARCHAR(100) NOT NULL DEFAULT 'Umum',
     satuan VARCHAR(50) DEFAULT 'Pcs',
     harga_beli NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
     harga_jual NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
@@ -166,13 +167,13 @@ CREATE TABLE public.sembako_produk (
 );
 
 -- ------------------------------------------------------------------------------
--- 10. TABEL TRANSAKSI PENJUALAN SEMBAKO / KASIR
+-- 10. TABEL TRANSAKSI PENJUALAN SEMBAKO / KASIR POS
 -- ------------------------------------------------------------------------------
 CREATE TABLE public.sembako_transaksi (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     kode_transaksi VARCHAR(50) UNIQUE NOT NULL,
     tanggal DATE NOT NULL DEFAULT CURRENT_DATE,
-    pembeli VARCHAR(255) NOT NULL,
+    pembeli VARCHAR(255) NOT NULL DEFAULT 'Pelanggan Umum',
     nomor_anggota VARCHAR(50) DEFAULT '-',
     items JSONB NOT NULL DEFAULT '[]'::jsonb,
     total NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
@@ -183,19 +184,19 @@ CREATE TABLE public.sembako_transaksi (
 );
 
 -- ------------------------------------------------------------------------------
--- 11. TABEL PESERTA TABUNGAN QURBAN
+-- 11. TABEL PESERTA PROGRAM TABUNGAN QURBAN
 -- ------------------------------------------------------------------------------
 CREATE TABLE public.qurban_peserta (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     kode_peserta VARCHAR(50) UNIQUE NOT NULL,
     nomor_anggota VARCHAR(50) DEFAULT '-',
     nama VARCHAR(255) NOT NULL,
-    tipe_hewan VARCHAR(100) NOT NULL,
+    tipe_hewan VARCHAR(100) NOT NULL DEFAULT '1 Ekor Kambing / Domba',
     target_nominal NUMERIC(15, 2) NOT NULL DEFAULT 3500000.00,
     total_terkumpul NUMERIC(15, 2) DEFAULT 0.00,
-    sisa_target NUMERIC(15, 2) NOT NULL,
+    sisa_target NUMERIC(15, 2) NOT NULL DEFAULT 3500000.00,
     tahun_qurban VARCHAR(50) DEFAULT '1448 H / 2026',
-    status VARCHAR(30) DEFAULT 'Berjalan' CHECK (status IN ('Berjalan', 'Tercapai', 'Tersalurkan')),
+    status VARCHAR(30) DEFAULT 'Berjalan' CHECK (status IN ('Berjalan', 'Menabung', 'Tercapai', 'Tersalurkan')),
     tanggal_daftar DATE DEFAULT CURRENT_DATE,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
@@ -214,13 +215,13 @@ CREATE TABLE public.qurban_mutasi (
     tipe VARCHAR(20) NOT NULL DEFAULT 'Setoran' CHECK (tipe IN ('Setoran', 'Penyaluran')),
     jumlah NUMERIC(15, 2) NOT NULL CHECK (jumlah > 0),
     metode VARCHAR(30) DEFAULT 'Tunai',
-    keterangan TEXT,
+    keterangan TEXT DEFAULT '',
     pencatat VARCHAR(100) DEFAULT 'Admin Kasir',
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- ------------------------------------------------------------------------------
--- 13. TABEL PENYESUAIAN TAGIHAN BULANAN (OVERRIDE POTONGAN)
+-- 13. TABEL PENYESUAIAN TAGIHAN BULANAN (OVERRIDE POTONGAN ANGGOTA)
 -- ------------------------------------------------------------------------------
 CREATE TABLE public.tagihan_override (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -238,23 +239,24 @@ CREATE TABLE public.tagihan_override (
 );
 
 -- ------------------------------------------------------------------------------
--- 14. INDEXING UNTUK OPTIMASI PERFORMA QUERY
+-- 14. INDEXING UNTUK QUERY CEPAT & PERFORMA TINGGI
 -- ------------------------------------------------------------------------------
-CREATE INDEX idx_anggota_nomor ON public.anggota(nomor_anggota);
-CREATE INDEX idx_simpanan_anggota ON public.simpanan(nomor_anggota);
-CREATE INDEX idx_simpanan_tanggal ON public.simpanan(tanggal);
-CREATE INDEX idx_pinjaman_anggota ON public.pinjaman(nomor_anggota);
-CREATE INDEX idx_pinjaman_status ON public.pinjaman(status);
-CREATE INDEX idx_riwayat_pinjaman ON public.riwayat_angsuran(nomor_pinjaman);
-CREATE INDEX idx_kas_tanggal ON public.kas(tanggal);
-CREATE INDEX idx_kas_jenis ON public.kas(jenis);
-CREATE INDEX idx_sembako_produk_kode ON public.sembako_produk(kode_produk);
-CREATE INDEX idx_qurban_peserta_kode ON public.qurban_peserta(kode_peserta);
-CREATE INDEX idx_qurban_mutasi_peserta ON public.qurban_mutasi(peserta_id);
-CREATE INDEX idx_tagihan_periode ON public.tagihan_override(periode);
+CREATE INDEX IF NOT EXISTS idx_anggota_nomor ON public.anggota(nomor_anggota);
+CREATE INDEX IF NOT EXISTS idx_simpanan_anggota ON public.simpanan(nomor_anggota);
+CREATE INDEX IF NOT EXISTS idx_simpanan_tanggal ON public.simpanan(tanggal);
+CREATE INDEX IF NOT EXISTS idx_pinjaman_anggota ON public.pinjaman(nomor_anggota);
+CREATE INDEX IF NOT EXISTS idx_pinjaman_status ON public.pinjaman(status);
+CREATE INDEX IF NOT EXISTS idx_riwayat_pinjaman ON public.riwayat_angsuran(nomor_pinjaman);
+CREATE INDEX IF NOT EXISTS idx_kas_tanggal ON public.kas(tanggal);
+CREATE INDEX IF NOT EXISTS idx_kas_jenis ON public.kas(jenis);
+CREATE INDEX IF NOT EXISTS idx_sembako_produk_kode ON public.sembako_produk(kode_produk);
+CREATE INDEX IF NOT EXISTS idx_sembako_transaksi_kode ON public.sembako_transaksi(kode_transaksi);
+CREATE INDEX IF NOT EXISTS idx_qurban_peserta_kode ON public.qurban_peserta(kode_peserta);
+CREATE INDEX IF NOT EXISTS idx_qurban_mutasi_peserta ON public.qurban_mutasi(peserta_id);
+CREATE INDEX IF NOT EXISTS idx_tagihan_periode ON public.tagihan_override(periode);
 
 -- ------------------------------------------------------------------------------
--- 15. ROW LEVEL SECURITY (RLS) & HAK AKSES API SUPABASE
+-- 15. ROW LEVEL SECURITY (RLS) & IZIN AKSES LENGKAP (CRUD)
 -- ------------------------------------------------------------------------------
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
@@ -269,27 +271,56 @@ ALTER TABLE public.qurban_peserta ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.qurban_mutasi ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tagihan_override ENABLE ROW LEVEL SECURITY;
 
--- Kebijakan Akses Penuh untuk API Client
-CREATE POLICY "Public settings" ON public.settings FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public users" ON public.users FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public anggota" ON public.anggota FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public simpanan" ON public.simpanan FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public pinjaman" ON public.pinjaman FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public riwayat_angsuran" ON public.riwayat_angsuran FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public kas" ON public.kas FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public sembako_produk" ON public.sembako_produk FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public sembako_transaksi" ON public.sembako_transaksi FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public qurban_peserta" ON public.qurban_peserta FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public qurban_mutasi" ON public.qurban_mutasi FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public tagihan_override" ON public.tagihan_override FOR ALL USING (true) WITH CHECK (true);
+-- Kebijakan Akses Penuh (Full CRUD Permissive Policies)
+CREATE POLICY "Public settings full access" ON public.settings FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public users full access" ON public.users FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public anggota full access" ON public.anggota FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public simpanan full access" ON public.simpanan FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public pinjaman full access" ON public.pinjaman FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public riwayat_angsuran full access" ON public.riwayat_angsuran FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public kas full access" ON public.kas FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public sembako_produk full access" ON public.sembako_produk FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public sembako_transaksi full access" ON public.sembako_transaksi FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public qurban_peserta full access" ON public.qurban_peserta FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public qurban_mutasi full access" ON public.qurban_mutasi FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public tagihan_override full access" ON public.tagihan_override FOR ALL USING (true) WITH CHECK (true);
 
--- Memberi izin operasi ke role Supabase
+-- Memberi izin operasi ke semua role Supabase (anon, authenticated, service_role)
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;
 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated, service_role;
+
 -- ------------------------------------------------------------------------------
--- 16. DATA AWAL (SEED INITIAL DATA)
+-- 16. AKTIFKAN SUPABASE REALTIME (PUBLICATION DUA ARAH)
+-- ------------------------------------------------------------------------------
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE 
+      public.settings,
+      public.users,
+      public.anggota,
+      public.simpanan,
+      public.pinjaman,
+      public.riwayat_angsuran,
+      public.kas,
+      public.sembako_produk,
+      public.sembako_transaksi,
+      public.qurban_peserta,
+      public.qurban_mutasi,
+      public.tagihan_override;
+  END IF;
+EXCEPTION
+  WHEN duplicate_object THEN
+    NULL;
+END $$;
+
+-- ------------------------------------------------------------------------------
+-- 17. DATA AWAL (SEED INITIAL DATA)
 -- ------------------------------------------------------------------------------
 
 -- Pengaturan Koperasi
@@ -309,12 +340,3 @@ VALUES
 ('USR-001', 'admin', 'rendi123', 'Rendi Yosandi, A.Md.', 'nararendi@gmail.com', 'Super Admin', 'Aktif', 'AD'),
 ('USR-002', 'bendahara', 'icacahyani123', 'Ica Cahyani', 'ica@smkassalaambandung.sch.id', 'Bendahara', 'Aktif', 'IC'),
 ('USR-003', 'kasir', 'wini123', 'Wini Desi', 'wini.kasir@koperasi-idaman.co.id', 'Kasir & Teller', 'Aktif', 'SR');
-
--- Data Katalog Produk Sembako Awal
-INSERT INTO public.sembako_produk (kode_produk, nama, kategori, satuan, harga_beli, harga_jual, stok)
-VALUES
-('PRD-001', 'Beras Premium Ramos 5 Kg', 'Beras', 'Karung 5kg', 65000.00, 74000.00, 35),
-('PRD-002', 'Minyak Goreng Refill 2 Liter', 'Minyak', 'Pouch 2L', 30000.00, 34500.00, 48),
-('PRD-003', 'Gula Pasir Kristal Putih 1 Kg', 'Gula', 'Bungkus 1kg', 15000.00, 17500.00, 50),
-('PRD-004', 'Tepung Terigu Segitiga Biru 1 Kg', 'Tepung', 'Bungkus 1kg', 11000.00, 13000.00, 40),
-('PRD-005', 'Telur Ayam Negeri 1 Kg (Tray)', 'Telur', 'Kg', 26000.00, 29000.00, 25);
