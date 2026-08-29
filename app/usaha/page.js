@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
+import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 import { pdfExport } from '../../lib/pdfExport';
@@ -913,24 +914,22 @@ export default function UsahaPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Harga Beli / Modal (Rp)</label>
-                  <input
-                    type="number"
+                  <RupiahInput
                     value={produkForm.harga_beli}
-                    onChange={(e) => setProdukForm({ ...produkForm, harga_beli: e.target.value })}
+                    onChange={(val) => setProdukForm({ ...produkForm, harga_beli: val })}
                     placeholder="0"
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] outline-none font-semibold text-slate-800"
+                    className="!rounded-2xl !bg-[#f8fafc] focus:!bg-white font-semibold text-slate-800"
                   />
                 </div>
 
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Harga Jual (Rp) *</label>
-                  <input
-                    type="number"
+                  <RupiahInput
                     required
                     value={produkForm.harga_jual}
-                    onChange={(e) => setProdukForm({ ...produkForm, harga_jual: e.target.value })}
+                    onChange={(val) => setProdukForm({ ...produkForm, harga_jual: val })}
                     placeholder="0"
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] outline-none font-bold text-[#2563eb]"
+                    className="!rounded-2xl !bg-[#f8fafc] focus:!bg-white font-bold text-[#2563eb]"
                   />
                 </div>
               </div>
@@ -1114,17 +1113,17 @@ export default function UsahaPage() {
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-600">Total Tagihan:</span>
                       <span className="text-base font-black text-[#2563eb]">{formatRupiah(cartTotal)}</span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2 text-xs">
-                      <label className="font-bold text-slate-700">Uang Bayar:</label>
-                      <input
-                        type="number"
-                        required
-                        value={kasirForm.bayar}
-                        onChange={(e) => setKasirForm({ ...kasirForm, bayar: e.target.value })}
-                        placeholder="0"
-                        className="w-32 px-2.5 py-1.5 bg-[#f8fafc] border border-slate-300 rounded-lg text-right font-extrabold text-slate-800 outline-none"
-                      />
+                    </d                    <div className="flex justify-between items-center gap-2 text-xs">
+                      <label className="font-bold text-slate-700 whitespace-nowrap">Uang Bayar:</label>
+                      <div className="w-36">
+                        <RupiahInput
+                          required
+                          value={kasirForm.bayar}
+                          onChange={(val) => setKasirForm({ ...kasirForm, bayar: val })}
+                          placeholder="0"
+                          className="!rounded-xl !bg-[#f8fafc] text-right font-extrabold text-slate-800"
+                        />
+                      </div>
                     </div>
                     <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-100">
                       <span className="text-slate-500">Kembalian:</span>
@@ -1240,14 +1239,14 @@ export default function UsahaPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Target Nominal (Rp)</label>
-                  <input
-                    type="number"
+                  <RupiahInput
                     required
                     value={pesertaQurbanForm.target_nominal}
-                    onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, target_nominal: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl font-bold text-[#2563eb] outline-none"
+                    onChange={(val) => setPesertaQurbanForm({ ...pesertaQurbanForm, target_nominal: val })}
+                    className="!rounded-2xl !bg-[#f8fafc] font-bold text-[#2563eb]"
                   />
                 </div>
+
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Tahun Target Qurban</label>
                   <input
@@ -1313,13 +1312,12 @@ export default function UsahaPage() {
 
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Nominal Setoran (Rp) *</label>
-                <input
-                  type="number"
+                <RupiahInput
                   required
                   value={setorQurbanForm.jumlah}
-                  onChange={(e) => setSetorQurbanForm({ ...setorQurbanForm, jumlah: e.target.value })}
-                  placeholder="Contoh: 500000"
-                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl font-black text-[#2563eb] text-sm outline-none"
+                  onChange={(val) => setSetorQurbanForm({ ...setorQurbanForm, jumlah: val })}
+                  placeholder="0"
+                  className="!rounded-2xl !bg-[#f8fafc] font-black text-[#2563eb] text-sm"
                 />
               </div>
 
