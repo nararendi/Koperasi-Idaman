@@ -190,7 +190,7 @@ export default function PengaturanPage() {
     }
   };
 
-  const handleSaveMyProfile = (e) => {
+  const handleSaveMyProfile = async (e) => {
     e.preventDefault();
     try {
       if (myProfileForm.newPassword) {
@@ -215,9 +215,9 @@ export default function PengaturanPage() {
       }
 
       if (currentUser?.id) {
-        authService.updateUser(currentUser.id, updatedFields);
+        await authService.updateUser(currentUser.id, updatedFields);
       }
-      showToast('Profil akun Anda berhasil diperbarui!');
+      showToast('Profil dan kata sandi berhasil diperbarui ke Cloud Supabase!');
       setMyProfileForm((prev) => ({
         ...prev,
         oldPassword: '',
