@@ -44,7 +44,7 @@ export default function PengaturanPage() {
   const [isEditingUser, setIsEditingUser] = useState(false);
 
   // Tab 3: Profil Saya
-  const [currentUser, setCurrentUser] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const [myProfileForm, setMyProfileForm] = useState({
     nama: '',
     email: '',
