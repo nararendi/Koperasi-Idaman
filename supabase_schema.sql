@@ -306,9 +306,9 @@ INSERT INTO public.settings (
 -- Akun Pengguna Admin Default
 INSERT INTO public.users (user_id, username, password, nama, email, role, status, avatar)
 VALUES 
-('USR-001', 'admin', 'password123', 'Administrator Utama', 'admin@koperasi-idaman.co.id', 'Super Admin', 'Aktif', 'AD'),
-('USR-002', 'bendahara', 'password123', 'Ica Cahyani', 'ica.bendahara@koperasi-idaman.co.id', 'Bendahara', 'Aktif', 'IC'),
-('USR-003', 'kasir', 'password123', 'Siti Rahayu', 'siti.kasir@koperasi-idaman.co.id', 'Kasir & Teller', 'Aktif', 'SR');
+('USR-001', 'admin', 'rendi123', 'Rendi Yosandi, A.Md.', 'nararendi@gmail.com', 'Super Admin', 'Aktif', 'AD'),
+('USR-002', 'bendahara', 'icacahyani123', 'Ica Cahyani', 'ica@smkassalaambandung.sch.id', 'Bendahara', 'Aktif', 'IC'),
+('USR-003', 'kasir', 'wini123', 'Wini Desi', 'wini.kasir@koperasi-idaman.co.id', 'Kasir & Teller', 'Aktif', 'SR');
 
 -- Data Katalog Produk Sembako Awal
 INSERT INTO public.sembako_produk (kode_produk, nama, kategori, satuan, harga_beli, harga_jual, stok)

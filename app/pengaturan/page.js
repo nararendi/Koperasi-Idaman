@@ -148,7 +148,7 @@ export default function PengaturanPage() {
     setUserModalOpen(true);
   };
 
-  const handleSaveUser = (e) => {
+  const handleSaveUser = async (e) => {
     e.preventDefault();
     try {
       if (isEditingUser) {
@@ -161,14 +161,14 @@ export default function PengaturanPage() {
         if (userFormData.password) {
           updateData.password = userFormData.password;
         }
-        authService.updateUser(userFormData.id, updateData);
+        await authService.updateUser(userFormData.id, updateData);
         showToast(`Akun admin ${userFormData.nama} berhasil diperbarui!`);
       } else {
         if (!userFormData.password) {
           alert('Kata sandi wajib diisi untuk pengguna baru.');
           return;
         }
-        authService.addUser(userFormData);
+        await authService.addUser(userFormData);
         showToast(`Pengguna admin baru "${userFormData.nama}" berhasil ditambahkan!`);
       }
       setUserModalOpen(false);
@@ -178,11 +178,12 @@ export default function PengaturanPage() {
     }
   };
 
-  const handleDeleteUser = (user) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus akun admin "${user.nama}" (${user.username})?`)) {
+  const handleDeleteUser = async (user) => {
+    if (!user) return;
+    if (confirm(`Apakah Anda yakin ingin menghapus akun pengguna "${user.nama}" (@${user.username})?`)) {
       try {
-        authService.deleteUser(user.id);
-        showToast(`Akun ${user.nama} berhasil dihapus.`);
+        await authService.deleteUser(user.id);
+        showToast(`Akun pengguna ${user.nama} berhasil dihapus permanen!`);
         loadData();
       } catch (err) {
         alert(err.message);

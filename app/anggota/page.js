@@ -80,20 +80,20 @@ export default function DaftarAnggotaPage() {
   };
 
   // Save Edit
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault();
-    dataService.updateAnggota(editFormData.id, editFormData);
+    await dataService.updateAnggota(editFormData.id, editFormData);
     setEditModalOpen(false);
     showToast(`Data anggota ${editFormData?.nama || ''} berhasil diperbarui!`);
   };
 
   // Delete Anggota
-  const handleDelete = (item) => {
+  const handleDelete = async (item) => {
     if (!item) return;
     const id = item.nomor_anggota || item.id;
-    if (confirm(`Apakah Anda yakin ingin menghapus data anggota "${item?.nama || item?.nama_lengkap || 'Anggota'}" (${id})?`)) {
-      dataService.deleteAnggota(id);
-      showToast(`Data anggota ${id} berhasil dihapus.`);
+    if (confirm(`Apakah Anda yakin ingin menghapus data anggota "${item?.nama || item?.nama_lengkap || 'Anggota'}" (${id})?\n\nPerhatian: Seluruh simpanan dan pinjaman terkait anggota ini juga akan dihapus permanen dari sistem & Supabase.`)) {
+      await dataService.deleteAnggota(id);
+      showToast(`Data anggota ${id} berhasil dihapus permanen!`);
     }
   };
 
