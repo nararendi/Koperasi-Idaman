@@ -261,9 +261,49 @@ export default function PengaturanPage() {
     reader.readAsText(file);
   };
 
+  // Cloud Supabase Sync
+  const [syncLoading, setSyncLoading] = useState(false);
+
+  const handleTestSupabaseConnection = async () => {
+    setSyncLoading(true);
+    const { testSupabaseConnection } = await import('../../lib/supabase');
+    const res = await testSupabaseConnection();
+    setSyncLoading(false);
+    if (res.success) {
+      showToast('Koneksi Supabase Cloud Berhasil & Aktif!');
+    } else {
+      alert('Koneksi Supabase: ' + res.message);
+    }
+  };
+
+  const handlePushToSupabase = async () => {
+    if (!confirm('Apakah Anda ingin mengunggah (push) seluruh data lokal (Anggota, Simpanan, Pinjaman, Kas, Produk Toko, Qurban, Tagihan) ke Supabase Cloud?')) return;
+    setSyncLoading(true);
+    const res = await dataService.pushAllToSupabase();
+    setSyncLoading(false);
+    if (res.success) {
+      showToast(res.message);
+    } else {
+      alert('Gagal: ' + res.message);
+    }
+  };
+
+  const handleFetchFromSupabase = async () => {
+    if (!confirm('Apakah Anda ingin menarik (fetch) seluruh data dari Supabase Cloud untuk menyelaraskan data lokal?')) return;
+    setSyncLoading(true);
+    const res = await dataService.fetchFromSupabase();
+    setSyncLoading(false);
+    if (res.success) {
+      showToast(res.message);
+      loadData();
+    } else {
+      alert('Gagal: ' + res.message);
+    }
+  };
+
   // Clear all demo data
   const handleClearAllData = async () => {
-    if (confirm('KONFIRMASI: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA transaksi (Anggota, Simpanan, Pinjaman, Buku Kas)?\n\nDatabase akan dikosongkan bersih sehingga siap diisi data operasional riil.')) {
+    if (confirm('KONFIRMASI: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA transaksi (Anggota, Simpanan, Pinjaman, Buku Kas, Toko, Qurban)?\n\nDatabase akan dikosongkan bersih sehingga siap diisi data operasional riil.')) {
       dataService.clearAllData();
       await dataService.clearSupabaseData();
       showToast('Seluruh data transaksi berhasil dibersihkan!');
@@ -855,6 +895,51 @@ export default function PengaturanPage() {
                   >
                     <span className="material-symbols-outlined text-base">delete_sweep</span>
                     Kosongkan Data Transaksi
+                  </button>
+                </div>
+              </div>
+
+              {/* Supabase Cloud Live Sync */}
+              <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-slate-800 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-emerald-600 text-base">cloud_sync</span>
+                      Sinkronisasi Supabase Cloud
+                    </h3>
+                    <p className="text-slate-500 text-[11px] mt-0.5 font-medium">
+                      Kelola sinkronisasi instan dua arah antara database aplikasi dan cloud database Supabase.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={syncLoading}
+                    onClick={handleTestSupabaseConnection}
+                    className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl text-[11px] font-bold text-slate-700 flex items-center gap-1 shadow-2xs cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-sm text-emerald-500">sensors</span>
+                    Tes Koneksi
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    disabled={syncLoading}
+                    onClick={handlePushToSupabase}
+                    className="py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-base">cloud_upload</span>
+                    {syncLoading ? 'Memproses...' : 'Unggah (Push) Semua Data ke Supabase'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={syncLoading}
+                    onClick={handleFetchFromSupabase}
+                    className="py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-2xl font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-base">cloud_download</span>
+                    {syncLoading ? 'Memproses...' : 'Tarik (Fetch) Data dari Supabase'}
                   </button>
                 </div>
               </div>
