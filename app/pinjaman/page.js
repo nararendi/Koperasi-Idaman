@@ -487,13 +487,11 @@ export default function PinjamanPage() {
                       onChange={(e) => setApplyForm({ ...applyForm, tenor: Number(e.target.value) })}
                       className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-xs"
                     >
-                      <option value={3}>3 Bulan</option>
-                      <option value={6}>6 Bulan</option>
-                      <option value={10}>10 Bulan</option>
-                      <option value={12}>12 Bulan (1 Tahun)</option>
-                      <option value={18}>18 Bulan</option>
-                      <option value={24}>24 Bulan (2 Tahun)</option>
-                      <option value={36}>36 Bulan (3 Tahun)</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
+                        <option key={m} value={m}>
+                          {m} Bulan {m === 12 ? '(1 Tahun)' : ''}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
