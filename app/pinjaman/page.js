@@ -201,7 +201,7 @@ export default function PinjamanPage() {
     e.preventDefault();
     if (!selectedPinjamanBayar) return;
 
-    dataService.payPinjamanInstallment({
+    const updated = dataService.payPinjamanInstallment({
       pinjamanId: selectedPinjamanBayar.id,
       jumlahBayar: bayarForm.jumlahBayar,
       metode: bayarForm.metode,
@@ -212,7 +212,16 @@ export default function PinjamanPage() {
     });
 
     setBayarModalOpen(false);
-    showToast(`Pembayaran Cicilan ke-${bayarForm.cicilanKe} sebesar ${formatRupiah(bayarForm.jumlahBayar)} berhasil dibukukan ke Kas Koperasi!`);
+    loadData();
+
+    if (updated) {
+      const sisa = Number(updated.sisa_hutang) || 0;
+      if (sisa <= 0 || updated.status === 'Lunas') {
+        showToast(`🎉 Pembayaran Cicilan ke-${bayarForm.cicilanKe} (${formatRupiah(bayarForm.jumlahBayar)}) berhasil! Pinjaman ${updated.nama} telah LUNAS.`);
+      } else {
+        showToast(`✅ Pembayaran Cicilan ke-${bayarForm.cicilanKe} (${formatRupiah(bayarForm.jumlahBayar)}) berhasil! Sisa pinjaman belum lunas: ${formatRupiah(sisa)}`);
+      }
+    }
   };
 
   // Open Detail Modal
@@ -398,12 +407,29 @@ export default function PinjamanPage() {
               ) : (
                 filteredList.map((item) => (
                   <tr key={item.id} className="hover:bg-[#f8fafc]/60 transition-colors">
-                    <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
-                      {item.nomor_pinjaman || item.id}
+                    <td className="px-4 py-3.5 font-mono font-bold whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDetailModal(item)}
+                        className="text-[#2563eb] hover:underline cursor-pointer flex items-center gap-1 font-mono"
+                        title="Klik untuk melihat rincian & sisa hutang pinjaman"
+                      >
+                        {item.nomor_pinjaman || item.id}
+                      </button>
                     </td>
                     <td className="px-4 py-3.5 whitespace-nowrap">
-                      <div className="font-extrabold text-[#0f172a]">{item.nama}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{item.nomor_anggota}</div>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDetailModal(item)}
+                        className="text-left group cursor-pointer block"
+                        title="Klik untuk melihat sisa pinjaman & rincian anggota ini"
+                      >
+                        <div className="font-extrabold text-[#0f172a] group-hover:text-[#2563eb] group-hover:underline flex items-center gap-1">
+                          {item.nama}
+                          <span className="material-symbols-outlined text-[13px] text-[#2563eb] opacity-0 group-hover:opacity-100 transition-opacity">info</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{item.nomor_anggota}</div>
+                      </button>
                     </td>
                     <td className="px-4 py-3.5 text-right font-extrabold text-[#0f172a] whitespace-nowrap">
                       {formatRupiah(item.jumlah)}
@@ -851,135 +877,197 @@ export default function PinjamanPage() {
       )}
 
       {/* MODAL DETAIL PINJAMAN */}
-      {detailModalOpen && selectedPinjamanDetail && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-in fade-in zoom-in duration-150">
-            <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[32px]">
-              <div>
-                <h3 className="text-base font-extrabold">Rincian & Jadwal Pinjaman</h3>
-                <p className="text-xs text-blue-100 font-mono">{selectedPinjamanDetail.nomor_pinjaman || selectedPinjamanDetail.id}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDetailModalOpen(false)}
-                className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
+      {detailModalOpen && selectedPinjamanDetail && (() => {
+        const detailSchedule = getPinjamanSchedule(selectedPinjamanDetail);
+        const totalWajib = Number(selectedPinjamanDetail.total_pinjaman) || 0;
+        const totalBayar = Number(selectedPinjamanDetail.total_terbayar) || 0;
+        const sisaHutang = Number(selectedPinjamanDetail.sisa_hutang) || 0;
+        const isLunas = sisaHutang <= 0 || selectedPinjamanDetail.status === 'Lunas';
+        const progressPercent = totalWajib > 0 ? Math.min(100, Math.round((totalBayar / totalWajib) * 100)) : 0;
+        const paidAngsuranKeSet = new Set((selectedPinjamanDetail.riwayat_angsuran || []).map((a) => Number(a.angsuran_ke)));
 
-            <div className="p-6 flex flex-col gap-4 text-xs">
-              <div className="grid grid-cols-2 gap-3 bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe]">
+        return (
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-in fade-in zoom-in duration-150">
+              <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[32px]">
                 <div>
-                  <span className="text-slate-400 font-bold block">Nama Peminjam:</span>
-                  <span className="font-extrabold text-slate-800 text-sm">{selectedPinjamanDetail?.nama || '-'}</span>
+                  <h3 className="text-base font-extrabold">Rincian & Status Pinjaman</h3>
+                  <p className="text-xs text-blue-100 font-mono">{selectedPinjamanDetail.nomor_pinjaman || selectedPinjamanDetail.id}</p>
                 </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Status Pinjaman:</span>
-                  <span>{getStatusBadge(selectedPinjamanDetail.status)}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Plafon Pinjaman:</span>
-                  <span className="font-extrabold text-slate-800">{formatRupiah(selectedPinjamanDetail.jumlah)}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Tenor & Bunga:</span>
-                  <span className="font-extrabold text-slate-800">{selectedPinjamanDetail.tenor} Bulan ({selectedPinjamanDetail.bunga}% / bln)</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Total Kewajiban:</span>
-                  <span className="font-extrabold text-slate-800">{formatRupiah(selectedPinjamanDetail.total_pinjaman)}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Sisa Hutang:</span>
-                  <span className="font-extrabold text-rose-500">{formatRupiah(selectedPinjamanDetail.sisa_hutang)}</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setDetailModalOpen(false)}
+                  className="text-white/80 hover:text-white p-1 rounded-xl hover:bg-white/10"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
               </div>
 
-              {/* Installment History Table */}
-              <div>
-                <h4 className="text-sm font-extrabold text-[#0f172a] mb-2 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-[#2563eb]">history</span>
-                  Riwayat Pembayaran Angsuran ({selectedPinjamanDetail.riwayat_angsuran?.length || 0})
-                </h4>
+              <div className="p-6 flex flex-col gap-4 text-xs">
+                {/* Prominent Sisa Pinjaman Belum Lunas Card */}
+                <div className={`p-4 rounded-2xl border ${isLunas ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                      {isLunas ? 'Status Pelunasan' : 'Sisa Pinjaman Belum Lunas'}
+                    </span>
+                    <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${isLunas ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
+                      {isLunas ? 'Lunas 100%' : `Sisa ${100 - progressPercent}%`}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <p className={`text-2xl font-black ${isLunas ? 'text-emerald-700' : 'text-rose-600'}`}>
+                      {isLunas ? 'Rp 0 (Lunas)' : formatRupiah(sisaHutang)}
+                    </p>
+                    <span className="text-xs font-semibold text-slate-500">
+                      Terbayar: <strong className="text-[#2563eb]">{formatRupiah(totalBayar)}</strong>
+                    </span>
+                  </div>
 
-                {(!selectedPinjamanDetail.riwayat_angsuran || selectedPinjamanDetail.riwayat_angsuran.length === 0) ? (
-                  <p className="text-slate-400 italic bg-[#f8fafc] p-3 rounded-xl border border-slate-100">
-                    Belum ada riwayat pembayaran angsuran.
-                  </p>
-                ) : (
-                  <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
-                    <table className="w-full text-left">
-                      <thead className="bg-[#eff6ff] text-slate-500 font-bold border-b border-slate-100">
-                        <tr>
-                          <th className="px-3 py-2">Angsuran Ke</th>
-                          <th className="px-3 py-2">Tanggal</th>
-                          <th className="px-3 py-2">Metode</th>
-                          <th className="px-3 py-2 text-right">Nominal</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {selectedPinjamanDetail.riwayat_angsuran.map((ang) => (
-                          <tr key={ang.id}>
-                            <td className="px-3 py-2 font-bold text-[#2563eb]">Ke-{ang.angsuran_ke}</td>
-                            <td className="px-3 py-2 text-slate-600">{ang.tanggal}</td>
-                            <td className="px-3 py-2 text-slate-600">{ang.metode}</td>
-                            <td className="px-3 py-2 text-right font-extrabold text-[#2563eb]">{formatRupiah(ang.jumlah)}</td>
+                  {/* Progress Bar */}
+                  <div className="mt-3">
+                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-500 rounded-full ${isLunas ? 'bg-emerald-500' : 'bg-[#2563eb]'}`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-500 mt-1 font-medium">
+                      <span>Sudah Masuk: {formatRupiah(totalBayar)}</span>
+                      <span>Total Kewajiban: {formatRupiah(totalWajib)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 bg-[#eff6ff] p-4 rounded-2xl border border-[#bfdbfe]">
+                  <div>
+                    <span className="text-slate-400 font-bold block">Nama Peminjam:</span>
+                    <span className="font-extrabold text-slate-800 text-sm">{selectedPinjamanDetail?.nama || '-'}</span>
+                    <span className="text-[10px] text-slate-400 font-mono block">{selectedPinjamanDetail?.nomor_anggota || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Status Pinjaman:</span>
+                    <span>{getStatusBadge(selectedPinjamanDetail.status)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Plafon Pinjaman:</span>
+                    <span className="font-extrabold text-slate-800">{formatRupiah(selectedPinjamanDetail.jumlah)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Tenor & Bunga:</span>
+                    <span className="font-extrabold text-slate-800">{selectedPinjamanDetail.tenor} Bulan ({selectedPinjamanDetail.bunga}% / bln)</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Sistem Bunga:</span>
+                    <span className="font-extrabold text-slate-800">
+                      {selectedPinjamanDetail.metode_bunga === 'flat' ? 'Bunga Flat' : 'Bunga Menurun (Efektif)'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Total Kewajiban:</span>
+                    <span className="font-extrabold text-slate-800">{formatRupiah(selectedPinjamanDetail.total_pinjaman)}</span>
+                  </div>
+                </div>
+
+                {/* Installment History Table */}
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#0f172a] mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-[#2563eb]">history</span>
+                    Riwayat Pembayaran Angsuran ({selectedPinjamanDetail.riwayat_angsuran?.length || 0})
+                  </h4>
+
+                  {(!selectedPinjamanDetail.riwayat_angsuran || selectedPinjamanDetail.riwayat_angsuran.length === 0) ? (
+                    <p className="text-slate-400 italic bg-[#f8fafc] p-3 rounded-xl border border-slate-100">
+                      Belum ada riwayat pembayaran angsuran.
+                    </p>
+                  ) : (
+                    <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-[#eff6ff] text-slate-500 font-bold border-b border-slate-100">
+                          <tr>
+                            <th className="px-3 py-2">Angsuran</th>
+                            <th className="px-3 py-2">Tanggal</th>
+                            <th className="px-3 py-2">Metode</th>
+                            <th className="px-3 py-2 text-right">Nominal</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {selectedPinjamanDetail.riwayat_angsuran.map((ang, idx) => (
+                            <tr key={ang.id || idx}>
+                              <td className="px-3 py-2 font-bold text-[#2563eb]">Cicilan ke-{ang.angsuran_ke}</td>
+                              <td className="px-3 py-2 text-slate-600">{ang.tanggal}</td>
+                              <td className="px-3 py-2 text-slate-600">{ang.metode}</td>
+                              <td className="px-3 py-2 text-right font-extrabold text-[#2563eb]">{formatRupiah(ang.jumlah)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* Projected Schedule & Payment Status */}
+                {detailSchedule.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-[#0f172a] mb-2 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-[#2563eb]">calendar_month</span>
+                      Jadwal & Status Tagihan Bulanan ({selectedPinjamanDetail.tenor} Bulan)
+                    </h4>
+                    <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-44 overflow-y-auto">
+                      <table className="w-full text-left text-[10px]">
+                        <thead className="bg-[#eff6ff] text-slate-700 font-bold border-b border-slate-100">
+                          <tr>
+                            <th className="p-1.5 text-center">Bln</th>
+                            <th className="p-1.5 text-right">Sisa Pokok</th>
+                            <th className="p-1.5 text-right">Pokok</th>
+                            <th className="p-1.5 text-right">Bunga</th>
+                            <th className="p-1.5 text-right">Total Tagihan</th>
+                            <th className="p-1.5 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {detailSchedule.map((j) => {
+                            const isPaidMonth = paidAngsuranKeSet.has(j.bulanKe);
+                            return (
+                              <tr key={j.bulanKe} className={isPaidMonth ? 'bg-emerald-50/40' : 'hover:bg-[#f8fafc]'}>
+                                <td className="p-1.5 text-center font-bold">{j.bulanKe}</td>
+                                <td className="p-1.5 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
+                                <td className="p-1.5 text-right font-semibold">{formatRupiah(j.pokok)}</td>
+                                <td className="p-1.5 text-right text-[#2563eb] font-semibold">{formatRupiah(j.bunga)}</td>
+                                <td className="p-1.5 text-right font-extrabold text-[#0f172a]">{formatRupiah(j.totalAngsuran)}</td>
+                                <td className="p-1.5 text-center">
+                                  {isPaidMonth ? (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-700">
+                                      ✓ Lunas
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500">
+                                      Belum
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Projected Schedule if Available */}
-              {selectedPinjamanDetail.jadwal_angsuran && selectedPinjamanDetail.jadwal_angsuran.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-bold text-[#0f172a] mb-2 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm text-[#2563eb]">calendar_month</span>
-                    Jadwal Estimasi Angsuran Bunga Menurun ({selectedPinjamanDetail.tenor} Bulan)
-                  </h4>
-                  <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-40 overflow-y-auto">
-                    <table className="w-full text-left text-[10px]">
-                      <thead className="bg-[#eff6ff] text-slate-700 font-bold border-b border-slate-100">
-                        <tr>
-                          <th className="p-1.5 text-center">Bln</th>
-                          <th className="p-1.5 text-right">Sisa Pokok Awal</th>
-                          <th className="p-1.5 text-right">Pokok</th>
-                          <th className="p-1.5 text-right">Bunga</th>
-                          <th className="p-1.5 text-right">Total Tagihan</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {selectedPinjamanDetail.jadwal_angsuran.map((j) => (
-                          <tr key={j.bulanKe}>
-                            <td className="p-1.5 text-center font-bold">{j.bulanKe}</td>
-                            <td className="p-1.5 text-right text-slate-600">{formatRupiah(j.sisaAwal)}</td>
-                            <td className="p-1.5 text-right font-semibold">{formatRupiah(j.pokok)}</td>
-                            <td className="p-1.5 text-right text-[#2563eb] font-semibold">{formatRupiah(j.bunga)}</td>
-                            <td className="p-1.5 text-right font-extrabold text-[#0f172a]">{formatRupiah(j.totalAngsuran)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setDetailModalOpen(false)}
-                className="px-5 py-2 bg-[#2563eb] text-white rounded-full text-xs font-extrabold hover:bg-[#1d4ed8] transition-all cursor-pointer"
-              >
-                Tutup
-              </button>
+              <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setDetailModalOpen(false)}
+                  className="px-5 py-2 bg-[#2563eb] text-white rounded-full text-xs font-extrabold hover:bg-[#1d4ed8] transition-all cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </AppLayout>
   );
 }
