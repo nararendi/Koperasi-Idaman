@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
+import Pagination from '../../components/Pagination';
 import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
@@ -22,6 +23,8 @@ export default function PinjamanPage() {
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Modal: Ajukan Pinjaman Baru
   const [applyModalOpen, setApplyModalOpen] = useState(false);
@@ -257,6 +260,16 @@ export default function PinjamanPage() {
     return matchSearch && matchStatus;
   });
 
+  // Reset page to 1 on filter/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const paginatedList = filteredList.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   // Real-time Declining Balance Loan Calculation & Rounding Preview
   const liveSim = hitungSimulasiPinjaman(
     applyForm.jumlah,
@@ -405,7 +418,7 @@ export default function PinjamanPage() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item) => (
+                paginatedList.map((item) => (
                   <tr key={item.id} className="hover:bg-[#f8fafc]/60 transition-colors">
                     <td className="px-4 py-3.5 font-mono font-bold whitespace-nowrap">
                       <button
@@ -514,6 +527,14 @@ export default function PinjamanPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* MODAL AJUKAN PINJAMAN BARU */}

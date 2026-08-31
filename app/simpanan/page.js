@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
+import Pagination from '../../components/Pagination';
 import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
@@ -21,6 +22,8 @@ export default function SimpananPage() {
   const [settings, setSettings] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [jenisFilter, setJenisFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Modal: Catat Transaksi Baru
   const [modalOpen, setModalOpen] = useState(false);
@@ -195,6 +198,16 @@ export default function SimpananPage() {
     });
   })();
 
+  // Reset to page 1 on filter/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, jenisFilter]);
+
+  const paginatedMembers = groupedMembers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   const formatRupiah = (num) => {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
   };
@@ -350,7 +363,7 @@ export default function SimpananPage() {
                 <th className="px-4 py-3.5 text-right">Simp. Pokok</th>
                 <th className="px-4 py-3.5 text-right">Simp. Wajib</th>
                 <th className="px-4 py-3.5 text-right">Simp. Sukarela</th>
-                <th className="px-4 py-3.5 text-right">Total Simpanan</th>
+<th className="px-4 py-3.5 text-right">Total Simpanan</th>
                 <th className="px-4 py-3.5 text-center w-24">Riwayat</th>
               </tr>
             </thead>
@@ -362,7 +375,7 @@ export default function SimpananPage() {
                   </td>
                 </tr>
               ) : (
-                groupedMembers.map((group) => {
+                paginatedMembers.map((group) => {
                   const isExpanded = expandedMembers.has(group.nomor_anggota);
                   const displayTrx = group.filteredTransactions || group.transactions;
 
@@ -388,53 +401,51 @@ export default function SimpananPage() {
                           {group.nomor_anggota}
                         </td>
                         <td className="px-4 py-3.5 font-extrabold text-[#0f172a] whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span>{group.nama_anggota}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 font-semibold text-slate-500">
-                              {group.transactions.length} trx
-                            </span>
-                          </div>
+                          {group.nama_anggota}
                         </td>
-                        <td className="px-4 py-3.5 text-right font-bold text-slate-700 whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-right font-semibold text-slate-700 whitespace-nowrap">
                           {formatRupiah(group.pokok)}
                         </td>
-                        <td className="px-4 py-3.5 text-right font-bold text-[#2563eb] whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-right font-semibold text-slate-700 whitespace-nowrap">
                           {formatRupiah(group.wajib)}
                         </td>
-                        <td className="px-4 py-3.5 text-right font-bold text-[#df9800] whitespace-nowrap">
+                        <td className="px-4 py-3.5 text-right font-semibold text-[#df9800] whitespace-nowrap">
                           {formatRupiah(group.sukarela)}
                         </td>
-                        <td className="px-4 py-3.5 text-right font-black text-[#0f172a] whitespace-nowrap bg-slate-50/40">
+                        <td className="px-4 py-3.5 text-right font-extrabold text-[#2563eb] whitespace-nowrap">
                           {formatRupiah(group.total)}
                         </td>
                         <td className="px-4 py-3.5 text-center whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
                               isExpanded
-                                ? 'bg-blue-100 text-[#1d4ed8]'
-                                : 'bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-[#2563eb]'
+                                ? 'bg-[#2563eb] text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
                             }`}
                           >
-                            {isExpanded ? 'Tutup' : 'Lihat'}
+                            {displayTrx.length} Trx
                           </span>
                         </td>
                       </tr>
 
-                      {/* Baris Collapse: Rincian Riwayat Transaksi Anggota */}
+                      {/* Sub-Table Rincian Mutasi / Transaksi Simpanan Anggota */}
                       {isExpanded && (
                         <tr>
-                          <td colSpan={8} className="p-0 bg-slate-50/80 border-y border-blue-100">
-                            <div className="p-4 pl-12 pr-6">
-                              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
-                                <div className="px-4 py-2.5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
-                                  <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
-                                    <span className="material-symbols-outlined text-[16px] text-[#2563eb]">history</span>
-                                    Riwayat Transaksi: {group.nama_anggota} ({group.nomor_anggota})
+                          <td colSpan={8} className="p-0 border-b border-slate-100 bg-[#f8fafc]">
+                            <div className="p-4 sm:px-8 sm:py-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-extrabold text-slate-700 text-xs flex items-center gap-1.5">
+                                  <span className="material-symbols-outlined text-sm text-[#2563eb]">
+                                    receipt_long
                                   </span>
-                                  <span className="text-[10px] font-bold text-slate-400">
-                                    Menampilkan {displayTrx.length} transaksi
-                                  </span>
-                                </div>
+                                  Mutasi Rekening: {group.nama_anggota} ({group.nomor_anggota})
+                                </span>
+                                <span className="text-[11px] text-slate-400 font-medium">
+                                  Total Saldo Terkumpul: <strong className="text-[#2563eb]">{formatRupiah(group.total)}</strong>
+                                </span>
+                              </div>
+
+                              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
                                 <table className="w-full text-left text-xs border-collapse">
                                   <thead>
                                     <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100">
@@ -493,15 +504,13 @@ export default function SimpananPage() {
                                             <td className="px-4 py-2.5 text-slate-600 whitespace-nowrap">
                                               {trx.metode || 'Tunai'}
                                             </td>
-                                            <td className="px-4 py-2.5 text-slate-600 max-w-[200px] truncate" title={trx.keterangan}>
+                                            <td className="px-4 py-2.5 text-slate-500 max-w-[220px] truncate" title={trx.keterangan || ''}>
                                               {trx.keterangan || '-'}
                                             </td>
-                                            <td
-                                              className={`px-4 py-2.5 text-right font-extrabold whitespace-nowrap ${
-                                                isWithdrawal ? 'text-rose-500' : 'text-emerald-600'
-                                              }`}
-                                            >
-                                              {isWithdrawal ? `-${formatRupiah(trx.jumlah)}` : `+${formatRupiah(trx.jumlah)}`}
+                                            <td className="px-4 py-2.5 text-right font-extrabold whitespace-nowrap">
+                                              <span className={isWithdrawal ? 'text-rose-600' : 'text-emerald-600'}>
+                                                {isWithdrawal ? '-' : '+'}{formatRupiah(trx.jumlah)}
+                                              </span>
                                             </td>
                                             <td className="px-4 py-2.5 text-center whitespace-nowrap">
                                               <button
@@ -510,10 +519,10 @@ export default function SimpananPage() {
                                                   e.stopPropagation();
                                                   handlePrintKuitansi(trx);
                                                 }}
-                                                className="p-1 text-[#2563eb] hover:bg-[#eff6ff] rounded-lg transition-colors cursor-pointer"
-                                                title="Cetak Kuitansi"
+                                                className="px-2.5 py-1 text-[11px] font-bold text-[#2563eb] bg-blue-50 hover:bg-[#2563eb] hover:text-white rounded-lg transition-all cursor-pointer shadow-2xs"
+                                                title="Cetak Kuitansi Resmi"
                                               >
-                                                <span className="material-symbols-outlined text-[16px]">receipt</span>
+                                                Kuitansi
                                               </button>
                                             </td>
                                           </tr>
@@ -534,6 +543,14 @@ export default function SimpananPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={groupedMembers.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* MODAL CATAT TRANSAKSI SIMPANAN */}

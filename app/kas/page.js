@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
+import Pagination from '../../components/Pagination';
 import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
@@ -18,6 +19,8 @@ export default function KasPage() {
   const [filterJenis, setFilterJenis] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -87,6 +90,16 @@ export default function KasPage() {
     const matchJenis = filterJenis === 'all' || (item?.jenis || '').toLowerCase() === filterJenis.toLowerCase();
     return matchSearch && matchJenis;
   });
+
+  // Reset page to 1 on filter/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterJenis]);
+
+  const paginatedKas = filteredKas.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   // Export Professional Excel Document
   const handleExportExcel = () => {
@@ -225,7 +238,7 @@ export default function KasPage() {
                   </td>
                 </tr>
               ) : (
-                filteredKas.map((k) => {
+                paginatedKas.map((k) => {
                   const isPenerimaan = k.jenis === 'Penerimaan';
                   return (
                     <tr key={k.id} className="hover:bg-[#f8fafc]/60 transition-colors">
@@ -263,6 +276,14 @@ export default function KasPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredKas.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* MODAL CATAT MUTASI KAS MANUAL */}

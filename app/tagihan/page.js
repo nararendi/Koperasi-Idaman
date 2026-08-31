@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AppLayout from '../../components/AppLayout';
+import Pagination from '../../components/Pagination';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 import { pdfExport } from '../../lib/pdfExport';
@@ -11,6 +12,8 @@ export default function TagihanPage() {
   const [tagihanData, setTagihanData] = useState({ list: [], totals: {} });
   const [settings, setSettings] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   
   // Modal Edit Tagihan Item
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -58,6 +61,16 @@ export default function TagihanPage() {
       (row?.nomor_anggota || '').toLowerCase().includes(q)
     );
   });
+
+  // Reset page to 1 on search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const paginatedList = filteredList.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handleOpenEdit = (row) => {
     setSelectedMember(row);
@@ -298,7 +311,7 @@ export default function TagihanPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredList.map((row, idx) => (
+                  paginatedList.map((row, idx) => (
                     <tr key={row.nomor_anggota} className={`${idx % 2 === 1 ? 'bg-[#fcfdfe]' : 'bg-white'} hover:bg-[#eff6ff]/70 transition-colors`}>
                       <td className="border border-slate-300 py-3 px-2 text-center font-semibold text-slate-500">{row.no}</td>
                       <td className="border border-slate-300 py-3 px-2 text-center">
@@ -352,6 +365,14 @@ export default function TagihanPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          <Pagination
+            currentPage={currentPage}
+            totalItems={filteredList.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+          />
         </div>
 
         {/* Tanda Tangan Sesuai Permintaan: Simetris, Rapi & Sejajar */}

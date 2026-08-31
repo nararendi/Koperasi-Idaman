@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../components/AppLayout';
+import Pagination from '../../components/Pagination';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 
@@ -11,6 +12,8 @@ export default function DaftarAnggotaPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [settings, setSettings] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Modal States
   const [selectedAnggota, setSelectedAnggota] = useState(null);
@@ -110,6 +113,16 @@ export default function DaftarAnggotaPage() {
 
     return matchesSearch && matchesStatus;
   });
+
+  // Reset page to 1 if search/filter reduces total pages
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const paginatedAnggota = filteredAnggota.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const getStatusBadge = (status) => {
     const s = (status || '').toLowerCase();
@@ -261,7 +274,7 @@ export default function DaftarAnggotaPage() {
                   </td>
                 </tr>
               ) : (
-                filteredAnggota.map((item) => (
+                paginatedAnggota.map((item) => (
                   <tr key={item?.id || item?.nomor_anggota} className="hover:bg-[#f8fafc]/60 transition-colors">
                     <td className="px-4 py-3.5 font-mono font-bold text-[#2563eb] whitespace-nowrap">
                       {item?.nomor_anggota || item?.id}
@@ -315,6 +328,14 @@ export default function DaftarAnggotaPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredAnggota.length}
+          itemsPerPage={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* DETAIL MODAL */}
