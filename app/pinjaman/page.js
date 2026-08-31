@@ -40,7 +40,10 @@ export default function PinjamanPage() {
   const [bayarModalOpen, setBayarModalOpen] = useState(false);
   const [selectedPinjamanBayar, setSelectedPinjamanBayar] = useState(null);
   const [bayarForm, setBayarForm] = useState({
+    cicilanKe: 1,
     jumlahBayar: '',
+    pokok: 0,
+    bunga: 0,
     metode: 'Tunai',
     penerima: 'Admin Kasir'
   });
@@ -130,15 +133,67 @@ export default function PinjamanPage() {
     }
   };
 
+  // Helper to get loan repayment schedule
+  const getPinjamanSchedule = (pinjaman) => {
+    if (!pinjaman) return [];
+    if (pinjaman.jadwal_angsuran && pinjaman.jadwal_angsuran.length > 0) {
+      return pinjaman.jadwal_angsuran;
+    }
+    const sim = hitungSimulasiPinjaman(
+      pinjaman.jumlah,
+      pinjaman.tenor || 12,
+      pinjaman.bunga || 2.5,
+      pinjaman.metode_bunga || 'menurun',
+      pinjaman.pembulatan !== undefined ? pinjaman.pembulatan : 50000
+    );
+    return sim.jadwal || [];
+  };
+
   // Open Pay Installment Modal
   const handleOpenBayarModal = (pinjaman) => {
     setSelectedPinjamanBayar(pinjaman);
+    const schedule = getPinjamanSchedule(pinjaman);
+    const paidCount = pinjaman.riwayat_angsuran ? pinjaman.riwayat_angsuran.length : 0;
+    const nextCicilan = Math.min(Number(pinjaman.tenor) || 12, paidCount + 1);
+    const scheduleItem = schedule.find((s) => s.bulanKe === nextCicilan) || schedule[0];
+
+    const initialAmount = scheduleItem
+      ? scheduleItem.totalAngsuran
+      : (pinjaman.total_angsuran_bulanan || Math.round(Number(pinjaman.total_pinjaman) / Number(pinjaman.tenor)));
+
     setBayarForm({
-      jumlahBayar: pinjaman.total_angsuran_bulanan || Math.round(Number(pinjaman.total_pinjaman) / Number(pinjaman.tenor)),
+      cicilanKe: nextCicilan,
+      jumlahBayar: initialAmount,
+      pokok: scheduleItem ? scheduleItem.pokok : 0,
+      bunga: scheduleItem ? scheduleItem.bunga : 0,
       metode: 'Tunai',
       penerima: 'Admin Kasir'
     });
     setBayarModalOpen(true);
+    showToast(`Pilih cicilan ke berapa yang ingin dibayarkan untuk pinjaman ${pinjaman.nomor_pinjaman || pinjaman.id}`);
+  };
+
+  // Handle changing selected installment period
+  const handleCicilanChange = (cicilanNumber) => {
+    const num = Number(cicilanNumber);
+    const schedule = getPinjamanSchedule(selectedPinjamanBayar);
+    const scheduleItem = schedule.find((s) => s.bulanKe === num);
+
+    if (scheduleItem) {
+      setBayarForm((prev) => ({
+        ...prev,
+        cicilanKe: num,
+        jumlahBayar: scheduleItem.totalAngsuran,
+        pokok: scheduleItem.pokok,
+        bunga: scheduleItem.bunga
+      }));
+      showToast(`Cicilan ke-${num}: Total ${formatRupiah(scheduleItem.totalAngsuran)} (Pokok ${formatRupiah(scheduleItem.pokok)} + Bunga ${formatRupiah(scheduleItem.bunga)})`);
+    } else {
+      setBayarForm((prev) => ({
+        ...prev,
+        cicilanKe: num
+      }));
+    }
   };
 
   // Submit Installment Payment
@@ -150,11 +205,14 @@ export default function PinjamanPage() {
       pinjamanId: selectedPinjamanBayar.id,
       jumlahBayar: bayarForm.jumlahBayar,
       metode: bayarForm.metode,
-      penerima: bayarForm.penerima
+      penerima: bayarForm.penerima,
+      angsuranKe: bayarForm.cicilanKe,
+      pokok: bayarForm.pokok,
+      bunga: bayarForm.bunga
     });
 
     setBayarModalOpen(false);
-    showToast(`Pembayaran angsuran Rp ${Number(bayarForm.jumlahBayar).toLocaleString('id-ID')} berhasil dibukukan ke Kas Koperasi!`);
+    showToast(`Pembayaran Cicilan ke-${bayarForm.cicilanKe} sebesar ${formatRupiah(bayarForm.jumlahBayar)} berhasil dibukukan ke Kas Koperasi!`);
   };
 
   // Open Detail Modal
@@ -691,6 +749,50 @@ export default function PinjamanPage() {
                   <div className="flex justify-between">
                     <span className="text-slate-500">Sisa Hutang:</span>
                     <span className="font-extrabold text-rose-500">{formatRupiah(selectedPinjamanBayar?.sisa_hutang || 0)}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Pilih Cicilan / Bulan Ke *
+                  </label>
+                  <select
+                    value={bayarForm.cicilanKe}
+                    onChange={(e) => handleCicilanChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-blue-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-bold text-slate-800 text-xs transition-all shadow-xs"
+                  >
+                    {getPinjamanSchedule(selectedPinjamanBayar).map((s) => {
+                      const isPaid = (selectedPinjamanBayar.riwayat_angsuran || []).some(
+                        (r) => Number(r.angsuran_ke) === s.bulanKe
+                      );
+                      return (
+                        <option key={s.bulanKe} value={s.bulanKe}>
+                          Bulan ke-{s.bulanKe}: {formatRupiah(s.totalAngsuran)} (Pokok {formatRupiah(s.pokok)} + Bunga {formatRupiah(s.bunga)}) {isPaid ? '✓ (Sudah Bayar)' : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Breakdown Cicilan Menurun */}
+                <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-2xl p-3.5 flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="font-bold text-emerald-800">
+                      Rincian Tagihan Bulan ke-{bayarForm.cicilanKe}:
+                    </span>
+                    <span className="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                      {selectedPinjamanBayar.metode_bunga === 'flat' ? 'Bunga Flat' : 'Bunga Menurun (Efektif)'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                    <div className="bg-white p-2 rounded-xl border border-emerald-100 shadow-2xs">
+                      <span className="text-slate-400 block text-[10px]">Pokok:</span>
+                      <span className="font-extrabold text-slate-800">{formatRupiah(bayarForm.pokok || 0)}</span>
+                    </div>
+                    <div className="bg-white p-2 rounded-xl border border-emerald-100 shadow-2xs">
+                      <span className="text-slate-400 block text-[10px]">Bunga:</span>
+                      <span className="font-extrabold text-emerald-600">{formatRupiah(bayarForm.bunga || 0)}</span>
+                    </div>
                   </div>
                 </div>
 
