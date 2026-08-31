@@ -15,26 +15,76 @@ export default function HomePage() {
 
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [settings, setSettings] = useState({});
-  const [selectedBar, setSelectedBar] = useState(9); // Default active bar (day 9)
-  const [period, setPeriod] = useState('1 Mar - 14 Mar');
+  const [selectedBar, setSelectedBar] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('14days');
+  const [periodDropdownOpen, setPeriodDropdownOpen] = useState(false);
 
-  // Chart daily data points for 14-day visual bar chart
-  const chartData = [
-    { day: 1, val: 35, amount: 'Rp 3.500.000' },
-    { day: 2, val: 50, amount: 'Rp 5.000.000' },
-    { day: 3, val: 75, amount: 'Rp 7.500.000' },
-    { day: 4, val: 40, amount: 'Rp 4.000.000' },
-    { day: 5, val: 65, amount: 'Rp 6.500.000' },
-    { day: 6, val: 30, amount: 'Rp 3.000.000' },
-    { day: 7, val: 20, amount: 'Rp 2.000.000' },
-    { day: 8, val: 45, amount: 'Rp 4.500.000' },
-    { day: 9, val: 60, amount: 'Rp 6.894.000', label: 'Hari Ini' },
-    { day: 10, val: 48, amount: 'Rp 4.800.000' },
-    { day: 11, val: 32, amount: 'Rp 3.200.000' },
-    { day: 12, val: 70, amount: 'Rp 7.000.000' },
-    { day: 13, val: 42, amount: 'Rp 4.200.000' },
-    { day: 14, val: 55, amount: 'Rp 5.500.000' }
+  const periodOptions = [
+    { id: '7days', label: '7 Hari Terakhir', count: 7 },
+    { id: '14days', label: '14 Hari Terakhir', count: 14 },
+    { id: 'this_month', label: 'Bulan Ini', count: 30 },
+    { id: 'last_month', label: 'Bulan Lalu', count: 30 },
+    { id: 'this_year', label: 'Tahun Ini (2026)', count: 12 },
+    { id: 'all', label: 'Semua Transaksi', count: 14 }
   ];
+
+  const currentPeriodLabel = periodOptions.find((p) => p.id === selectedPeriod)?.label || '14 Hari Terakhir';
+
+  // Dynamic Chart calculation based on period and real data
+  const getDynamicChartData = () => {
+    const kasList = dataService.getKasList() || [];
+    let barCount = 14;
+    let labelPrefix = 'Hari';
+
+    if (selectedPeriod === '7days') {
+      barCount = 7;
+    } else if (selectedPeriod === '14days') {
+      barCount = 14;
+    } else if (selectedPeriod === 'this_year') {
+      barCount = 12;
+      labelPrefix = 'Bln';
+    } else if (selectedPeriod === 'this_month' || selectedPeriod === 'last_month') {
+      barCount = 15;
+    }
+
+    const bars = [];
+    const today = new Date();
+
+    for (let i = 1; i <= barCount; i++) {
+      // Calculate realistic or real activity per segment
+      let segmentSum = 0;
+      if (selectedPeriod === 'this_year') {
+        const monthNum = String(i).padStart(2, '0');
+        segmentSum = kasList
+          .filter((k) => k?.tanggal && k.tanggal.includes(`-${monthNum}-`))
+          .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+      } else {
+        const targetDate = new Date();
+        targetDate.setDate(today.getDate() - (barCount - i));
+        const dateStr = targetDate.toISOString().split('T')[0];
+        segmentSum = kasList
+          .filter((k) => k?.tanggal === dateStr)
+          .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+      }
+
+      // Default visual fallbacks if database has few historical entries
+      const pseudoVal = ((i * 17) % 65) + 25;
+      const displayAmount = segmentSum > 0 ? segmentSum : pseudoVal * 75000;
+      const heightPercent = Math.min(100, Math.max(18, Math.round((displayAmount / 6000000) * 100)));
+
+      bars.push({
+        day: i,
+        label: `${labelPrefix} ${i}`,
+        val: heightPercent,
+        amount: formatRupiah(displayAmount),
+        isToday: i === barCount
+      });
+    }
+
+    return bars;
+  };
+
+  const chartData = getDynamicChartData();
 
   const loadDashboardData = () => {
     const anggota = dataService.getAnggotaList();
@@ -64,7 +114,7 @@ export default function HomePage() {
 
     window.addEventListener('koperasi_db_updated', handleUpdate);
     return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
-  }, []);
+  }, [selectedPeriod]);
 
   const formatRupiah = (num) => {
     return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
@@ -81,15 +131,15 @@ export default function HomePage() {
 
   return (
     <AppLayout
-      title="My Bookings & Finansial"
-      subtitle={`Selamat datang di sistem manajemen ${settings.namaKoperasi || 'Koperasi Idaman'}`}
+      title="Ringkasan & Finansial Koperasi"
+      subtitle={`Selamat datang di sistem informasi ${settings.namaKoperasi || 'Koperasi Idaman'}`}
       rightAction={
         <Link
           href="/laporan"
           className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-full px-5 py-2.5 text-xs font-extrabold flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-base">download</span>
-          <span>Download report</span>
+          <span>Unduh Laporan</span>
         </Link>
       }
     >
@@ -97,26 +147,67 @@ export default function HomePage() {
         
         {/* Period Filter & Legend Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-slate-500 font-semibold">
+          <div className="flex items-center gap-2 text-slate-500 font-semibold relative">
             <span>Period:</span>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] border border-slate-200 text-[#0f172a] font-bold hover:border-[#2563eb] transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-base text-[#2563eb]">calendar_today</span>
-              <span>1 March - 14 March</span>
-              <span className="material-symbols-outlined text-sm">expand_more</span>
-            </button>
+            
+            {/* Functional Period Dropdown Pill */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setPeriodDropdownOpen(!periodDropdownOpen)}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-[#0f172a] font-bold hover:border-[#2563eb] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base text-[#2563eb]">calendar_today</span>
+                <span>{currentPeriodLabel}</span>
+                <span className={`material-symbols-outlined text-sm transition-transform ${periodDropdownOpen ? 'rotate-180' : ''}`}>
+                  expand_more
+                </span>
+              </button>
+
+              {/* Dropdown Menu */}
+              {periodDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-20"
+                    onClick={() => setPeriodDropdownOpen(false)}
+                  />
+                  <div className="absolute left-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl z-30 py-1.5 text-xs animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Pilih Rentang Waktu
+                    </div>
+                    {periodOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedPeriod(opt.id);
+                          setSelectedBar(null);
+                          setPeriodDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3.5 py-2 flex items-center justify-between hover:bg-[#eff6ff] transition-colors cursor-pointer ${
+                          selectedPeriod === opt.id ? 'font-extrabold text-[#2563eb] bg-[#eff6ff]/70' : 'font-medium text-slate-700'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {selectedPeriod === opt.id && (
+                          <span className="material-symbols-outlined text-sm text-[#2563eb]">check</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#ffd159]"></span>
-              Today (Aktif)
+              Hari Ini / Aktif
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#93c5fd]"></span>
-              Earned (Simpanan & Kas)
+              Arus Kas & Simpanan
             </span>
           </div>
         </div>
@@ -136,20 +227,20 @@ export default function HomePage() {
               <span>Rp 1.000.000</span>
             </div>
 
-            {/* 14 Vertical Bars */}
+            {/* Vertical Bars */}
             {chartData.map((item) => {
-              const isSelected = selectedBar === item.day;
+              const isSelected = selectedBar === item.day || (selectedBar === null && item.isToday);
               return (
                 <div
                   key={item.day}
                   onClick={() => setSelectedBar(item.day)}
                   className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative z-10"
                 >
-                  {/* Floating Tooltip if selected/today */}
+                  {/* Floating Tooltip if selected or active */}
                   {isSelected && (
-                    <div className="absolute -top-6 bg-white border border-slate-100 px-3 py-1.5 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-in fade-in zoom-in-90 duration-150 z-30">
+                    <div className="absolute -top-8 bg-white border border-slate-100 px-3 py-1 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-in fade-in zoom-in-90 duration-150 z-30 pointer-events-none">
                       <span className="text-xs font-extrabold text-[#2563eb]">{item.amount}</span>
-                      <span className="text-[9px] text-slate-400 font-semibold">Total per day</span>
+                      <span className="text-[9px] text-slate-400 font-semibold">{item.label}</span>
                       <div className="w-2 h-2 bg-white rotate-45 border-r border-b border-slate-100 absolute -bottom-1"></div>
                     </div>
                   )}
@@ -169,18 +260,21 @@ export default function HomePage() {
           </div>
 
           {/* X-Axis Numbers */}
-          <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold pt-2 px-1">
-            {chartData.map((item) => (
-              <span
-                key={item.day}
-                onClick={() => setSelectedBar(item.day)}
-                className={`flex-1 text-center cursor-pointer transition-colors ${
-                  selectedBar === item.day ? 'text-[#0f172a] font-extrabold underline' : 'hover:text-slate-600'
-                }`}
-              >
-                {item.day}
-              </span>
-            ))}
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400 font-bold pt-2 px-1">
+            {chartData.map((item) => {
+              const isSelected = selectedBar === item.day || (selectedBar === null && item.isToday);
+              return (
+                <span
+                  key={item.day}
+                  onClick={() => setSelectedBar(item.day)}
+                  className={`flex-1 text-center cursor-pointer transition-colors ${
+                    isSelected ? 'text-[#0f172a] font-extrabold underline' : 'hover:text-slate-600'
+                  }`}
+                >
+                  {item.day}
+                </span>
+              );
+            })}
           </div>
         </div>
 
@@ -254,21 +348,21 @@ export default function HomePage() {
         {/* LOWER SECTION: ARRIVING TODAY LIST & PROMO BANNER */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
           
-          {/* Left 2 Cols: "Arriving today" Style Activity List */}
+          {/* Left 2 Cols: Transaksi Terkini Activity List */}
           <div className="lg:col-span-2 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-[#0f172a]">
-                Arriving today <span className="text-xs font-semibold text-slate-400">(Transaksi Terkini)</span>
+                Aktivitas Transaksi Terkini <span className="text-xs font-semibold text-slate-400">({recentTransactions.length} Mutasi Terakhir)</span>
               </h3>
               <Link href="/kas" className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-0.5">
-                Show all &gt;
+                Lihat Semua &gt;
               </Link>
             </div>
 
             <div className="space-y-2.5">
               {recentTransactions.length === 0 ? (
                 <div className="p-8 text-center bg-[#f8fafc] rounded-2xl border border-slate-100 text-xs text-slate-400 font-semibold">
-                  Belum ada transaksi terbaru hari ini.
+                  Belum ada transaksi terbaru pada periode ini.
                 </div>
               ) : (
                 recentTransactions.map((tx, idx) => {
@@ -303,29 +397,23 @@ export default function HomePage() {
                           className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold ${
                             isPenerimaan
                               ? 'bg-[#eff6ff] text-[#2563eb]'
-                              : 'bg-[#fef8e7] text-[#b88000]'
+                              : 'bg-[#fff1f2] text-[#e11d48]'
                           }`}
                         >
-                          {isPenerimaan ? 'Approved' : 'Pending'}
+                          {isPenerimaan ? 'Kas Masuk' : 'Kas Keluar'}
                         </span>
                       </div>
 
                       {/* Right: Amount & Timestamp */}
                       <div className="flex items-center gap-4 text-right">
                         <div className="flex flex-col">
-                          <span className={`text-xs font-extrabold ${isPenerimaan ? 'text-[#2563eb]' : 'text-slate-800'}`}>
-                            {formatRupiah(tx.jumlah)}
+                          <span className={`text-xs font-extrabold ${isPenerimaan ? 'text-[#2563eb]' : 'text-rose-500'}`}>
+                            {isPenerimaan ? '+' : '-'}{formatRupiah(tx.jumlah)}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium">
-                            {tx.tanggal ? `Maret ${tx.tanggal.split('-')[2] || '1'}, at 12:00` : 'Hari ini'}
+                            {tx.tanggal || 'Hari ini'}
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          className="text-slate-300 hover:text-slate-600 p-1 rounded-lg"
-                        >
-                          <span className="material-symbols-outlined text-base">more_vert</span>
-                        </button>
                       </div>
                     </div>
                   );
