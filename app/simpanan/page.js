@@ -601,6 +601,10 @@ export default function SimpananPage() {
 
                 {/* Pilih Anggota */}
                 <div>
+                  <label className="font-bold text-slate-700 block mb-1">Pilih Anggota *</label>
+                  <select
+                    required
+                    value={formData.nomor_anggota || ''}
                     onChange={(e) => setFormData({ ...formData, nomor_anggota: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   >
@@ -688,8 +692,8 @@ export default function SimpananPage() {
 
       {/* MODAL KUITANSI PRINT PREVIEW */}
       {kuitansiModalOpen && selectedKuitansi && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-md w-full max-h-[88vh] my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center">
               <span className="text-xs font-extrabold uppercase tracking-wider">Kuitansi Resmi Transaksi</span>
               <button
