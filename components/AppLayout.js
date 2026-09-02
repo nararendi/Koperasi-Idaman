@@ -12,7 +12,6 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -121,22 +120,36 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           </nav>
         </div>
 
-        {/* Bottom Sidebar: Info Card & Logout Quick Trigger */}
-        <div className="p-4 pt-2 border-t border-white/10 shrink-0 space-y-3">
-          <div className="bg-[#172554]/50 rounded-2xl p-3 border border-white/15 shadow-inner backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="material-symbols-outlined text-[#ffd159] text-base">verified_user</span>
-              <h4 className="text-xs font-extrabold text-white">Koperasi Idaman</h4>
+        {/* Bottom Sidebar: User Profile Card & Logout Quick Trigger */}
+        <div className="p-3.5 pt-2 border-t border-white/10 shrink-0 space-y-2.5">
+          <Link
+            href="/pengaturan"
+            className="flex items-center gap-3 p-2.5 rounded-2xl bg-[#172554]/60 hover:bg-[#172554] border border-white/15 shadow-inner backdrop-blur-sm transition-all group cursor-pointer"
+            title="Kelola Profil & Pengaturan"
+          >
+            <div className="w-9 h-9 rounded-full bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-black text-xs shadow-md shrink-0 group-hover:scale-105 transition-transform">
+              {currentUser?.avatar || 'AD'}
             </div>
-            <p className="text-[10px] text-blue-100/80 leading-snug">Amanah, Transparan & Berkelanjutan</p>
-          </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-extrabold text-white truncate group-hover:text-[#ffd159] transition-colors">
+                {currentUser?.nama || 'Administrator'}
+              </span>
+              <span className="text-[10px] text-blue-200/90 font-medium truncate flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                <span className="truncate">{currentUser?.role || 'Super Admin'}</span>
+              </span>
+            </div>
+            <span className="material-symbols-outlined text-white/40 group-hover:text-white text-base transition-colors shrink-0">
+              settings
+            </span>
+          </Link>
 
           <button
             type="button"
             onClick={() => setLogoutModalOpen(true)}
-            className="flex items-center justify-center gap-2 text-white/80 hover:text-white px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full font-bold text-xs cursor-pointer"
+            className="flex items-center justify-center gap-2 text-white/80 hover:text-white hover:bg-white/10 px-3 py-2 rounded-xl transition-colors w-full font-bold text-xs cursor-pointer btn-interactive"
           >
-            <span className="material-symbols-outlined text-lg">logout</span>
+            <span className="material-symbols-outlined text-lg text-rose-300">logout</span>
             <span>LogOut</span>
           </button>
         </div>
@@ -172,16 +185,21 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
 
       {/* MOBILE DRAWER */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#1e40af] px-4 py-3 text-white shadow-xl space-y-1 border-b border-blue-700">
-          <div className="flex items-center gap-3 p-2 bg-white/10 rounded-xl mb-3">
-            <div className="w-8 h-8 rounded-full bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-bold text-xs">
+        <div className="md:hidden bg-[#1e40af] px-4 py-3 text-white shadow-xl space-y-1 border-b border-blue-700 animate-slide-down">
+          <Link
+            href="/pengaturan"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 p-2.5 bg-white/10 rounded-2xl mb-3 hover:bg-white/15 transition-colors"
+          >
+            <div className="w-9 h-9 rounded-full bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-bold text-xs shrink-0">
               {currentUser?.avatar || 'AD'}
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold">{currentUser?.nama || 'Administrator'}</span>
-              <span className="text-[10px] text-blue-100">{currentUser?.role || 'Super Admin'}</span>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-bold truncate">{currentUser?.nama || 'Administrator'}</span>
+              <span className="text-[10px] text-blue-100 truncate">{currentUser?.role || 'Super Admin'}</span>
             </div>
-          </div>
+            <span className="material-symbols-outlined text-white/50 text-base">settings</span>
+          </Link>
 
           {navigation.map((item) => {
             const active = isActive(item.href);
@@ -190,7 +208,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors ${
                   active ? 'bg-white text-[#2563eb]' : 'text-white/80 hover:bg-white/10'
                 }`}
               >
@@ -204,48 +222,6 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
 
       {/* ==================== MAIN CONTENT FULL FRAME ==================== */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-[#f8fafc]">
-        {/* Top Header Bar */}
-        <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-6 lg:px-8 py-3.5 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
-          {/* Search Pill Input */}
-          <div className="relative max-w-md w-full">
-            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder="Search data..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#f8fafc] border border-transparent rounded-full text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#2563eb] focus:bg-white transition-all shadow-inner"
-            />
-          </div>
-
-          {/* Profile & Quick Actions */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/pengaturan"
-              className="flex items-center gap-2.5 p-1 rounded-full hover:bg-[#f8fafc] transition-colors"
-            >
-              <span className="text-xs font-extrabold text-[#0f172a] hidden sm:inline">{currentUser?.nama || 'Administrator'}</span>
-              <div className="w-8 h-8 rounded-full bg-[#2563eb] text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-[#eff6ff]">
-                {currentUser?.avatar || 'AD'}
-              </div>
-            </Link>
-
-            {/* Notification Bell */}
-            <div className="relative">
-              <button
-                type="button"
-                title="Notifikasi Sistem"
-                className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-slate-600 hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-lg">notifications</span>
-              </button>
-              <span className="w-2 h-2 rounded-full bg-[#ef4444] absolute top-0.5 right-0.5 ring-2 ring-white"></span>
-            </div>
-          </div>
-        </header>
-
         {/* Page Inner Container with Smooth Entrance */}
         <div className="p-6 lg:p-8 flex-1 flex flex-col max-w-[1700px] w-full mx-auto animate-fade-in">
           {/* Dynamic Page Header Title & Action (if supplied) */}
