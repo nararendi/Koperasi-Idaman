@@ -17,7 +17,6 @@ export default function HomePage() {
   const [settings, setSettings] = useState({});
   const [selectedBar, setSelectedBar] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState('14days');
-  const [periodDropdownOpen, setPeriodDropdownOpen] = useState(false);
 
   const periodOptions = [
     { id: '7days', label: '7 Hari Terakhir', count: 7 },
@@ -147,56 +146,31 @@ export default function HomePage() {
         
         {/* Period Filter & Legend Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-slate-500 font-semibold relative z-30">
+          <div className="flex items-center gap-2 text-slate-500 font-semibold">
             <span>Period:</span>
             
             {/* Functional Period Dropdown Pill */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setPeriodDropdownOpen((prev) => !prev)}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-[#0f172a] font-bold hover:border-[#2563eb] shadow-xs hover:shadow-sm transition-all cursor-pointer select-none"
+            <div className="relative inline-flex items-center">
+              <span className="material-symbols-outlined text-base text-[#2563eb] absolute left-3 pointer-events-none z-10">
+                calendar_today
+              </span>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => {
+                  setSelectedPeriod(e.target.value);
+                  setSelectedBar(null);
+                }}
+                className="appearance-none bg-white border border-slate-200 text-[#0f172a] font-bold rounded-full pl-9 pr-9 py-1.5 hover:border-[#2563eb] focus:border-[#2563eb] focus:outline-none shadow-xs hover:shadow-sm transition-all cursor-pointer text-xs"
               >
-                <span className="material-symbols-outlined text-base text-[#2563eb]">calendar_today</span>
-                <span>{currentPeriodLabel}</span>
-                <span className={`material-symbols-outlined text-sm transition-transform duration-200 ${periodDropdownOpen ? 'rotate-180' : ''}`}>
-                  expand_more
-                </span>
-              </button>
-
-              {/* Dropdown Menu */}
-              {periodDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setPeriodDropdownOpen(false)}
-                  />
-                  <div className="absolute left-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-50 py-1.5 text-xs animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-3.5 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                      Pilih Rentang Waktu
-                    </div>
-                    {periodOptions.map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedPeriod(opt.id);
-                          setSelectedBar(null);
-                          setPeriodDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between hover:bg-[#eff6ff] transition-colors cursor-pointer ${
-                          selectedPeriod === opt.id ? 'font-extrabold text-[#2563eb] bg-[#eff6ff]/80' : 'font-medium text-slate-700'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                        {selectedPeriod === opt.id && (
-                          <span className="material-symbols-outlined text-sm text-[#2563eb]">check</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+                {periodOptions.map((opt) => (
+                  <option key={opt.id} value={opt.id} className="text-slate-800 font-medium py-1">
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined text-sm text-slate-600 absolute right-3 pointer-events-none z-10">
+                expand_more
+              </span>
             </div>
           </div>
 
