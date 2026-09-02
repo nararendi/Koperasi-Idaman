@@ -19,15 +19,12 @@ export default function HomePage() {
   const [selectedPeriod, setSelectedPeriod] = useState('14days');
 
   const periodOptions = [
-    { id: '7days', label: '7 Hari Terakhir', count: 7 },
-    { id: '14days', label: '14 Hari Terakhir', count: 14 },
-    { id: 'this_month', label: 'Bulan Ini', count: 30 },
-    { id: 'last_month', label: 'Bulan Lalu', count: 30 },
-    { id: 'this_year', label: 'Tahun Ini (2026)', count: 12 },
-    { id: 'all', label: 'Semua Transaksi', count: 14 }
+    { id: '7days', label: '7 Hari' },
+    { id: '14days', label: '14 Hari' },
+    { id: 'this_month', label: 'Bulan Ini' },
+    { id: 'this_year', label: 'Tahun Ini' },
+    { id: 'all', label: 'Semua' }
   ];
-
-  const currentPeriodLabel = periodOptions.find((p) => p.id === selectedPeriod)?.label || '14 Hari Terakhir';
 
   // Dynamic Chart calculation based on period and real data
   const getDynamicChartData = () => {
@@ -146,35 +143,31 @@ export default function HomePage() {
         
         {/* Period Filter & Legend Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-slate-500 font-semibold">
-            <span>Period:</span>
-            
-            {/* Functional Period Dropdown Pill */}
-            <div className="relative inline-flex items-center">
-              <span className="material-symbols-outlined text-base text-[#2563eb] absolute left-3 pointer-events-none z-10">
-                calendar_today
-              </span>
-              <select
-                value={selectedPeriod}
-                onChange={(e) => {
-                  setSelectedPeriod(e.target.value);
-                  setSelectedBar(null);
-                }}
-                className="appearance-none bg-white border border-slate-200 text-[#0f172a] font-bold rounded-full pl-9 pr-9 py-1.5 hover:border-[#2563eb] focus:border-[#2563eb] focus:outline-none shadow-xs hover:shadow-sm transition-all cursor-pointer text-xs"
-              >
-                {periodOptions.map((opt) => (
-                  <option key={opt.id} value={opt.id} className="text-slate-800 font-medium py-1">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <span className="material-symbols-outlined text-sm text-slate-600 absolute right-3 pointer-events-none z-10">
-                expand_more
-              </span>
-            </div>
+          {/* Segmented Filter Buttons */}
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-x-auto">
+            {periodOptions.map((opt) => {
+              const isActive = selectedPeriod === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedPeriod(opt.id);
+                    setSelectedBar(null);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all text-xs whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'bg-[#2563eb] text-white shadow-sm scale-[1.02]'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
+          <div className="flex items-center gap-4 text-xs font-bold text-slate-600 shrink-0">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#ffd159]"></span>
               Hari Ini / Aktif
