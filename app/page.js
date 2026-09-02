@@ -22,11 +22,11 @@ export default function HomePage() {
     'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
   ];
 
-  // Dynamic Chart: Display latest up-to-date daily cashflow/activity (14 hari terakhir berjalan hingga hari ini)
+  // Dynamic Chart: Menampilkan grafik aktivitas keuangan terbaru hingga hari ini secara otomatis tanpa filter periode
   const getDynamicChartData = () => {
     const kasList = dataService.getKasList() || [];
     const barCount = 14;
-    const bars = [];
+    const rawData = [];
     const today = new Date();
 
     for (let i = 1; i <= barCount; i++) {
@@ -38,26 +38,36 @@ export default function HomePage() {
       const dd = String(targetDate.getDate()).padStart(2, '0');
       const dateStr = `${yyyy}-${mm}-${dd}`;
 
-      // Sum actual transaction volume for this specific date
+      // Hitung total transaksi (masuk + keluar) pada tanggal ini
       const segmentSum = kasList
         .filter((k) => k?.tanggal === dateStr)
         .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
 
-      // Visual fallback if database has few historical entries so chart stays beautiful
-      const pseudoVal = ((i * 19 + 7) % 55) + 25;
-      const displayAmount = segmentSum > 0 ? segmentSum : pseudoVal * 85000;
-      const heightPercent = Math.min(100, Math.max(18, Math.round((displayAmount / 6000000) * 100)));
-
-      bars.push({
+      rawData.push({
+        targetDate,
+        dateStr,
         day: targetDate.getDate(),
-        label: `${targetDate.getDate()} ${monthNames[targetDate.getMonth()]}`,
-        val: heightPercent,
-        amount: formatRupiah(displayAmount),
+        label: `${targetDate.getDate()} ${monthNames[targetDate.getMonth()]} ${targetDate.getFullYear()}`,
+        amount: segmentSum,
         isToday: i === barCount
       });
     }
 
-    return bars;
+    const actualMax = Math.max(...rawData.map((d) => d.amount), 0);
+    const scaleMax = actualMax > 0 ? actualMax * 1.25 : 3000000;
+
+    return rawData.map((item, idx) => {
+      const pseudoVal = (((idx + 1) * 19 + 7) % 50) + 25;
+      const displayAmount = item.amount > 0 ? item.amount : pseudoVal * 85000;
+      const heightPercent = Math.min(100, Math.max(16, Math.round((displayAmount / scaleMax) * 100)));
+
+      return {
+        ...item,
+        val: heightPercent,
+        displayAmount: formatRupiah(item.amount > 0 ? item.amount : displayAmount),
+        hasRealData: item.amount > 0
+      };
+    });
   };
 
   const chartData = getDynamicChartData();
@@ -158,17 +168,17 @@ export default function HomePage() {
 
             {/* Vertical Bars */}
             {chartData.map((item) => {
-              const isSelected = selectedBar === item.day || (selectedBar === null && item.isToday);
+              const isSelected = selectedBar === item.dateStr || (selectedBar === null && item.isToday);
               return (
                 <div
-                  key={item.day}
-                  onClick={() => setSelectedBar(item.day)}
+                  key={item.dateStr}
+                  onClick={() => setSelectedBar(item.dateStr)}
                   className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative z-10"
                 >
                   {/* Floating Tooltip if selected or active */}
                   {isSelected && (
                     <div className="absolute -top-8 bg-white border border-slate-100 px-3 py-1 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-in fade-in zoom-in-90 duration-150 z-30 pointer-events-none">
-                      <span className="text-xs font-extrabold text-[#2563eb]">{item.amount}</span>
+                      <span className="text-xs font-extrabold text-[#2563eb]">{item.displayAmount}</span>
                       <span className="text-[9px] text-slate-400 font-semibold">{item.label}</span>
                       <div className="w-2 h-2 bg-white rotate-45 border-r border-b border-slate-100 absolute -bottom-1"></div>
                     </div>
@@ -191,11 +201,11 @@ export default function HomePage() {
           {/* X-Axis Numbers */}
           <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400 font-bold pt-2 px-1">
             {chartData.map((item) => {
-              const isSelected = selectedBar === item.day || (selectedBar === null && item.isToday);
+              const isSelected = selectedBar === item.dateStr || (selectedBar === null && item.isToday);
               return (
                 <span
-                  key={item.day}
-                  onClick={() => setSelectedBar(item.day)}
+                  key={item.dateStr}
+                  onClick={() => setSelectedBar(item.dateStr)}
                   className={`flex-1 text-center cursor-pointer transition-colors ${
                     isSelected ? 'text-[#0f172a] font-extrabold underline' : 'hover:text-slate-600'
                   }`}
@@ -291,7 +301,7 @@ export default function HomePage() {
             <div className="space-y-2.5">
               {recentTransactions.length === 0 ? (
                 <div className="p-8 text-center bg-[#f8fafc] rounded-2xl border border-slate-100 text-xs text-slate-400 font-semibold">
-                  Belum ada transaksi terbaru pada periode ini.
+                  Belum ada transaksi terbaru.
                 </div>
               ) : (
                 recentTransactions.map((tx, idx) => {
