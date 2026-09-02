@@ -149,7 +149,7 @@ export default function HomePage() {
         </div>
 
         {/* INTERACTIVE VERTICAL BAR CHART */}
-        <div className="bg-[#f8fafc] border border-slate-100 rounded-3xl p-5 md:p-6 shadow-inner relative">
+        <div className="bg-[#f8fafc] border border-slate-100 rounded-3xl p-5 md:p-6 shadow-inner relative overflow-hidden">
           <div className="relative h-56 flex items-end justify-between gap-1 sm:gap-2 pt-10 pb-4 border-b border-slate-200/80">
             
             {/* Background horizontal grid lines */}
@@ -163,8 +163,8 @@ export default function HomePage() {
               <span>Rp 1.000.000</span>
             </div>
 
-            {/* Vertical Bars */}
-            {chartData.map((item) => {
+            {/* Vertical Bars with Staggered Rise Animation */}
+            {chartData.map((item, idx) => {
               const isSelected = selectedBar === item.dateStr || (selectedBar === null && item.isToday);
               return (
                 <div
@@ -174,7 +174,7 @@ export default function HomePage() {
                 >
                   {/* Floating Tooltip if selected or active */}
                   {isSelected && (
-                    <div className="absolute -top-8 bg-white border border-slate-100 px-3 py-1 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-in fade-in zoom-in-90 duration-150 z-30 pointer-events-none">
+                    <div className="absolute -top-8 bg-white border border-slate-100 px-3 py-1 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-pop-in z-30 pointer-events-none">
                       <span className="text-xs font-extrabold text-[#2563eb]">{item.displayAmount}</span>
                       <span className="text-[9px] text-slate-400 font-semibold">{item.label}</span>
                       <div className="w-2 h-2 bg-white rotate-45 border-r border-b border-slate-100 absolute -bottom-1"></div>
@@ -183,11 +183,14 @@ export default function HomePage() {
 
                   {/* The Bar */}
                   <div
-                    style={{ height: `${item.val}%` }}
-                    className={`w-3 sm:w-4 md:w-5 rounded-t-lg transition-all duration-300 ${
+                    style={{
+                      height: `${item.val}%`,
+                      animationDelay: `${idx * 45}ms`
+                    }}
+                    className={`w-3 sm:w-4 md:w-5 rounded-t-lg transition-all duration-300 animate-bar-rise ${
                       isSelected
-                        ? 'bg-[#ffd159] shadow-md scale-y-105 ring-2 ring-[#ffd159]/40'
-                        : 'bg-[#bfdbfe] hover:bg-[#93c5fd] group-hover:scale-y-105'
+                        ? 'bg-[#ffd159] shadow-md scale-y-105 ring-2 ring-[#ffd159]/50'
+                        : 'bg-[#bfdbfe] hover:bg-[#93c5fd] group-hover:scale-y-105 group-hover:shadow-sm'
                     }`}
                   ></div>
                 </div>
@@ -203,8 +206,8 @@ export default function HomePage() {
                 <span
                   key={item.dateStr}
                   onClick={() => setSelectedBar(item.dateStr)}
-                  className={`flex-1 text-center cursor-pointer transition-colors ${
-                    isSelected ? 'text-[#0f172a] font-extrabold underline' : 'hover:text-slate-600'
+                  className={`flex-1 text-center cursor-pointer transition-all duration-150 ${
+                    isSelected ? 'text-[#0f172a] font-black scale-110 underline decoration-[#ffd159] decoration-2' : 'hover:text-slate-700'
                   }`}
                 >
                   {item.day}
@@ -217,65 +220,65 @@ export default function HomePage() {
         {/* 4 SUMMARY STAT CARDS */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Anggota */}
-          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm card-hover flex flex-col justify-between group">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Anggota Aktif</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs group-hover:scale-110 group-hover:bg-[#2563eb] group-hover:text-white transition-all duration-200">
                 <span className="material-symbols-outlined text-lg">group</span>
               </div>
             </div>
             <div className="text-xl font-extrabold text-[#0f172a] mt-2">
               {stats.totalAnggota} <span className="text-xs font-semibold text-slate-400">Orang</span>
             </div>
-            <Link href="/anggota" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1">
+            <Link href="/anggota" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1 group-hover:translate-x-1 transition-transform">
               Kelola Data &rarr;
             </Link>
           </div>
 
           {/* Total Simpanan */}
-          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm card-hover flex flex-col justify-between group">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Simpanan</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs group-hover:scale-110 group-hover:bg-[#2563eb] group-hover:text-white transition-all duration-200">
                 <span className="material-symbols-outlined text-lg">savings</span>
               </div>
             </div>
             <div className="text-xl font-extrabold text-[#2563eb] mt-2">
               {formatRupiah(stats.totalSimpanan)}
             </div>
-            <Link href="/simpanan" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1">
+            <Link href="/simpanan" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1 group-hover:translate-x-1 transition-transform">
               Buku Simpanan &rarr;
             </Link>
           </div>
 
           {/* Total Pinjaman */}
-          <div className="bg-[#fefbf2] border border-[#faecd2] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#fefbf2] border border-[#faecd2] rounded-2xl p-4 shadow-sm card-hover flex flex-col justify-between group">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Pinjaman Berjalan</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#df9800] shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#df9800] shadow-xs group-hover:scale-110 group-hover:bg-[#df9800] group-hover:text-white transition-all duration-200">
                 <span className="material-symbols-outlined text-lg">payments</span>
               </div>
             </div>
             <div className="text-xl font-extrabold text-[#df9800] mt-2">
               {formatRupiah(stats.totalPinjaman)}
             </div>
-            <Link href="/pinjaman" className="mt-2 text-[11px] font-bold text-[#df9800] hover:underline flex items-center gap-1">
+            <Link href="/pinjaman" className="mt-2 text-[11px] font-bold text-[#df9800] hover:underline flex items-center gap-1 group-hover:translate-x-1 transition-transform">
               Tagihan & Angsuran &rarr;
             </Link>
           </div>
 
           {/* Saldo Kas */}
-          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm hover:shadow transition-all flex flex-col justify-between">
+          <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 shadow-sm card-hover flex flex-col justify-between group">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Saldo Kas</span>
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#2563eb] shadow-xs group-hover:scale-110 group-hover:bg-[#2563eb] group-hover:text-white transition-all duration-200">
                 <span className="material-symbols-outlined text-lg">account_balance</span>
               </div>
             </div>
             <div className="text-xl font-extrabold text-[#0f172a] mt-2">
               {formatRupiah(stats.saldoKas)}
             </div>
-            <Link href="/kas" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1">
+            <Link href="/kas" className="mt-2 text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1 group-hover:translate-x-1 transition-transform">
               Arus Kas &rarr;
             </Link>
           </div>
@@ -287,10 +290,11 @@ export default function HomePage() {
           {/* Left 2 Cols: Transaksi Terkini Activity List */}
           <div className="lg:col-span-2 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-[#0f172a]">
-                Aktivitas Transaksi Terkini <span className="text-xs font-semibold text-slate-400">({recentTransactions.length} Mutasi Terakhir)</span>
+              <h3 className="text-base font-extrabold text-[#0f172a] flex items-center gap-2">
+                <span>Aktivitas Transaksi Terkini</span>
+                <span className="text-xs font-semibold text-slate-400">({recentTransactions.length} Mutasi Terakhir)</span>
               </h3>
-              <Link href="/kas" className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-0.5">
+              <Link href="/kas" className="text-xs font-bold text-[#2563eb] hover:underline flex items-center gap-0.5 btn-interactive">
                 Lihat Semua &gt;
               </Link>
             </div>
@@ -308,17 +312,17 @@ export default function HomePage() {
                   return (
                     <div
                       key={tx.id || idx}
-                      className="bg-white border border-slate-100 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xs hover:border-[#2563eb]/40 hover:shadow-sm transition-all"
+                      className="bg-white border border-slate-100 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xs hover:border-[#2563eb]/40 card-hover group"
                     >
                       {/* Left: Avatar / Art icon & Info */}
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-10 h-10 rounded-2xl ${avatarColor} flex items-center justify-center font-bold text-xs shrink-0 shadow-inner`}>
+                        <div className={`w-10 h-10 rounded-2xl ${avatarColor} flex items-center justify-center font-bold text-xs shrink-0 shadow-inner group-hover:scale-105 transition-transform`}>
                           <span className="material-symbols-outlined text-xl">
                             {isPenerimaan ? 'arrow_downward' : 'arrow_upward'}
                           </span>
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-bold text-[#0f172a] truncate">
+                          <span className="text-xs font-bold text-[#0f172a] truncate group-hover:text-[#2563eb] transition-colors">
                             {tx.keterangan || tx.kategori || 'Transaksi Keuangan'}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium truncate">
@@ -330,7 +334,7 @@ export default function HomePage() {
                       {/* Middle: Status Badge */}
                       <div className="hidden sm:block">
                         <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold ${
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold transition-transform group-hover:scale-105 ${
                             isPenerimaan
                               ? 'bg-[#eff6ff] text-[#2563eb]'
                               : 'bg-[#fff1f2] text-[#e11d48]'
@@ -359,9 +363,9 @@ export default function HomePage() {
           </div>
 
           {/* Right 1 Col: Summary Banner */}
-          <div className="bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border border-[#bfdbfe] rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xs min-h-[220px]">
+          <div className="bg-gradient-to-br from-[#eff6ff] via-[#dbeafe] to-[#bfdbfe] border border-[#93c5fd]/50 rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden shadow-xs min-h-[220px] card-hover">
             {/* Background Decorative Palms & Geometric Art */}
-            <div className="absolute -bottom-6 -right-6 w-36 h-36 opacity-70 pointer-events-none">
+            <div className="absolute -bottom-6 -right-6 w-36 h-36 opacity-70 pointer-events-none animate-float">
               <svg viewBox="0 0 100 100" className="w-full h-full text-[#2563eb]/20 fill-current">
                 <path d="M50 0 C40 30 10 40 0 50 C30 60 40 90 50 100 C60 70 90 60 100 50 C70 40 60 10 50 0 Z" />
               </svg>
@@ -369,21 +373,26 @@ export default function HomePage() {
             
             {/* Top Text Content */}
             <div className="relative z-10">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/60 text-[#1d4ed8] text-[10px] font-extrabold mb-2 backdrop-blur-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] animate-ping"></span>
+                Status Sehat
+              </div>
               <h4 className="text-base font-extrabold text-[#0f172a]">
                 Kinerja Koperasi!
               </h4>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed font-medium">
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
                 Likuiditas kas dan perputaran dana anggota bulan ini dalam performa optimal.
               </p>
             </div>
 
             {/* Bottom Yellow Action Button */}
-            <div className="pt-6 relative z-10">
+            <div className="pt-5 relative z-10">
               <Link
                 href="/kas"
-                className="inline-block px-5 py-2 bg-[#ffd159] hover:bg-[#f7be38] text-[#0f172a] rounded-xl font-extrabold text-xs shadow-sm transition-all"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#ffd159] hover:bg-[#f7be38] text-[#0f172a] rounded-xl font-extrabold text-xs shadow-sm btn-interactive cursor-pointer"
               >
-                Kelola Kas
+                <span>Kelola Kas</span>
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </Link>
             </div>
           </div>

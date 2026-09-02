@@ -39,15 +39,15 @@ export default function LoginPage() {
 
   return (
     <div className="h-screen max-h-screen w-screen overflow-hidden bg-[#eaf2fc] flex items-center justify-center p-3 sm:p-4 font-sans text-[#0f172a] relative select-none">
-      {/* Decorative ambient background shapes */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#2563eb]/15 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#3b82f6]/20 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Decorative ambient background shapes with float animation */}
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#2563eb]/20 rounded-full blur-3xl pointer-events-none animate-float"></div>
+      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#3b82f6]/25 rounded-full blur-3xl pointer-events-none animate-float delay-200"></div>
 
-      {/* Main Login Card */}
-      <div className="max-w-[410px] w-full bg-white rounded-[28px] shadow-2xl overflow-hidden border-[3px] border-[#2563eb] relative z-10 flex flex-col my-auto">
+      {/* Main Login Card with Pop-In animation */}
+      <div className="max-w-[410px] w-full bg-white rounded-[28px] shadow-2xl overflow-hidden border-[3px] border-[#2563eb] relative z-10 flex flex-col my-auto animate-pop-in card-hover">
         {/* Header */}
         <div className="bg-gradient-to-br from-[#1e40af] via-[#1d4ed8] to-[#2563eb] px-6 py-6 text-white text-center relative overflow-hidden shrink-0">
-          <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -mr-8 -mt-8 blur-lg pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -mr-8 -mt-8 blur-lg pointer-events-none animate-pulse-glow"></div>
           
           <div className="mb-2.5">
             <AppLogo size="large" />

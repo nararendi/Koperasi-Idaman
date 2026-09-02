@@ -98,20 +98,20 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           </div>
 
           {/* Navigation Menu Links */}
-          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5">
             {navigation.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs transition-all duration-150 ${
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs transition-all duration-200 group ${
                     active
-                      ? 'bg-white text-[#2563eb] font-extrabold shadow-sm scale-[1.01]'
-                      : 'text-white/80 hover:text-white hover:bg-white/10 font-bold'
+                      ? 'bg-white text-[#2563eb] font-extrabold shadow-md scale-[1.02]'
+                      : 'text-white/80 hover:text-white hover:bg-white/10 font-bold hover:translate-x-1'
                   }`}
                 >
-                  <span className={`material-symbols-outlined text-[20px] ${active ? 'text-[#2563eb]' : 'text-white/80'}`}>
+                  <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:scale-110 ${active ? 'text-[#2563eb]' : 'text-white/80'}`}>
                     {item.icon}
                   </span>
                   <span className="tracking-wide">{item.label}</span>
@@ -246,8 +246,8 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           </div>
         </header>
 
-        {/* Page Inner Container */}
-        <div className="p-6 lg:p-8 flex-1 flex flex-col max-w-[1700px] w-full mx-auto">
+        {/* Page Inner Container with Smooth Entrance */}
+        <div className="p-6 lg:p-8 flex-1 flex flex-col max-w-[1700px] w-full mx-auto animate-slide-up">
           {/* Dynamic Page Header Title & Action (if supplied) */}
           {(title || rightAction) && (
             <div className="pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -275,8 +275,8 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           <footer className="mt-12 pt-4 border-t border-slate-200 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>&copy; {new Date().getFullYear()} <strong>Koperasi Idaman</strong> &bull; Sistem Informasi Manajemen Terpadu</span>
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 text-[#2563eb] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] animate-ping"></span>
+              <span className="inline-flex items-center gap-1.5 text-[#2563eb] font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Online: {currentUser?.role || 'Super Admin'}
               </span>
             </div>
@@ -286,10 +286,10 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
 
       {/* ==================== LOGOUT CONFIRMATION MODAL ==================== */}
       {logoutModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col text-xs animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col text-xs animate-pop-in">
             <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner">
                 <span className="material-symbols-outlined text-2xl text-[#ffd159]">logout</span>
               </div>
               <div>
@@ -306,14 +306,14 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
               <button
                 type="button"
                 onClick={() => setLogoutModalOpen(false)}
-                className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="px-4 py-2 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 btn-interactive cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleLogoutConfirm}
-                className="px-5 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-full font-bold shadow-sm transition-colors cursor-pointer"
+                className="px-5 py-2 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-full font-bold shadow-sm btn-interactive cursor-pointer"
               >
                 Ya, Keluar
               </button>
