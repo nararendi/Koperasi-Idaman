@@ -6,6 +6,7 @@ import Pagination from '../../components/Pagination';
 import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
+import { formatRupiah } from '../../lib/formatters';
 
 export default function KasPage() {
   const [summary, setSummary] = useState({
@@ -104,10 +105,6 @@ export default function KasPage() {
   // Export Professional Excel Document
   const handleExportExcel = () => {
     excelExport.exportBukuKas(filteredKas, summary, settings);
-  };
-
-  const formatRupiah = (num) => {
-    return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
   };
 
   return (

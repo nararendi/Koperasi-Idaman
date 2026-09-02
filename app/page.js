@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLayout from '../components/AppLayout';
 import { dataService } from '../lib/dataService';
+import { formatRupiah } from '../lib/formatters';
 
 export default function HomePage() {
   const [stats, setStats] = useState({
@@ -101,10 +102,6 @@ export default function HomePage() {
     window.addEventListener('koperasi_db_updated', handleUpdate);
     return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
   }, []);
-
-  const formatRupiah = (num) => {
-    return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
-  };
 
   // Pastel icon colors for transaction list
   const avatarColors = [

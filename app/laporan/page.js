@@ -5,6 +5,7 @@ import AppLayout from '../../components/AppLayout';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 import { pdfExport } from '../../lib/pdfExport';
+import { formatRupiah } from '../../lib/formatters';
 
 export default function LaporanPage() {
   const [laporan, setLaporan] = useState({
@@ -78,10 +79,6 @@ export default function LaporanPage() {
     window.addEventListener('koperasi_db_updated', handleUpdate);
     return () => window.removeEventListener('koperasi_db_updated', handleUpdate);
   }, []);
-
-  const formatRupiah = (num) => {
-    return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
-  };
 
   const handleExportPDF = () => {
     pdfExport.exportLaporanKeuanganPDF(laporan, settings, getPeriodeLabel());

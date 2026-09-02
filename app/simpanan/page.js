@@ -8,6 +8,7 @@ import RupiahInput from '../../components/RupiahInput';
 import { dataService } from '../../lib/dataService';
 import { excelExport } from '../../lib/excelExport';
 import { pdfExport } from '../../lib/pdfExport';
+import { formatRupiah } from '../../lib/formatters';
 
 export default function SimpananPage() {
   const [summary, setSummary] = useState({
@@ -207,10 +208,6 @@ export default function SimpananPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  const formatRupiah = (num) => {
-    return `Rp ${(Number(num) || 0).toLocaleString('id-ID')}`;
-  };
 
   const handlePrintKuitansi = (item) => {
     setSelectedKuitansi(item);
