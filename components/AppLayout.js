@@ -120,38 +120,37 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
           </nav>
         </div>
 
-        {/* Bottom Sidebar: User Profile Card & Logout Quick Trigger */}
-        <div className="p-3.5 pt-2 border-t border-white/10 shrink-0 space-y-2.5">
-          <Link
-            href="/pengaturan"
-            className="flex items-center gap-3 p-2.5 rounded-2xl bg-[#172554]/60 hover:bg-[#172554] border border-white/15 shadow-inner backdrop-blur-sm transition-all group cursor-pointer"
-            title="Kelola Profil & Pengaturan"
-          >
-            <div className="w-9 h-9 rounded-full bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-black text-xs shadow-md shrink-0 group-hover:scale-105 transition-transform">
-              {currentUser?.avatar || 'AD'}
-            </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-xs font-extrabold text-white truncate group-hover:text-[#ffd159] transition-colors">
-                {currentUser?.nama || 'Administrator'}
-              </span>
-              <span className="text-[10px] text-blue-200/90 font-medium truncate flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                <span className="truncate">{currentUser?.role || 'Super Admin'}</span>
-              </span>
-            </div>
-            <span className="material-symbols-outlined text-white/40 group-hover:text-white text-base transition-colors shrink-0">
-              settings
-            </span>
-          </Link>
+        {/* Bottom Sidebar: Compact User Profile & Quick Logout */}
+        <div className="p-2.5 px-3 border-t border-white/10 shrink-0">
+          <div className="flex items-center justify-between gap-2 p-1.5 pl-2 rounded-xl bg-black/20 hover:bg-black/30 border border-white/10 transition-all">
+            <Link
+              href="/pengaturan"
+              className="flex items-center gap-2 min-w-0 flex-1 group cursor-pointer"
+              title="Pengaturan Profil Akun"
+            >
+              <div className="w-7 h-7 rounded-lg bg-[#ffd159] text-[#0f172a] flex items-center justify-center font-black text-[11px] shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                {currentUser?.avatar || 'AD'}
+              </div>
+              <div className="flex flex-col min-w-0 flex-1 leading-tight">
+                <span className="text-[11px] font-bold text-white truncate group-hover:text-[#ffd159] transition-colors">
+                  {currentUser?.nama || 'Administrator'}
+                </span>
+                <span className="text-[9px] text-blue-200/80 font-medium truncate flex items-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                  <span className="truncate">{currentUser?.role || 'Super Admin'}</span>
+                </span>
+              </div>
+            </Link>
 
-          <button
-            type="button"
-            onClick={() => setLogoutModalOpen(true)}
-            className="flex items-center justify-center gap-2 text-white/80 hover:text-white hover:bg-white/10 px-3 py-2 rounded-xl transition-colors w-full font-bold text-xs cursor-pointer btn-interactive"
-          >
-            <span className="material-symbols-outlined text-lg text-rose-300">logout</span>
-            <span>LogOut</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setLogoutModalOpen(true)}
+              className="p-1.5 text-white/60 hover:text-rose-300 hover:bg-white/10 rounded-lg transition-colors cursor-pointer shrink-0"
+              title="Keluar / LogOut"
+            >
+              <span className="material-symbols-outlined text-[17px] block">logout</span>
+            </button>
+          </div>
         </div>
       </aside>
 
