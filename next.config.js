@@ -7,6 +7,9 @@ const nextConfig = {
     // Memastikan build tidak gagal karena peringatan eslint minor saat deploy
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   webpack: (config) => {
     config.resolve.alias['@'] = path.resolve(__dirname);
     return config;

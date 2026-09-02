@@ -1,8 +1,2 @@
-{
-  "git": {
-    "deploymentEnabled": {
-      "main": true
-    },
-    "submodules": false
-  }
-}
+{}
+
