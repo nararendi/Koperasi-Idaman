@@ -539,8 +539,8 @@ export default function PinjamanPage() {
 
       {/* MODAL AJUKAN PINJAMAN BARU */}
       {applyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-xl w-full max-h-[88vh] my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-xl text-[#ffd159]">request_quote</span>
@@ -766,8 +766,8 @@ export default function PinjamanPage() {
 
       {/* MODAL BAYAR ANGSURAN */}
       {bayarModalOpen && selectedPinjamanBayar && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-md w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-md w-full max-h-[88vh] my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-xl text-[#ffd159]">payments</span>
@@ -800,17 +800,15 @@ export default function PinjamanPage() {
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Pilih Cicilan / Bulan Ke *
-                  </label>
+                  <label className="font-bold text-slate-700 block mb-1">Pilih Angsuran Bulan Ke- *</label>
                   <select
                     value={bayarForm.cicilanKe}
-                    onChange={(e) => handleCicilanChange(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-blue-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-bold text-slate-800 text-xs transition-all shadow-xs"
+                    onChange={(e) => handleSelectCicilan(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-bold text-slate-800 transition-all text-xs"
                   >
-                    {getPinjamanSchedule(selectedPinjamanBayar).map((s) => {
+                    {(selectedPinjamanBayar?.jadwal_angsuran || []).map((s) => {
                       const isPaid = (selectedPinjamanBayar.riwayat_angsuran || []).some(
-                        (r) => Number(r.angsuran_ke) === s.bulanKe
+                        (a) => Number(a.angsuran_ke) === Number(s.bulanKe)
                       );
                       return (
                         <option key={s.bulanKe} value={s.bulanKe}>
@@ -821,49 +819,46 @@ export default function PinjamanPage() {
                   </select>
                 </div>
 
-                {/* Breakdown Cicilan Menurun */}
-                <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-2xl p-3.5 flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="font-bold text-emerald-800">
-                      Rincian Tagihan Bulan ke-{bayarForm.cicilanKe}:
-                    </span>
-                    <span className="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">
-                      {selectedPinjamanBayar.metode_bunga === 'flat' ? 'Bunga Flat' : 'Bunga Menurun (Efektif)'}
-                    </span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Tanggal Bayar *</label>
+                    <input
+                      type="date"
+                      required
+                      value={bayarForm.tanggal}
+                      onChange={(e) => setBayarForm({ ...bayarForm, tanggal: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all text-xs"
+                    />
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
-                    <div className="bg-white p-2 rounded-xl border border-emerald-100 shadow-2xs">
-                      <span className="text-slate-400 block text-[10px]">Pokok:</span>
-                      <span className="font-extrabold text-slate-800">{formatRupiah(bayarForm.pokok || 0)}</span>
-                    </div>
-                    <div className="bg-white p-2 rounded-xl border border-emerald-100 shadow-2xs">
-                      <span className="text-slate-400 block text-[10px]">Bunga:</span>
-                      <span className="font-extrabold text-emerald-600">{formatRupiah(bayarForm.bunga || 0)}</span>
-                    </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Metode Bayar</label>
+                    <select
+                      value={bayarForm.metode}
+                      onChange={(e) => setBayarForm({ ...bayarForm, metode: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all text-xs"
+                    >
+                      <option value="Tunai">Tunai / Cash</option>
+                      <option value="Transfer Bank">Transfer Bank</option>
+                      <option value="Potong Gaji">Potong Gaji</option>
+                    </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nominal Pembayaran (Rp) *</label>
-                  <RupiahInput
-                    required
-                    value={bayarForm.jumlahBayar}
-                    onChange={(val) => setBayarForm({ ...bayarForm, jumlahBayar: val })}
-                    className="focus:border-[#2563eb] font-extrabold text-[#2563eb] bg-[#f8fafc] rounded-2xl"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Metode Pembayaran</label>
-                  <select
-                    value={bayarForm.metode}
-                    onChange={(e) => setBayarForm({ ...bayarForm, metode: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
-                  >
-                    <option value="Tunai">Tunai / Kasir</option>
-                    <option value="Transfer Bank">Transfer Bank</option>
-                    <option value="Potong Gaji">Potong Gaji</option>
-                  </select>
+                {/* Rincian Terhitung Otomatis */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Pokok Terbayar:</span>
+                    <span className="font-extrabold text-slate-800">{formatRupiah(bayarForm.pokok || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Jasa / Bunga Koperasi:</span>
+                    <span className="font-extrabold text-emerald-600">{formatRupiah(bayarForm.bunga || 0)}</span>
+                  </div>
+                  <div className="border-t border-slate-200 pt-1.5 flex justify-between font-extrabold text-xs text-[#2563eb]">
+                    <span>Total Pembayaran:</span>
+                    <span>{formatRupiah(bayarForm.jumlahBayar || 0)}</span>
+                  </div>
                 </div>
 
                 <div>
@@ -908,8 +903,8 @@ export default function PinjamanPage() {
         const paidAngsuranKeSet = new Set((selectedPinjamanDetail.riwayat_angsuran || []).map((a) => Number(a.angsuran_ke)));
 
         return (
-          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-in fade-in zoom-in duration-150">
+          <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+            <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-xl w-full max-h-[88vh] my-auto overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-pop-in">
               <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[32px]">
                 <div>
                   <h3 className="text-base font-extrabold">Rincian & Status Pinjaman</h3>

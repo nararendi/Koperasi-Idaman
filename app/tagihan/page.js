@@ -401,8 +401,8 @@ export default function TagihanPage() {
       {/* MODAL: EDIT TAGIHAN ANGGOTA */}
       {/* ========================================================================= */}
       {editModalOpen && selectedMember && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white w-full max-w-lg max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-y-auto animate-pop-in">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-mono font-bold text-slate-400 block">{selectedMember?.nomor_anggota || '-'}</span>

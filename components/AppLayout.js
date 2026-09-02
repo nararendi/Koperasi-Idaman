@@ -247,7 +247,7 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
         </header>
 
         {/* Page Inner Container with Smooth Entrance */}
-        <div className="p-6 lg:p-8 flex-1 flex flex-col max-w-[1700px] w-full mx-auto animate-slide-up">
+        <div className="p-6 lg:p-8 flex-1 flex flex-col max-w-[1700px] w-full mx-auto animate-fade-in">
           {/* Dynamic Page Header Title & Action (if supplied) */}
           {(title || rightAction) && (
             <div className="pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

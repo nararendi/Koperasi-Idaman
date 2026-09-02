@@ -61,22 +61,22 @@ body {
 @keyframes slideUpFade {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 @keyframes slideDownFade {
   from {
     opacity: 0;
-    transform: translateY(-14px);
+    transform: translateY(-12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 

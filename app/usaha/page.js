@@ -850,9 +850,9 @@ export default function UsahaPage() {
       {/* MODAL: TAMBAH / EDIT PRODUK SEMBAKO */}
       {/* ========================================================================= */}
       {modalProdukOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
-            <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
+            <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#2563eb]">inventory_2</span>
                 <h3 className="font-extrabold text-sm text-[#0f172a]">
@@ -868,7 +868,7 @@ export default function UsahaPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduk} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSaveProduk} className="p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Nama Produk Sembako *</label>
                 <input
@@ -903,9 +903,10 @@ export default function UsahaPage() {
                   <label className="font-bold text-slate-700 block mb-1">Satuan</label>
                   <input
                     type="text"
+                    required
                     value={produkForm.satuan}
                     onChange={(e) => setProdukForm({ ...produkForm, satuan: e.target.value })}
-                    placeholder="Contoh: Kg / Pouch / Karung"
+                    placeholder="Kg, Liter, Pcs, Dus"
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] outline-none font-semibold text-slate-800"
                   />
                 </div>
@@ -913,49 +914,50 @@ export default function UsahaPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Harga Beli / Modal (Rp)</label>
+                  <label className="font-bold text-slate-700 block mb-1">Harga Beli / Kulakan (Rp)</label>
                   <RupiahInput
                     value={produkForm.harga_beli}
                     onChange={(val) => setProdukForm({ ...produkForm, harga_beli: val })}
                     placeholder="0"
-                    className="!rounded-2xl !bg-[#f8fafc] focus:!bg-white font-semibold text-slate-800"
+                    className="!rounded-2xl !bg-[#f8fafc]"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Harga Jual (Rp) *</label>
+                  <label className="font-bold text-slate-700 block mb-1">Harga Jual Konsumen (Rp) *</label>
                   <RupiahInput
                     required
                     value={produkForm.harga_jual}
                     onChange={(val) => setProdukForm({ ...produkForm, harga_jual: val })}
                     placeholder="0"
-                    className="!rounded-2xl !bg-[#f8fafc] focus:!bg-white font-bold text-[#2563eb]"
+                    className="!rounded-2xl !bg-[#f8fafc] font-black text-[#2563eb]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Stok Awal / Tersedia</label>
+                <label className="font-bold text-slate-700 block mb-1">Jumlah Stok Masuk / Awal</label>
                 <input
                   type="number"
+                  min="0"
+                  required
                   value={produkForm.stok}
-                  onChange={(e) => setProdukForm({ ...produkForm, stok: e.target.value })}
-                  placeholder="0"
-                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] outline-none font-semibold text-slate-800"
+                  onChange={(e) => setProdukForm({ ...produkForm, stok: Number(e.target.value) })}
+                  className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] outline-none font-bold text-slate-800"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 shrink-0">
                 <button
                   type="button"
                   onClick={() => setModalProdukOpen(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-2xl font-bold transition-colors"
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-2xl font-bold transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-extrabold transition-all shadow-md shadow-[#2563eb]/20"
+                  className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-extrabold transition-all shadow-md shadow-[#2563eb]/20 cursor-pointer"
                 >
                   Simpan Produk
                 </button>
@@ -969,8 +971,8 @@ export default function UsahaPage() {
       {/* MODAL: TRANSAKSI KASIR (POS) SEMBAKO */}
       {/* ========================================================================= */}
       {modalKasirOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white w-full max-w-4xl max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-pop-in">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#2563eb]">point_of_sale</span>
@@ -1150,9 +1152,9 @@ export default function UsahaPage() {
       {/* MODAL: DAFTAR PESERTA QURBAN BARU */}
       {/* ========================================================================= */}
       {modalPesertaQurbanOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
-            <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
+            <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#2563eb]">person_add</span>
                 <h3 className="font-extrabold text-sm text-[#0f172a]">Daftar Peserta Tabungan Qurban</h3>
@@ -1166,7 +1168,7 @@ export default function UsahaPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSavePesertaQurban} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSavePesertaQurban} className="p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Status Keanggotaan</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -1208,9 +1210,9 @@ export default function UsahaPage() {
                   <input
                     type="text"
                     required
-                    value={pesertaQurbanForm.nama}
-                    onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, nama: e.target.value })}
-                    placeholder="Contoh: H. Ahmad Fauzi"
+                    value={pesertaQurbanForm.namaManual}
+                    onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, namaManual: e.target.value })}
+                    placeholder="Nama Lengkap"
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl font-semibold outline-none"
                   />
                 </div>
@@ -1219,58 +1221,61 @@ export default function UsahaPage() {
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Pilihan Hewan Qurban</label>
                 <select
-                  value={pesertaQurbanForm.tipe_hewan}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    let targetNominal = 3500000;
-                    if (val.includes('Kambing Super')) targetNominal = 4500000;
-                    if (val.includes('Sapi 1/7')) targetNominal = 3200000;
-                    if (val.includes('1 Ekor Sapi')) targetNominal = 22000000;
-                    setPesertaQurbanForm({ ...pesertaQurbanForm, tipe_hewan: val, target_nominal: targetNominal });
-                  }}
+                  value={pesertaQurbanForm.tipeHewan}
+                  onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, tipeHewan: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl font-semibold outline-none"
                 >
-                  <option value="1 Ekor Kambing / Domba Standar">1 Ekor Kambing / Domba Standar (Rp 3.500.000)</option>
-                  <option value="1 Ekor Kambing Super / Premium">1 Ekor Kambing Super / Premium (Rp 4.500.000)</option>
-                  <option value="Patungan Sapi 1/7 Bagian">Patungan Sapi 1/7 Bagian (Rp 3.200.000)</option>
-                  <option value="1 Ekor Sapi Utuh">1 Ekor Sapi Utuh (Rp 22.000.000)</option>
+                  <option value="Sapi (1 Ekor Penuh)">Sapi (1 Ekor Penuh)</option>
+                  <option value="Sapi (1/7 Bagian Kolektif)">Sapi (1/7 Bagian Kolektif)</option>
+                  <option value="Kambing / Domba">Kambing / Domba</option>
+                  <option value="Titip Dana Qurban Bebas">Titip Dana Qurban Bebas</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Target Nominal Tabungan (Rp) *</label>
+                <RupiahInput
+                  required
+                  value={pesertaQurbanForm.targetNominal}
+                  onChange={(val) => setPesertaQurbanForm({ ...pesertaQurbanForm, targetNominal: val })}
+                  placeholder="0"
+                  className="!rounded-2xl !bg-[#f8fafc] font-black text-[#2563eb]"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Target Nominal (Rp)</label>
-                  <RupiahInput
-                    required
-                    value={pesertaQurbanForm.target_nominal}
-                    onChange={(val) => setPesertaQurbanForm({ ...pesertaQurbanForm, target_nominal: val })}
-                    className="!rounded-2xl !bg-[#f8fafc] font-bold text-[#2563eb]"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Tahun Target Qurban</label>
+                  <label className="font-bold text-slate-700 block mb-1">Target Periode Qurban</label>
                   <input
                     type="text"
-                    value={pesertaQurbanForm.tahun_qurban}
-                    onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, tahun_qurban: e.target.value })}
-                    placeholder="1448 H / 2026"
+                    value={pesertaQurbanForm.periode}
+                    onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, periode: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl font-semibold outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor HP / WA</label>
+                  <input
+                    type="text"
+                    value={pesertaQurbanForm.kontak}
+                    onChange={(e) => setPesertaQurbanForm({ ...pesertaQurbanForm, kontak: e.target.value })}
+                    placeholder="08xxxxxxxx"
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl font-semibold outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 shrink-0">
                 <button
                   type="button"
                   onClick={() => setModalPesertaQurbanOpen(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-2xl font-bold transition-colors"
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-2xl font-bold transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-extrabold transition-all shadow-md shadow-[#2563eb]/20"
+                  className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-extrabold transition-all shadow-md shadow-[#2563eb]/20 cursor-pointer"
                 >
                   Daftarkan Peserta
                 </button>
@@ -1284,9 +1289,9 @@ export default function UsahaPage() {
       {/* MODAL: SETOR TABUNGAN QURBAN */}
       {/* ========================================================================= */}
       {modalSetorQurbanOpen && selectedPesertaQurban && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
-            <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
+            <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#2563eb]">savings</span>
                 <h3 className="font-extrabold text-sm text-[#0f172a]">Setor Tabungan Qurban</h3>
@@ -1300,7 +1305,7 @@ export default function UsahaPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveSetorQurban} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSaveSetorQurban} className="p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
               <div className="p-3.5 bg-[#eff6ff] rounded-2xl border border-[#bfdbfe]">
                 <span className="text-[10px] text-slate-500 font-bold block">Peserta Qurban:</span>
                 <h4 className="text-sm font-extrabold text-[#0f172a]">{selectedPesertaQurban?.nama || 'Peserta'}</h4>
@@ -1345,17 +1350,17 @@ export default function UsahaPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 shrink-0">
                 <button
                   type="button"
                   onClick={() => setModalSetorQurbanOpen(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-2xl font-bold transition-colors"
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-2xl font-bold transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-extrabold transition-all shadow-md shadow-[#2563eb]/20"
+                  className="px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-extrabold transition-all shadow-md shadow-[#2563eb]/20 cursor-pointer"
                 >
                   Konfirmasi Setoran
                 </button>
@@ -1369,8 +1374,8 @@ export default function UsahaPage() {
       {/* MODAL: NOTA / STRUK / KUITANSI CETAK */}
       {/* ========================================================================= */}
       {modalNotaOpen && notaData && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-4 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
               <span className="font-extrabold text-xs text-[#0f172a]">Bukti Transaksi Resmi</span>
               <button

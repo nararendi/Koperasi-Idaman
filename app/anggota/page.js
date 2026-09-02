@@ -340,9 +340,9 @@ export default function DaftarAnggotaPage() {
 
       {/* DETAIL MODAL */}
       {detailModalOpen && selectedAnggota && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-in fade-in zoom-in duration-150">
-            <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[32px]">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-2xl w-full max-h-[88vh] my-auto overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-pop-in">
+            <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[28px] sm:rounded-t-[32px]">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center font-bold text-base border border-white/30">
                   {(selectedAnggota?.nama || selectedAnggota?.nama_lengkap || 'A').charAt(0)}
@@ -454,10 +454,12 @@ export default function DaftarAnggotaPage() {
                       <tbody className="divide-y divide-slate-100">
                         {selectedAnggota.pinjamanList.map((p) => (
                           <tr key={p.id}>
-                            <td className="px-3 py-2 font-mono font-bold text-[#2563eb]">{p.nomor_pinjaman || p.id}</td>
-                            <td className="px-3 py-2 font-extrabold">Rp {Number(p.jumlah || 0).toLocaleString('id-ID')}</td>
-                            <td className="px-3 py-2 font-bold text-amber-600">{p.status}</td>
-                            <td className="px-3 py-2 text-right font-extrabold text-rose-600">Rp {Number(p.sisa_hutang || 0).toLocaleString('id-ID')}</td>
+                            <td className="px-3 py-2 font-mono text-[#2563eb]">{p.nomor_pinjaman || p.id}</td>
+                            <td className="px-3 py-2 font-bold">Rp {Number(p.jumlah || 0).toLocaleString('id-ID')}</td>
+                            <td className="px-3 py-2">{getStatusBadge(p.status)}</td>
+                            <td className="px-3 py-2 text-right font-extrabold text-rose-500">
+                              Rp {Number(p.sisa_hutang || 0).toLocaleString('id-ID')}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -467,13 +469,13 @@ export default function DaftarAnggotaPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end">
+            <div className="p-4 bg-[#f8fafc] border-t border-slate-100 flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setDetailModalOpen(false)}
-                className="px-5 py-2 bg-[#2563eb] text-white rounded-full text-xs font-extrabold hover:bg-[#1d4ed8] transition-all cursor-pointer"
+                className="px-5 py-2 bg-[#2563eb] text-white rounded-full font-bold hover:bg-[#1d4ed8] transition-colors"
               >
-                Tutup Detail
+                Tutup Rincian
               </button>
             </div>
           </div>
@@ -482,8 +484,8 @@ export default function DaftarAnggotaPage() {
 
       {/* EDIT MODAL */}
       {editModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-xl w-full max-h-[92vh] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-xl w-full max-h-[88vh] my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined">edit_square</span>
