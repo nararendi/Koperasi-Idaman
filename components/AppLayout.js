@@ -262,8 +262,8 @@ export default function AppLayout({ children, title, subtitle, rightAction }) {
 
       {/* ==================== LOGOUT CONFIRMATION MODAL ==================== */}
       {logoutModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col text-xs animate-pop-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col text-xs animate-pop-in">
             <div className="p-5 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner">
                 <span className="material-symbols-outlined text-2xl text-[#ffd159]">logout</span>

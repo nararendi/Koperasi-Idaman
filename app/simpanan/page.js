@@ -552,7 +552,7 @@ export default function SimpananPage() {
 
       {/* MODAL CATAT TRANSAKSI SIMPANAN */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-lg w-full max-h-[88vh] my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
@@ -601,10 +601,6 @@ export default function SimpananPage() {
 
                 {/* Pilih Anggota */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Pilih Anggota Koperasi *</label>
-                  <select
-                    required
-                    value={formData.nomor_anggota}
                     onChange={(e) => setFormData({ ...formData, nomor_anggota: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-[#f8fafc] border border-slate-200 rounded-2xl focus:border-[#2563eb] focus:bg-white outline-none font-semibold text-slate-800 transition-all"
                   >

@@ -850,7 +850,7 @@ export default function UsahaPage() {
       {/* MODAL: TAMBAH / EDIT PRODUK SEMBAKO */}
       {/* ========================================================================= */}
       {modalProdukOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
@@ -971,7 +971,7 @@ export default function UsahaPage() {
       {/* MODAL: TRANSAKSI KASIR (POS) SEMBAKO */}
       {/* ========================================================================= */}
       {modalKasirOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white w-full max-w-4xl max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-pop-in">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1152,7 +1152,7 @@ export default function UsahaPage() {
       {/* MODAL: DAFTAR PESERTA QURBAN BARU */}
       {/* ========================================================================= */}
       {modalPesertaQurbanOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
@@ -1289,7 +1289,7 @@ export default function UsahaPage() {
       {/* MODAL: SETOR TABUNGAN QURBAN */}
       {/* ========================================================================= */}
       {modalSetorQurbanOpen && selectedPesertaQurban && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-5 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
@@ -1374,7 +1374,7 @@ export default function UsahaPage() {
       {/* MODAL: NOTA / STRUK / KUITANSI CETAK */}
       {/* ========================================================================= */}
       {modalNotaOpen && notaData && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white w-full max-w-md max-h-[88vh] my-auto rounded-[28px] sm:rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-4 bg-[#f8fafc] border-b border-slate-100 flex items-center justify-between">
               <span className="font-extrabold text-xs text-[#0f172a]">Bukti Transaksi Resmi</span>

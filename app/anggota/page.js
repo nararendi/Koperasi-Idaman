@@ -340,7 +340,7 @@ export default function DaftarAnggotaPage() {
 
       {/* DETAIL MODAL */}
       {detailModalOpen && selectedAnggota && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-2xl w-full max-h-[88vh] my-auto overflow-y-auto shadow-2xl border border-slate-100 flex flex-col animate-pop-in">
             <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center rounded-t-[28px] sm:rounded-t-[32px]">
               <div className="flex items-center gap-3">
@@ -484,7 +484,7 @@ export default function DaftarAnggotaPage() {
 
       {/* EDIT MODAL */}
       {editModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:pl-64 lg:pl-68 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-[28px] sm:rounded-[32px] max-w-xl w-full max-h-[88vh] my-auto shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-pop-in">
             <div className="p-6 bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
