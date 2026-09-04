@@ -122,8 +122,11 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="bg-[#f8fafc] px-4 py-3 border-t border-slate-100 text-center text-[11px] text-slate-400 font-medium shrink-0">
-          &copy; {new Date().getFullYear()} Koperasi Idaman &bull; Sistem Terpadu
+        <div className="bg-[#f8fafc] px-4 py-3 border-t border-slate-100 text-center text-[11px] text-slate-400 font-medium shrink-0 flex flex-col items-center gap-0.5">
+          <span>&copy; {new Date().getFullYear()} Koperasi Idaman &bull; Sistem Terpadu</span>
+          <span className="text-[10px] text-slate-400 font-medium">
+            Application by <span className="text-slate-600 font-semibold">rendiyosan</span>
+          </span>
         </div>
       </div>
     </div>
