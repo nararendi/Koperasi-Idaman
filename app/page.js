@@ -23,7 +23,7 @@ export default function HomePage() {
     'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
   ];
 
-  // Dynamic Chart: Menampilkan grafik aktivitas keuangan terbaru hingga hari ini secara otomatis tanpa filter periode
+  // Dynamic Chart: Menampilkan grafik aktivitas keuangan terkini secara murni & realistis dari data aktual
   const getDynamicChartData = () => {
     const kasList = dataService.getKasList() || [];
     const barCount = 14;
@@ -39,10 +39,11 @@ export default function HomePage() {
       const dd = String(targetDate.getDate()).padStart(2, '0');
       const dateStr = `${yyyy}-${mm}-${dd}`;
 
-      // Hitung total transaksi (masuk + keluar) pada tanggal ini
-      const segmentSum = kasList
-        .filter((k) => k?.tanggal === dateStr)
-        .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+      // Ambil seluruh transaksi kas aktual pada tanggal ini
+      const matchingKas = kasList.filter(
+        (k) => (k?.tanggal || '').slice(0, 10) === dateStr
+      );
+      const segmentSum = matchingKas.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
 
       rawData.push({
         targetDate,
@@ -50,28 +51,43 @@ export default function HomePage() {
         day: targetDate.getDate(),
         label: `${targetDate.getDate()} ${monthNames[targetDate.getMonth()]} ${targetDate.getFullYear()}`,
         amount: segmentSum,
+        count: matchingKas.length,
         isToday: i === barCount
       });
     }
 
     const actualMax = Math.max(...rawData.map((d) => d.amount), 0);
-    const scaleMax = actualMax > 0 ? actualMax * 1.25 : 3000000;
+    // Skala dinamis mengikuti data riil tertinggi (atau default 1.000.000 jika belum ada transaksi)
+    const scaleMax = actualMax > 0 
+      ? Math.max(100000, Math.ceil((actualMax * 1.2) / 100000) * 100000) 
+      : 1000000;
 
-    return rawData.map((item, idx) => {
-      const pseudoVal = (((idx + 1) * 19 + 7) % 50) + 25;
-      const displayAmount = item.amount > 0 ? item.amount : pseudoVal * 85000;
-      const heightPercent = Math.min(100, Math.max(16, Math.round((displayAmount / scaleMax) * 100)));
+    const bars = rawData.map((item) => {
+      // Tinggi bar murni proporsional terhadap data aktual (0 jika tidak ada transaksi)
+      const heightPercent = item.amount > 0 
+        ? Math.min(100, Math.max(6, Math.round((item.amount / scaleMax) * 100))) 
+        : 0;
 
       return {
         ...item,
         val: heightPercent,
-        displayAmount: formatRupiah(item.amount > 0 ? item.amount : displayAmount),
+        displayAmount: formatRupiah(item.amount),
         hasRealData: item.amount > 0
       };
     });
+
+    return {
+      bars,
+      scaleMax,
+      actualMax,
+      level3: Math.round(scaleMax),
+      level2: Math.round(scaleMax * 0.66),
+      level1: Math.round(scaleMax * 0.33)
+    };
   };
 
-  const chartData = getDynamicChartData();
+  const chartInfo = getDynamicChartData();
+  const chartData = chartInfo.bars;
 
   const loadDashboardData = () => {
     const anggota = dataService.getAnggotaList();
@@ -152,20 +168,22 @@ export default function HomePage() {
         <div className="bg-[#f8fafc] border border-slate-100 rounded-3xl p-5 md:p-6 shadow-inner relative overflow-hidden">
           <div className="relative h-56 flex items-end justify-between gap-1 sm:gap-2 pt-10 pb-4 border-b border-slate-200/80">
             
-            {/* Background horizontal grid lines */}
+            {/* Background horizontal grid lines with dynamic amounts */}
             <div className="absolute inset-x-0 top-6 border-b border-dashed border-slate-200/60 pointer-events-none flex justify-between text-[10px] text-slate-400 font-semibold px-1">
-              <span>Rp 3.000.000</span>
+              <span>{formatRupiah(chartInfo.level3)}</span>
             </div>
             <div className="absolute inset-x-0 top-24 border-b border-dashed border-slate-200/60 pointer-events-none flex justify-between text-[10px] text-slate-400 font-semibold px-1">
-              <span>Rp 2.000.000</span>
+              <span>{formatRupiah(chartInfo.level2)}</span>
             </div>
             <div className="absolute inset-x-0 top-40 border-b border-dashed border-slate-200/60 pointer-events-none flex justify-between text-[10px] text-slate-400 font-semibold px-1">
-              <span>Rp 1.000.000</span>
+              <span>{formatRupiah(chartInfo.level1)}</span>
             </div>
 
             {/* Vertical Bars with Staggered Rise Animation */}
             {chartData.map((item, idx) => {
               const isSelected = selectedBar === item.dateStr || (selectedBar === null && item.isToday);
+              const hasData = item.amount > 0;
+
               return (
                 <div
                   key={item.dateStr}
@@ -174,23 +192,31 @@ export default function HomePage() {
                 >
                   {/* Floating Tooltip if selected or active */}
                   {isSelected && (
-                    <div className="absolute -top-8 bg-white border border-slate-100 px-3 py-1 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-pop-in z-30 pointer-events-none">
-                      <span className="text-xs font-extrabold text-[#2563eb]">{item.displayAmount}</span>
-                      <span className="text-[9px] text-slate-400 font-semibold">{item.label}</span>
-                      <div className="w-2 h-2 bg-white rotate-45 border-r border-b border-slate-100 absolute -bottom-1"></div>
+                    <div className="absolute -top-10 bg-white border border-slate-200/80 px-3 py-1.5 rounded-xl shadow-lg flex flex-col items-center whitespace-nowrap animate-pop-in z-30 pointer-events-none">
+                      <span className={`text-xs font-extrabold ${hasData ? 'text-[#2563eb]' : 'text-slate-500'}`}>
+                        {item.displayAmount}
+                      </span>
+                      <span className="text-[9px] text-slate-400 font-semibold">
+                        {item.label} {item.count > 0 ? `• ${item.count} Transaksi` : '• Tidak ada transaksi'}
+                      </span>
+                      <div className="w-2 h-2 bg-white rotate-45 border-r border-b border-slate-200/80 absolute -bottom-1"></div>
                     </div>
                   )}
 
-                  {/* The Bar */}
+                  {/* The Bar: Menampilkan tinggi riil jika ada data, atau garis dasar tipis jika Rp 0 */}
                   <div
                     style={{
-                      height: `${item.val}%`,
-                      animationDelay: `${idx * 45}ms`
+                      height: hasData ? `${item.val}%` : '4px',
+                      animationDelay: `${idx * 30}ms`
                     }}
-                    className={`w-3 sm:w-4 md:w-5 rounded-t-lg transition-all duration-300 animate-bar-rise ${
-                      isSelected
-                        ? 'bg-[#ffd159] shadow-md scale-y-105 ring-2 ring-[#ffd159]/50'
-                        : 'bg-[#bfdbfe] hover:bg-[#93c5fd] group-hover:scale-y-105 group-hover:shadow-sm'
+                    className={`w-3 sm:w-4 md:w-5 rounded-t-lg transition-all duration-300 ${
+                      hasData
+                        ? isSelected
+                          ? 'bg-[#ffd159] shadow-md scale-y-105 ring-2 ring-[#ffd159]/50 animate-bar-rise'
+                          : 'bg-[#bfdbfe] hover:bg-[#93c5fd] group-hover:scale-y-105 group-hover:shadow-sm animate-bar-rise'
+                        : isSelected
+                          ? 'bg-[#ffd159] shadow-xs'
+                          : 'bg-slate-200 hover:bg-slate-300'
                     }`}
                   ></div>
                 </div>
